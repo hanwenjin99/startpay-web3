@@ -47,7 +47,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import supplierHover from '@/assets/icons/supplier_hover.png'
+import supplierHover from '@/assets/supplier_hover.png'
 
 const searchString = ref('')
 const selectClassify = ref('')
