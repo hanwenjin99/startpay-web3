@@ -17,13 +17,13 @@
       <div class="add_body">
         <div class="down_load">
           任务文件
-          <el-button color="#000" plain round icon="download">下载模版</el-button>
+          <el-button color="#000" plain round icon="download" @click="downloadTemplate">下载模版</el-button>
         </div>
         <!-- 拖拽上传 -->
         <el-upload
           class="upload"
           drag
-          action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15"
+          :action="UPLOAD_FILE_URL"
         >
           <div class="upload_div">
             <el-icon size="32"><Document /></el-icon>
@@ -43,6 +43,9 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+
+import { UPLOAD_FILE_URL } from '@/constants/constants'
+import { getBatchPayoutTemplate } from '@/api/account'
 import { copyMessage } from '@/utils/common.js'
 import fcLogo from '@/assets/icons/fc-logo.svg'
 
@@ -52,6 +55,14 @@ const link = ref('https://connect.futures.cash/?user=hanwenjin99@gmail.com')
 
 const copyLink = () => {
   copyMessage(link.value)
+}
+
+// 下载模版
+const downloadTemplate = async () => {
+  const { code, data } = await getBatchPayoutTemplate()
+  if (code === 0) {
+    window.open(data, '_blank')
+  }
 }
 </script>
 

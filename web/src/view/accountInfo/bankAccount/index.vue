@@ -33,8 +33,8 @@
       </el-table-column>
       <el-table-column align="right">
         <template #default="scope">
-          <el-button icon="delete" type="danger" circle></el-button>
-          <el-button icon="edit" type="info" circle></el-button>
+          <el-button icon="delete" type="danger" circle />
+          <el-button icon="edit" type="info" circle />
           <el-button color="#000" plain round @click="router.push('/layout/account/pay')">支付</el-button>
         </template>
       </el-table-column>
@@ -43,17 +43,26 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+
+import { getBankAccountList } from '@/api/accountInfo'
 
 const router = useRouter()
 const searchString = ref('')
 
-const listData = [{
-  bankTitle: "BISON BANK S.A.",
-  receiverName: "Start Pay Technology Limited",
-  receiverNumber: "PT50006301087042000188015"
-}]
+const listData = ref([])
+
+const queryList = async () => {
+  const { code, data } = await getBankAccountList()
+  if (code === 0) {
+    listData.value = data || []
+  }
+}
+
+onMounted(() => {
+  queryList()
+})
 </script>
 
 <style lang="scss" scoped>

@@ -4,7 +4,7 @@
 
     <!-- 选择币种组件 -->
     <span class="selectTitle">币种</span>
-    <SelectCurrency />
+    <SelectCurrency @handle-select-callback="queryAddress" />
 
     <!-- 地址 -->
     <span class="smallTitle">地址</span>
@@ -14,8 +14,8 @@
       </div>
       <span class="line" />
       <div class="addressBottom">
-        <span>{{ value }}</span>
-        <el-icon @click.stop="copyMessage(value)"><CopyDocument /></el-icon>
+        <span>{{ addressValue }}</span>
+        <el-icon @click.stop="copyMessage(addressValue)"><CopyDocument /></el-icon>
       </div>
     </section>
 
@@ -92,6 +92,10 @@
           </template>
         </el-table-column>
       </el-table>
+      <!-- 分页 -->
+      <div class="footerPage">
+        <el-pagination background layout="prev, pager, next" :total="total" @current-change="handleChangePage" />
+      </div>
     </section>
   </main>
 </template>
@@ -102,32 +106,44 @@ import QRCode from 'qrcode'
 import dayjs from 'dayjs'
 import { useRouter } from 'vue-router'
 
+import { getDepositAddress, getDepositOrderList } from '@/api/account'
 import SelectCurrency from '@/components/selectCurrency/index.vue'
 import { copyMessage } from '@/utils/common.js'
 
 const router = useRouter()
 const qrCanvas = ref(null)
-const value = ref('0x11a8ba50106b0fb8db914c507cdc799fc091f04c')
+const addressValue = ref('')
 
-const recordData = ref([
-  {
-    lastUpdate: "2024-05-31T09:58:10.710+00:00",
-    status: 'FINISHED',
-    fromAddress: "0xa180fe01b906a1be37be6c534a3300785b20d947",
-    address: "0x11a8ba50106b0fb8db914c507cdc799fc091f04c",
-    txHash: "0xca5391f8e1b61d6f2b93823ce7d994f796e19d2843f6584140e7130583bfc767",
-    chain: "BSC",
-    chainIcon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/bnb.png",
-    asset: "USDT",
-    assetIcon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/usdt.png",
-    amountUsd: 2766.67
+const recordData = ref([])
+const total = ref(0)
+
+// 根据选择的币种查询地址
+const queryAddress = async ({currency, chain}) => {
+  const { code, data } = await getDepositAddress({ asset: currency, chain })
+  if (code === 0) {
+    addressValue.value = data
   }
-])
+}
+
+const queryDepositList = async (page) => {
+  const { code, data } = await getDepositOrderList({ depositOrderType: 'ACCOUNT', pageSize: 10, page })
+  if (code === 0) {
+    recordData.value = data.content ?? []
+    total.value = data.total_pages ?? 0
+  }
+}
+
+// 列表翻页
+const handleChangePage = (page) => {
+  queryDepositList(page)
+}
 
 onMounted(() => {
-  QRCode.toCanvas(qrCanvas.value, value.value, error => {
+  QRCode.toCanvas(qrCanvas.value, addressValue.value, error => {
     if (error) console.error(error);
   });
+  // 初始化查询收款记录
+  queryDepositList(1)
 });
 </script>
 
@@ -320,5 +336,28 @@ onMounted(() => {
       }
     }
   }
+}
+
+.footerPage {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+:deep(.el-pagination.is-background .el-pager li),
+:deep(.el-pagination.is-background .btn-prev),
+:deep(.el-pagination.is-background .btn-next) {
+  border-radius: 24px;
+}
+
+:deep(.el-pagination.is-background .el-pager li.is-active) {
+  background-color: #000;
+}
+
+:deep(.el-pagination.is-background .el-pager li):hover {
+  color: #000;
+}
+:deep(.el-pagination.is-background .el-pager li.is-active):hover {
+  color: #fff;
 }
 </style>

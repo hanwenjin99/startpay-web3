@@ -4,7 +4,7 @@
     <h1 class="title">资产</h1>
     <section class="assets">
       <h2>资产估值</h2>
-      <h1>≈ $2770.753</h1>
+      <h1>≈ ${{ Number(accountInfo.assetValuationAmount ?? 0).toFixed(3) }}</h1>
     </section>
 
     <!-- 添加币种 -->
@@ -14,7 +14,7 @@
     </section>
 
     <!-- 列表 -->
-    <el-table :data="currencyData" style="width: 100%">
+    <el-table :data="accountInfo.accountInfo ?? []" style="width: 100%">
       <el-table-column>
         <template #default="scope">
           <ShowCurrency
@@ -35,8 +35,8 @@
       </el-table-column>
       <el-table-column align="right">
         <template #default="scope">
-          <el-button color="#000" plain type="info" icon="top" round>收款</el-button>
-          <el-button color="#000" plain type="info" icon="bottom" round>转账</el-button>
+          <el-button color="#000" plain type="info" icon="bottom" round>收款</el-button>
+          <el-button color="#000" plain type="info" icon="top" round>转账</el-button>
           <el-button color="#000" plain type="info" icon="topRight" round>支付</el-button>
         </template>
       </el-table-column>
@@ -45,21 +45,27 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { getAccountInfo } from '@/api/account'
 
 import ShowCurrency from '@/components/showCurrency/index.vue'
 
 const router = useRouter()
 
-const currencyData = reactive([{
-  amountUsd: 0.08240702647012606,
-  balance: 0.000145191,
-  chain: "BSC",
-  chainIcon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/bnb.png",
-  currency: "BNB",
-  currencyIcon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/bnb.png"
-}])
+const accountInfo = ref({})
+
+const initAccountInfo = async () => {
+  const { code, data } = await getAccountInfo()
+  if (code === 0) {
+    accountInfo.value = data
+  }
+}
+
+onMounted(() => {
+  // 初始化获取资产信息
+  initAccountInfo()
+})
 </script>
 
 <style lang="scss" scoped>

@@ -5,7 +5,7 @@
     <section class="search">
       <div class="left">
         <el-input
-          v-model="searchString"
+          v-model="search"
           placeholder="ID、任务"
           prefix-icon="search"
           size="large"
@@ -13,19 +13,24 @@
         />
         <!-- 状态 -->
         <el-select
-          v-model="selectStatus"
+          v-model="status"
           clearable
           placeholder="状态"
           style="width: 100px"
           size="large"
         >
           <el-option
-            v-for="item in statusOptions"
+            v-for="item in TRANSFER_STATUS_OPTIONS"
             :key="item.value"
             :label="item.label"
             :value="item.value"
           />
         </el-select>
+
+        <!-- 查询按钮 -->
+        <el-button style="margin-left: 20px;" size="large" color="#000" round @click="paramsQuery">查询</el-button>
+        <!-- 重置按钮 -->
+        <el-button size="large" color="#000" round plain @click="resetQuery">重置</el-button>
       </div>
     </section>
 
@@ -40,24 +45,70 @@
       <el-table-column label="支付总金额"></el-table-column>
       <el-table-column label="操作"></el-table-column>
     </el-table>
+
+    <!-- 分页 -->
+    <div class="footerPage">
+      <el-pagination
+        background
+        layout="prev, pager, next"
+        :current-page="currentPage"
+        :total="total"
+        @current-change="handleChangePage"
+      />
+    </div>
   </main>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, onMounted } from 'vue'
 
-const searchString = ref('')
-const selectStatus = ref('')
+import { TRANSFER_STATUS_OPTIONS } from '@/constants/constants'
+import { getBatchPayoutList } from '@/api/account'
 
-const statusOptions = reactive([
-  { label: '已创建', value: '1' },
-  { label: '已完成', value: '2' },
-  { label: '进行中', value: '3' },
-  { label: '错误', value: '4' },
-  { label: '待审核', value: '5' },
-])
+const search = ref('')
+const status = ref('')
 
-const recordData = []
+const recordData = ref([])
+const currentPage = ref(1)
+const total = ref(0)
+
+// 获取批量转账记录
+const queryBatchPayoutList = async (params) => {
+  const { code, data = {} } = await getBatchPayoutList(params)
+  if (code === 0) {
+    recordData.value = data.content ?? []
+    total.value = data.total_pages ?? 0
+  }
+}
+
+// 条件查询列表
+const paramsQuery = () => {
+  currentPage.value = 1 // 第一页开始
+  const params = { page: 1 }
+  if (search.value) params.search = search.value
+  if (status.value) params.status = status.value
+  queryBatchPayoutList(params)
+}
+
+// 重置条件查询
+const resetQuery = () => {
+  currentPage.value = 1
+  search.value = ''
+  status.value = ''
+  queryBatchPayoutList({ page: 1 })
+}
+
+// 翻页查询
+const handleChangePage = (page) => {
+  const params = { page }
+  if (search.value) params.search = search.value
+  if (status.value) params.status = status.value
+  queryBatchPayoutList(params)
+}
+
+onMounted(() => {
+  queryBatchPayoutList({ page: 1 })
+})
 </script>
 
 <style lang="scss" scoped>
@@ -99,5 +150,28 @@ const recordData = []
 :deep(.el-input__wrapper.is-focus),
 :deep(.el-select__wrapper.is-focused) {
   box-shadow: 0 0 0 2px rgba(0,0,0,0.2);
+}
+
+.footerPage {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+:deep(.el-pagination.is-background .el-pager li),
+:deep(.el-pagination.is-background .btn-prev),
+:deep(.el-pagination.is-background .btn-next) {
+  border-radius: 24px;
+}
+
+:deep(.el-pagination.is-background .el-pager li.is-active) {
+  background-color: #000;
+}
+
+:deep(.el-pagination.is-background .el-pager li):hover {
+  color: #000;
+}
+:deep(.el-pagination.is-background .el-pager li.is-active):hover {
+  color: #fff;
 }
 </style>

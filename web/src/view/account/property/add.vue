@@ -15,7 +15,7 @@
     <!-- 搜索 -->
     <section class="search">
       <el-input
-        v-model="searchString"
+        v-model="currency"
         placeholder="币种"
         prefix-icon="search"
         size="large"
@@ -23,38 +23,68 @@
       />
 
       <el-select
-        v-model="selectVal"
+        v-model="chain"
         clearable
         placeholder="网络"
         style="width: 140px"
         size="large"
       >
         <el-option
-          v-for="item in options"
-          :key="item.value"
-          :label="item.label"
-          :value="item.value"
+          v-for="item in commonStore.chainsList"
+          :key="item.chain"
+          :label="item.chain"
+          :value="item.chain"
         />
       </el-select>
+
+      <el-button style="margin-left: 20px;" size="large" color="#000" round @click="oddsQuery">查询</el-button>
+
+      <el-button size="large" color="#000" round plain @click="restOddsQuery">重置</el-button>
     </section>
   </main>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useCommonStore } from '@/pinia/modules/common'
+import { getAccountCurrencyCreatableList } from '@/api/account'
 
 const router = useRouter()
-const searchString = ref('')
-const selectVal = ref('')
+// 条件查询字段
+const currency = ref('')
+const chain = ref('')
+const commonStore = useCommonStore()
 
-const options = reactive([
-  { label: 'ETH', value: 'ETH' },
-  { label: 'BSC', value: 'BSC' },
-  { label: 'TRON', value: 'TRON' },
-  { label: 'POLYGON', value: 'POLYGON' },
-  { label: 'BTC', value: 'BTC' },
-])
+const currencyList = ref([])
+
+// 条件查询
+const oddsQuery = () => {
+  initCurrencyList({ currency: currency.value, chain: chain.value })
+}
+
+// 重置条件查询
+const restOddsQuery = () => {
+  currency.value = ''
+  chain.value = ''
+  initCurrencyList()
+}
+
+const initCurrencyList = async (params) => {
+  const { code, data } = await getAccountCurrencyCreatableList(params)
+  if (code === 0) {
+    currencyList.value = data || []
+  }
+}
+
+onMounted(() => {
+  if (commonStore.chainsList.length === 0) {
+    // 更新网络列表
+    commonStore.GetChainsInfo()
+  }
+  // 初始化获取账户可创建币种列表
+  initCurrencyList()
+})
 </script>
 
 <style lang="scss" scoped>

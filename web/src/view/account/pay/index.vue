@@ -2,24 +2,24 @@
   <main class="content_container">
     <h1 class="title">支付</h1>
     <!-- 选择币种组件 -->
-    <SelectCurrency />
+    <SelectCurrency @handle-select-callback="handleSelect" />
     <div class="inputTitle">
       提现金额
-      <span>0USDT 可用</span>
+      <span>0{{ selectOneCurrency.currency }} 可用</span>
     </div>
     <div class="sumAmount">
-      <span>0USDT</span>
+      <span>0{{ selectOneCurrency.currency }}</span>
     </div>
     <img class="smallImg" :src="reduce" alt="">
     <div class="feeContainer">
       <h2>Satogate服务费+汇款手续费</h2>
-      <h2>0USDC+35USDC=35USDC</h2>
+      <h2>0{{ selectOneCurrency.currency }}+{{ selectOneCurrency.remittanceFeeAmount ?? 0 }}{{ selectOneCurrency.currency }}=35{{ selectOneCurrency.currency }}</h2>
     </div>
     <img class="smallImg" :src="equal" alt="">
     <span class="realAmountTitle">到账金额</span>
     <div class="amountOuter">
       <span class="amountBtn">最大</span>
-      <input placeholder="0 USDT" class="amountInput">
+      <input :placeholder="`0 ${selectOneCurrency.currency ?? ''}`" class="amountInput">
     </div>
     <span class="payee">到</span>
     <div class="bankSelector">
@@ -59,19 +59,51 @@
         <el-table-column label="扣款金额"></el-table-column>
         <el-table-column label="到账金额"></el-table-column>
       </el-table>
+
+      <!-- 分页 -->
+      <div class="footerPage">
+        <el-pagination background layout="prev, pager, next" :total="total" @current-change="handleChangePage" />
+      </div>
     </section>
   </main>
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+
+import { getWithdrawOrderList } from '@/api/account'
 import SelectCurrency from '@/components/selectCurrency/index.vue'
 import reduce from '@/assets/icons/reduce.svg'
 import equal from '@/assets/icons/equal.svg'
 
 const router = useRouter()
 
-const recordData = []
+const selectOneCurrency = ref({})
+const recordData = ref([])
+const total = ref(0)
+
+// 选择币种回调
+const handleSelect = (selectInfo) => {
+  selectOneCurrency.value = selectInfo
+}
+
+// 分页请求
+const handleChangePage = (page) => {
+  queryList(page)
+}
+
+const queryList = async (page) => {
+  const { code, data = {} } = await getWithdrawOrderList({ page, pageSize: 10 })
+  if (code === 0) {
+    recordData.value = data.content ?? []
+    total.value = data.total_pages ?? 0
+  }
+}
+
+onMounted(() => {
+  queryList(1)
+})
 </script>
 
 <style lang="scss" scoped>
@@ -272,5 +304,28 @@ const recordData = []
       }
     }
   }
+}
+
+.footerPage {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+:deep(.el-pagination.is-background .el-pager li),
+:deep(.el-pagination.is-background .btn-prev),
+:deep(.el-pagination.is-background .btn-next) {
+  border-radius: 24px;
+}
+
+:deep(.el-pagination.is-background .el-pager li.is-active) {
+  background-color: #000;
+}
+
+:deep(.el-pagination.is-background .el-pager li):hover {
+  color: #000;
+}
+:deep(.el-pagination.is-background .el-pager li.is-active):hover {
+  color: #fff;
 }
 </style>

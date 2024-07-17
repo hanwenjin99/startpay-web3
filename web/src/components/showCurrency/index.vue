@@ -1,19 +1,32 @@
 <template>
   <section class="showCurrency">
     <div class="icon">
-      <img class="mainIcon" :src="mainIcon" alt="" />
+      <img class="mainIcon" :src="mainIcon" alt="">
       <img class="secondaryIcon" :src="secondaryIcon" alt="">
     </div>
     <span class="name">{{ mainName }}-{{ secondaryName }}</span>
   </section>
 </template>
 
-<script setup lang="ts">
+<script setup>
+// eslint-disable-next-line no-unused-vars
 const props = defineProps({
-  mainIcon: String,
-  secondaryIcon: String,
-  mainName: String,
-  secondaryName: String
+  mainIcon: {
+    type: String,
+    default: ''
+  },
+  secondaryIcon: {
+    type: String,
+    default: ''
+  },
+  mainName: {
+    type: String,
+    default: ''
+  },
+  secondaryName: {
+    type: String,
+    default: ''
+  }
 })
 
 </script>

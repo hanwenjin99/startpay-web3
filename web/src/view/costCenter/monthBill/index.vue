@@ -3,7 +3,7 @@
     <header class="header">
       <h1 class="title">每月账单</h1>
 
-      <el-date-picker v-model="selectMonth" type="month" placeholder="选择月份" />
+      <el-date-picker v-model="selectMonth" type="month" placeholder="选择月份" @change="handleChangeDate" />
     </header>
     <div class="month_bill_chart">
       <div class="left_chart">
@@ -49,7 +49,7 @@
 
         <!-- 状态 -->
         <div class="left_chart_status">
-          <span class="date">账单周期: 07-01 ~ 07-31</span>
+          <span class="date">账单周期: {{ billCycle }}</span>
           <div class="status">
             <span :class="['signle', summary.billStatus === 'PENDING' ? 'pending' : 'settled' ]" />
             {{ summary.billStatus === 'PENDING' ? '待处理' : '已结算' }}
@@ -82,7 +82,7 @@
     <section class="record">
       <div class="title">
         <span>费用明细</span>
-        <el-button link icon="upload">导出文件</el-button>
+        <el-button link icon="upload" @click="handleDownload">导出文件</el-button>
       </div>
     </section>
 
@@ -97,11 +97,24 @@
       <el-table-column label="链上燃料费"></el-table-column>
       <el-table-column label="总费用"></el-table-column>
     </el-table>
+
+    <!-- 分页 -->
+    <div class="footerPage">
+      <el-pagination
+        background
+        layout="prev, pager, next"
+        :current-page="currentPage"
+        :total="total"
+        @current-change="handleChangePage"
+      />
+    </div>
   </main>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import dayjs from 'dayjs'
+
 // 使用vue-chart
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
@@ -116,6 +129,8 @@ use([
   GridComponent
 ])
 
+import { getBillSummary, getBillList, exportBillList } from '@/api/cost'
+
 import totalCostIcon from '@/assets/total_cost_icon.png'
 import sum from '@/assets/sum.png'
 import monthCost from '@/assets/month_cost.png'
@@ -123,10 +138,15 @@ import addCost from '@/assets/add_cost.png'
 import gasCost from '@/assets/gas_cost.png'
 import feeCost from '@/assets/fee_cost.png'
 
-const selectMonth = ref('')
+const selectMonth = ref(dayjs(new Date()).format('YYYY-MM'))
 const trendSelect = ref('total')
 
 const recordData = ref([])
+const total = ref(0)
+const currentPage = ref(1)
+const billCycle = computed(() => (
+  `${dayjs(selectMonth.value).startOf('month').format('MM-DD')} ~ ${dayjs(selectMonth.value).endOf('month').format('MM-DD')}`
+))
 
 const trendOptions = ref([
   { label: '总费用', value: 'total'},
@@ -135,45 +155,10 @@ const trendOptions = ref([
   { label: '兑换手续费', value: 'switchFee' }
 ])
 
-const summary = ref({
-  total: '0',
-  monthly: '0',
-  gas: '0',
-  switchFee: '0',
-  billStatus: 'PENDING'
-})
+const summary = ref({})
 
 // 柱状图数据
-const trends = [
-  {
-      "month": "2024-07",
-      "total": "0",
-      "monthly": "0",
-      "gas": "0",
-      "switchFee": "0"
-  },
-  {
-      "month": "2024-06",
-      "total": "0",
-      "monthly": "0",
-      "gas": "0",
-      "switchFee": "0"
-  },
-  {
-      "month": "2024-05",
-      "total": "0.1291825179",
-      "monthly": "0",
-      "gas": "0.1291825179",
-      "switchFee": "0"
-  },
-  {
-      "month": "2024-04",
-      "total": "0",
-      "monthly": "0",
-      "gas": "0",
-      "switchFee": "0"
-  }
-]
+const trends = ref([])
 
 const option = computed(() => ({
   grid: {
@@ -189,7 +174,7 @@ const option = computed(() => ({
     },
   },
   xAxis: {
-    data: trends.map(item => item.month).reverse()
+    data: trends.value.map(item => item.month).reverse()
   },
   yAxis: {
     show: false
@@ -208,10 +193,50 @@ const option = computed(() => ({
         color: '#fab30a',
         borderRadius: [8, 8, 0, 0]
       },
-      data: trends.map(item => Number(item[trendSelect.value]).toFixed(2)).reverse()
+      data: trends.value.map(item => Number(item[trendSelect.value]).toFixed(2)).reverse()
     }
   ]
 }));
+
+const queryBillSummary = async (month) => {
+  const { code, data = {} } = await getBillSummary(month)
+  if (code === 0) {
+    summary.value = data
+    trends.value = data.trends || []
+  }
+}
+
+const queryBillList = async (page) => {
+  const { code, data = {} } = await getBillList({
+    page,
+    month: dayjs(selectMonth.value).format('YYYY-MM')
+  })
+  if (code === 0) {
+    recordData.value = data.content || []
+    total.value = data.total || 0
+  }
+}
+
+const handleDownload = () => {
+  exportBillList(dayjs(selectMonth.value).format('YYYY-MM'))
+}
+
+// 分页查询明细
+const handleChangePage = (page) => {
+  queryBillList(page)
+}
+
+// 选择日期
+const handleChangeDate = (val) => {
+  currentPage.value = 1
+  queryBillSummary(dayjs(val).format('YYYY-MM'))
+  queryBillList(1)
+}
+
+onMounted(() => {
+  queryBillSummary(dayjs(new Date()).format('YYYY-MM'))
+  queryBillList(1)
+})
 
 </script>
 
@@ -402,6 +427,29 @@ const option = computed(() => ({
 
 :deep(.el-select__wrapper.is-focused) {
   box-shadow: 0 0 0 2px rgba(0,0,0,0.2);
+}
+
+.footerPage {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+:deep(.el-pagination.is-background .el-pager li),
+:deep(.el-pagination.is-background .btn-prev),
+:deep(.el-pagination.is-background .btn-next) {
+  border-radius: 24px;
+}
+
+:deep(.el-pagination.is-background .el-pager li.is-active) {
+  background-color: #000;
+}
+
+:deep(.el-pagination.is-background .el-pager li):hover {
+  color: #000;
+}
+:deep(.el-pagination.is-background .el-pager li.is-active):hover {
+  color: #fff;
 }
 </style>
 

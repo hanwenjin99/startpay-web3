@@ -6,7 +6,7 @@
     <section class="top">
       <section class="search">
         <el-input
-          v-model="searchString"
+          v-model="contactSearch"
           placeholder="名称、地址"
           prefix-icon="search"
           size="large"
@@ -14,22 +14,25 @@
         />
 
         <el-select
-          v-model="selectInteVal"
+          v-model="chain"
           clearable
           placeholder="网络"
           style="width: 100px; margin-right: 20px;"
           size="large"
         >
           <el-option
-            v-for="item in inteOptions"
+            v-for="item in commonStore.chainsList"
             :key="item.value"
             :label="item.label"
             :value="item.value"
           />
         </el-select>
 
+        <!-- 查询按钮 -->
+        <el-button size="large" color="#000" type="info" round @click="paramsQuery">查询</el-button>
+
         <!-- 重置按钮 -->
-        <el-button size="large" color="#000" plain type="info" round>重置</el-button>
+        <el-button size="large" color="#000" plain type="info" round @click="resetQuery">重置</el-button>
       </section>
       <el-button color="#000" icon="plus" type="info" round @click="router.push('addPayee')">添加收款人</el-button>
     </section>
@@ -66,36 +69,52 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
+import { useCommonStore } from '@/pinia/modules/common'
+import { getMerchantContactList } from '@/api/accountInfo'
+
 const router = useRouter()
+const commonStore = useCommonStore()
 
-const searchString = ref('')
-const selectInteVal = ref('')
+const contactSearch = ref('')
+const chain = ref('')
 
-const inteOptions = reactive([
-  { label: 'ETH', value: 'ETH' },
-  { label: 'BSC', value: 'BSC' },
-  { label: 'TRON', value: 'TRON' },
-  { label: 'POLYGON', value: 'POLYGON' },
-  { label: 'BTC', value: 'BTC' },
-])
-
-const list = [
-  {
-    address: "0xa0eb5663d9c027cd6dbf0c27e82ee63fb5caaa76",
-    chain: "ETH",
-    chainIcon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/eth.png",
-    id: "665e9d4ba98d5b5cbe760d52",
-    isInternal: false,
-    name: "startpay-bison"
-  }
-]
+const list = ref([])
 
 const selectPayee = () => {
   router.push('/layout/account/transfer/single')
 }
+
+const queryList = async (params) => {
+  const { code, data = {} } = await getMerchantContactList({ ...params, page: 0, pageSize: 200 })
+  if (code === 0) {
+    list.value = data.content || []
+  }
+}
+
+// 条件查询
+const paramsQuery = () => {
+  const params = {}
+  if (chain.value) params.chain = chain.value
+  if (contactSearch.value) params.contactSearch = contactSearch.value
+  queryList(params)
+}
+
+// 重置条件查询
+const resetQuery = () => {
+  chain.value = ''
+  contactSearch.value = ''
+  queryList()
+}
+
+onMounted(() => {
+  if (commonStore.chainsList.length === 0) {
+    commonStore.GetChainsInfo()
+  }
+  queryList()
+})
 </script>
 
 <style lang="scss" scoped>

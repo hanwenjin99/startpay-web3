@@ -4,17 +4,22 @@
       单笔转账
     </h1>
     <!-- 选择币种组件 -->
-    <SelectCurrency />
+    <SelectCurrency @handle-select-callback="handleSelect" />
 
     <section class="amountOuter">
       <div class="formOuter">
-        <span class="amountBtn">最大</span>
-        <input v-model="amountVal" class="input" placeholder="0 USDT">
+        <span class="amountBtn" @click="handleMaxBtn">最大</span>
+        <input
+          v-model="amountInputVal"
+          class="input"
+          :placeholder="`0${selectOneCurrency.currency ?? ''}`"
+          @input="e => handleChange(e.target.value)"
+        >
         <span class="btnDisabled" />
       </div>
-      <span>≈${{ amountVal }}</span>
+      <span>≈${{ amountEqualVal }}</span>
     </section>
-    <span class="useful">0USDT 可用</span>
+    <span class="useful">{{ selectOneCurrency.balance ?? 0 }}{{ selectOneCurrency.currency ?? '' }} 可用</span>
 
     <!-- 收款人 -->
     <span class="inputTitle">收款人</span>
@@ -27,12 +32,12 @@
     <!-- 手续费 -->
     <div class="sumContainer">
       <span class="name">手续费</span>
-      0
+      {{ feeAmount }}
     </div>
 
     <div class="sumContainer">
       <span class="name">总金额</span>
-      0
+      {{ sumAmount }}
     </div>
 
     <!-- 按钮 -->
@@ -121,36 +126,81 @@
           </template>
         </el-table-column>
       </el-table>
+
+      <!-- 分页 -->
+      <div class="footerPage">
+        <el-pagination background layout="prev, pager, next" :total="recordTotal" @current-change="handleChangePage" />
+      </div>
     </section>
   </main>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router'
 import dayjs from 'dayjs'
+
+import { postBackendQuote, getTransferList } from '@/api/account'
 import SelectCurrency from '@/components/selectCurrency/index.vue'
 import { copyMessage } from '@/utils/common.js'
 
-const amountVal = ref('')
 const router = useRouter()
+const selectOneCurrency = ref({})
+// 填入的值
+const amountInputVal = ref(0)
+// 手续费
+const feeAmount = ref(0)
 
-const recordData = [{
-  updateTime: "2024-05-31T10:06:54.152+00:00",
-  status: 'SUCCESS',
-  fromAddress: "0x11a8ba50106b0fb8db914c507cdc799fc091f04c",
-  toAddress: '0xe65baff9112775663954c8d0232ce9bd9eca4d87',
-  txid: '0x7028d68f82dad1f889f840139df6022990903309fcced0b2f83e3064625d67a6',
-  chain: "BSC",
-  chainIcon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/bnb.png",
-  currency: "USDT",
-  currencyIcon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/usdt.png",
-  gas: 0.000154809,
-  gasToken: 'BNB',
-  fee: 0,
-  amount: 1,
-  amountUsd: 0.999105
-}]
+// 等价的值
+const amountEqualVal = computed(() => (
+  ((selectOneCurrency.value.usdPrice ?? 0) * (amountInputVal.value ?? 0)).toFixed(2)
+))
+
+// 总金额
+const sumAmount = computed(() => (
+  Number(amountInputVal.value ?? 0) + Number(feeAmount.value ?? 0)
+))
+
+// 文本框输入
+const handleChange = (val) => {
+  // 过滤非数字或者小数的值
+  amountInputVal.value = val.replace(/[^\d.]/g, "")
+  // 调接口
+  postBackendQuote(selectOneCurrency.value.chain)
+}
+
+const recordData = []
+const recordTotal = 0
+
+// 点击最大按钮
+const handleMaxBtn = () => {
+  // 文本框填入最大值
+  amountInputVal.value = selectOneCurrency.value.balance
+  // 调接口
+  postBackendQuote(selectOneCurrency.value.chain)
+}
+
+// 选择币种回调
+const handleSelect = (selectInfo) => {
+  selectOneCurrency.value = selectInfo
+}
+
+// 翻页
+const handleChangePage = (page) => {
+  queryTransferList(page)
+}
+
+const queryTransferList = async (page) => {
+  const { code, data = {} } = await getTransferList({ page, pageSize: 10 })
+  if (code === 0) {
+    recordData.value = data.content ?? []
+    recordTotal.value = data.total_pages ?? 0
+  }
+}
+
+onMounted(() => {
+  queryTransferList(1)
+})
 </script>
 
 <style lang="scss" scoped>
@@ -399,5 +449,28 @@ const recordData = [{
       }
     }
   }
+}
+
+.footerPage {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+:deep(.el-pagination.is-background .el-pager li),
+:deep(.el-pagination.is-background .btn-prev),
+:deep(.el-pagination.is-background .btn-next) {
+  border-radius: 24px;
+}
+
+:deep(.el-pagination.is-background .el-pager li.is-active) {
+  background-color: #000;
+}
+
+:deep(.el-pagination.is-background .el-pager li):hover {
+  color: #000;
+}
+:deep(.el-pagination.is-background .el-pager li.is-active):hover {
+  color: #fff;
 }
 </style>

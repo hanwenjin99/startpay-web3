@@ -4,47 +4,43 @@
 
     <!-- 搜索 -->
     <section class="search">
-      <el-input
-        v-model="searchString"
-        placeholder="地址,Txid"
-        prefix-icon="search"
-        size="large"
-        style="width: 600px; margin-right: 16px;"
-      />
       <!-- 网络 -->
       <el-select
-        v-model="selectInteVal"
+        v-model="chain"
         clearable
         placeholder="网络"
         style="width: 100px"
         size="large"
       >
         <el-option
-          v-for="item in inteOptions"
-          :key="item.value"
-          :label="item.label"
-          :value="item.value"
+          v-for="item in commonStore.chainsList"
+          :key="item.chain"
+          :label="item.chain"
+          :value="item.chain"
         />
       </el-select>
 
       <!-- 币种 -->
       <el-select
-        v-model="selectCurrencyVal"
+        v-model="currency"
         clearable
         placeholder="币种"
         style="width: 100px; margin: 0 20px;"
         size="large"
       >
         <el-option
-          v-for="item in currencyOptions"
-          :key="item.value"
-          :label="item.label"
-          :value="item.value"
+          v-for="item in commonStore.currencyOptions"
+          :key="item"
+          :label="item"
+          :value="item"
         />
       </el-select>
 
+      <!-- 查询按钮 -->
+      <el-button size="large" color="#000" type="info" round @click="paramsQuery">查询</el-button>
+
       <!-- 重置按钮 -->
-      <el-button size="large" color="#000" plain type="info" round>重置</el-button>
+      <el-button size="large" color="#000" plain type="info" round @click="resetQuery">重置</el-button>
     </section>
 
     <!-- 表格 -->
@@ -123,52 +119,84 @@
         </template>
       </el-table-column>
     </el-table>
+
+    <!-- 分页 -->
+    <div class="footerPage">
+      <el-pagination
+        background
+        layout="prev, pager, next"
+        :current-page="currentPage"
+        :total="total"
+        @current-change="handleChangePage"
+      />
+    </div>
   </main>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, onMounted } from 'vue'
 import dayjs from 'dayjs'
+
+import { getTransferList } from '@/api/account'
+import { useCommonStore } from '@/pinia/modules/common'
 import { copyMessage } from '@/utils/common.js'
 
-const searchString = ref('')
-const selectInteVal = ref('')
-const inteOptions = reactive([
-  { label: 'ETH', value: 'ETH' },
-  { label: 'BSC', value: 'BSC' },
-  { label: 'TRON', value: 'TRON' },
-  { label: 'POLYGON', value: 'POLYGON' },
-  { label: 'BTC', value: 'BTC' },
-])
+const commonStore = useCommonStore()
 
-const selectCurrencyVal = ref('')
-const currencyOptions = reactive([
-  { label: 'ETH', value: 'ETH' },
-  { label: 'BNB', value: 'BNB' },
-  { label: 'USDT', value: 'USDT' },
-  { label: 'USDC', value: 'USDC' },
-  { label: 'MATIC', value: 'MATIC' },
-  { label: 'TRX', value: 'TRX' },
-  { label: 'BTC', value: 'BTC' },
-  { label: 'USD', value: 'USD' },
-])
+const chain = ref('')
+const currency = ref('')
 
-const recordData = [{
-  updateTime: "2024-05-31T10:06:54.152+00:00",
-  status: 'SUCCESS',
-  fromAddress: "0x11a8ba50106b0fb8db914c507cdc799fc091f04c",
-  toAddress: '0xe65baff9112775663954c8d0232ce9bd9eca4d87',
-  txid: '0x7028d68f82dad1f889f840139df6022990903309fcced0b2f83e3064625d67a6',
-  chain: "BSC",
-  chainIcon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/bnb.png",
-  currency: "USDT",
-  currencyIcon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/usdt.png",
-  gas: 0.000154809,
-  gasToken: 'BNB',
-  fee: 0,
-  amount: 1,
-  amountUsd: 0.999105
-}]
+const recordData = ref([])
+const total = ref(0)
+const currentPage = ref(1)
+
+const queryList = async (params) => {
+  const { code, data = {} } = await getTransferList({ ...params, pageSize: 20 })
+  if (code === 0) {
+    recordData.value = data.content || []
+    total.value = data.total_pages || 0
+  }
+}
+
+// 翻页
+const handleChangePage = (page) => {
+  currentPage.value = page
+  const params = { page }
+  if (chain.value) params.chain = chain.value
+  if (currency.value) params.currency = currency.value
+  queryList(params)
+}
+
+// 条件查询
+const paramsQuery = () => {
+  currentPage.value = 1
+  const params = { page: 1 }
+  if (chain.value) params.chain = chain.value
+  if (currency.value) params.currency = currency.value
+  queryList(params)
+}
+
+// 重置条件查询
+const resetQuery = () => {
+  currentPage.value = 1
+  chain.value = ''
+  currency.value = ''
+  queryList({ page: 1 })
+}
+
+onMounted(() => {
+  if (commonStore.chainsList.length === 0) {
+    commonStore.GetChainsInfo()
+  }
+
+  if (commonStore.currencyOptions.length === 0) {
+    commonStore.QueryCurrencyOptions()
+  }
+
+  queryList({
+    page: 1
+  })
+})
 </script>
 
 <style lang="scss" scoped>
@@ -309,5 +337,28 @@ const recordData = [{
 :deep(.el-input__wrapper.is-focus),
 :deep(.el-select__wrapper.is-focused) {
   box-shadow: 0 0 0 2px rgba(0,0,0,0.2);
+}
+
+.footerPage {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+:deep(.el-pagination.is-background .el-pager li),
+:deep(.el-pagination.is-background .btn-prev),
+:deep(.el-pagination.is-background .btn-next) {
+  border-radius: 24px;
+}
+
+:deep(.el-pagination.is-background .el-pager li.is-active) {
+  background-color: #000;
+}
+
+:deep(.el-pagination.is-background .el-pager li):hover {
+  color: #000;
+}
+:deep(.el-pagination.is-background .el-pager li.is-active):hover {
+  color: #fff;
 }
 </style>

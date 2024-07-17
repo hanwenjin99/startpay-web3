@@ -6,7 +6,7 @@
     </h1>
     <section class="assets">
       <h2>资产估值</h2>
-      <h1>≈ $2770.753 <img src="@/assets/icons/arrow-right.svg" alt=""> </h1>
+      <h1>≈ ${{ Number(dashboardData.assetValuationAmount ?? 0).toFixed(2) }} <img src="@/assets/icons/arrow-right.svg" alt=""> </h1>
     </section>
     <!-- 统计 -->
     <section class="statistics">
@@ -23,14 +23,14 @@
       </div>
       <div class="statisticsList">
         <span v-for="item in statisticsList" :key="item.key" class="statisticsItem">
-          <h1>{{ item.value }} {{ item.unit }}</h1>
-          <h2>{{ item.name }}{{ statisticsActionActive === 'recharge' ? '充值' : '提现' }}金额</h2>
+          <h1>{{ dashboardData[`total${statisticsActionActive}Amount${item.value}`] ?? 0 }} {{ dashboardData.assetValuationCurrency ?? 'USDT' }}</h1>
+          <h2>{{ item.name }}{{ statisticsActionActive === 'Deposit' ? '充值' : '提现' }}金额</h2>
         </span>
       </div>
     </section>
 
     <!-- 公告 -->
-    <section class="announcement">
+    <section v-if="announcementList.length > 0" class="announcement">
       <h1>公告</h1>
       <el-card class="announcementList" shadow="never">
         <div
@@ -60,31 +60,30 @@
 </template>
 
 <script setup>
-import  { ref, reactive } from 'vue'
+import  { ref, reactive, onMounted } from 'vue'
 import dayjs from 'dayjs'
+import { getDashboard, getAnnouncementList } from '@/api/overview'
 
-const statisticsActions = [{ key: 'recharge', name: '充值' }, { key: 'withdraw', name: '提现' }]
+const statisticsActions = [{ key: 'Deposit', name: '充值' }, { key: 'Withdraw', name: '提现' }]
 
-const statisticsActionActive = ref('recharge')
+const statisticsActionActive = ref('Deposit')
 
 const changestatisticsAction = (key) => {
   statisticsActionActive.value = key
 }
 
+const dashboardData = ref({})
+
 // 统计列表
 const statisticsList = reactive([
-  { key: 'today', name: '今日', value: 0, unit: 'USDT' },
-  { key: 'yesterday', name: '昨日', value: 0, unit: 'USDT' },
-  { key: 'last7', name: '过去7天', value: 0, unit: 'USDT' },
-  { key: 'last30', name: '过去30天', value: 2771.67, unit: 'USDT' },
+  { key: 'today', name: '今日', value: 'Today', unit: 'USDT' },
+  { key: 'yesterday', name: '昨日', value: 'Yesterday', unit: 'USDT' },
+  { key: 'last7days', name: '过去7天', value: '7Days', unit: 'USDT' },
+  { key: 'last30days', name: '过去30天', value: '30Days', unit: 'USDT' },
 ])
 
 // 公告列表
-const announcementList = reactive([
-  { id: 1, title: 'FuturesPay 品牌正式升级成为 Satogate', time: '2024-02-23T09:54:20.869+00:00', content: 'x惺惺相惜阿列克' },
-  { id: 2, title: 'FuturesPay新增对Polygon公链的支持，继续扩大数字货币服务范围！', time: '2023-06-19T07:31:18.665+00:00', content: 'x惺惺相惜阿列克' },
-  { id: 3, title: '全新Futures Pay控制台正式上线！向全球商户提供卓越的数字货币收付款服务', time: '2023-05-24T07:19:13.951+00:00', content: 'x惺惺相惜阿列克' }
-])
+const announcementList = ref([])
 
 const dialogVisible = ref(false)
 const announcementIndex = ref(0)
@@ -93,6 +92,27 @@ const openDetail = (index) => {
   announcementIndex.value = index
   dialogVisible.value = true
 }
+
+const initDashboard = async () => {
+  const { code, data } = await getDashboard()
+  if (code === 0) {
+    dashboardData.value = data
+  }
+}
+
+const initAnnouncementList = async () => {
+  const { code, data } = await getAnnouncementList()
+  if (code === 0) {
+    announcementList.value = data?.announcementList || []
+  }
+}
+
+onMounted(() => {
+  // 初始化获取估值统计数据
+  initDashboard()
+  // 初始化获取公告列表
+  initAnnouncementList()
+})
 </script>
 
 <style lang="scss" scoped>

@@ -4,31 +4,27 @@
 
     <!-- 搜索 -->
     <section class="search">
-      <el-input
-        v-model="searchString"
-        placeholder="地址,Txid"
-        prefix-icon="search"
-        size="large"
-        style="width: 600px; margin-right: 16px;"
-      />
-
       <!-- 币种 -->
       <el-select
-        v-model="selectCurrencyVal"
+        v-model="currency"
         clearable
         placeholder="币种"
         style="width: 100px; margin: 0 20px;"
         size="large"
       >
         <el-option
-          v-for="item in currencyOptions"
+          v-for="item in commonStore.currencyOptions"
           :key="item.value"
           :label="item.label"
           :value="item.value"
         />
       </el-select>
+
+      <!-- 查询按钮 -->
+      <el-button size="large" color="#000" type="info" round @click="paramsQuery">查询</el-button>
+
       <!-- 重置按钮 -->
-      <el-button size="large" color="#000" plain type="info" round>重置</el-button>
+      <el-button size="large" color="#000" plain type="info" round @click="resetQuery">重置</el-button>
     </section>
 
     <!-- 表格 -->
@@ -42,26 +38,71 @@
       <el-table-column label="扣款金额"></el-table-column>
       <el-table-column label="到账金额"></el-table-column>
     </el-table>
+
+    <!-- 分页 -->
+    <div class="footerPage">
+      <el-pagination
+        background
+        layout="prev, pager, next"
+        :current-page="currentPage"
+        :total="total"
+        @current-change="handleChangePage"
+      />
+    </div>
   </main>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useCommonStore } from '@/pinia/modules/common'
+import { getWithdrawOrderList } from '@/api/account'
 
-const searchString = ref('')
-const recordData = []
+const commonStore = useCommonStore()
 
-const selectCurrencyVal = ref('')
-const currencyOptions = reactive([
-  { label: 'ETH', value: 'ETH' },
-  { label: 'BNB', value: 'BNB' },
-  { label: 'USDT', value: 'USDT' },
-  { label: 'USDC', value: 'USDC' },
-  { label: 'MATIC', value: 'MATIC' },
-  { label: 'TRX', value: 'TRX' },
-  { label: 'BTC', value: 'BTC' },
-  { label: 'USD', value: 'USD' },
-])
+const currency = ref('')
+
+const recordData = ref([])
+const total = ref(0)
+const currentPage = ref(1)
+
+// 翻页
+const handleChangePage = (page) => {
+  currentPage.value = page
+  const params = { page }
+  if (currency.value) params.currency = currency.value
+  queryList(params)
+}
+
+// 条件查询
+const paramsQuery = () => {
+  currentPage.value = 1
+  const params = { page: 1 }
+  if (currency.value) params.currency = currency.value
+  queryList(params)
+}
+
+// 重置条件查询
+const resetQuery = () => {
+  currentPage.value = 1
+  currency.value = ''
+  queryList({ page: 1 })
+}
+
+const queryList = async (params) => {
+  const { code, data = {} } = await getWithdrawOrderList({ ...params, pageSize: 20 })
+  if (code === 0) {
+    recordData.value = data.content || []
+    total.value = data.total_pages || 0
+  }
+}
+
+onMounted(() => {
+  if (commonStore.currencyOptions.length === 0) {
+    commonStore.QueryCurrencyOptions()
+  }
+
+  queryList({ page: 1 })
+})
 </script>
 
 <style lang="scss" scoped>
@@ -97,5 +138,28 @@ const currencyOptions = reactive([
 :deep(.el-input__wrapper.is-focus),
 :deep(.el-select__wrapper.is-focused) {
   box-shadow: 0 0 0 2px rgba(0,0,0,0.2);
+}
+
+.footerPage {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+:deep(.el-pagination.is-background .el-pager li),
+:deep(.el-pagination.is-background .btn-prev),
+:deep(.el-pagination.is-background .btn-next) {
+  border-radius: 24px;
+}
+
+:deep(.el-pagination.is-background .el-pager li.is-active) {
+  background-color: #000;
+}
+
+:deep(.el-pagination.is-background .el-pager li):hover {
+  color: #000;
+}
+:deep(.el-pagination.is-background .el-pager li.is-active):hover {
+  color: #fff;
 }
 </style>

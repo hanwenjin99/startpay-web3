@@ -15,8 +15,8 @@
       <el-radio-group v-model="radioCurrency" class="groupStyle" @change="handleChange">
         <el-radio
           v-for="item in currencyData"
-          :key="item.id"
-          :value="item.id"
+          :key="`${item.currency}_${item.chain}`"
+          :value="`${item.currency}_${item.chain}`"
           size="large"
         >
           <!-- 选项展示 -->
@@ -33,29 +33,40 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import ShowCurrency from '@/components/showCurrency/index.vue'
+import { getAccountInfo } from '@/api/account'
 
+const emit = defineEmits(['handleSelectCallback'])
 const radioCurrency = ref('')
-const selectInfo = ref(null)
+const selectInfo = ref({})
 
 const dialogVisible = ref(false)
 
-const currencyData = [{
-  id: '1',
-  amountUsd: 0.08240702647012606,
-  balance: 0.000145191,
-  chain: "BSC",
-  chainIcon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/bnb.png",
-  currency: "BNB",
-  currencyIcon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/bnb.png"
-}]
+const currencyData = ref([])
 
-const handleChange = (id) => {
-  selectInfo.value = currencyData.filter(item => item.id === id)[0]
+const handleChange = (value) => {
+  selectInfo.value = currencyData.value.filter(item => `${item.currency}_${item.chain}` === value)[0]
   dialogVisible.value = false
+  // 父组件回调
+  emit('handleSelectCallback', selectInfo.value)
 }
 
+const initCurrencyList = async () => {
+  const { code, data } = await getAccountInfo()
+  if (code === 0) {
+    currencyData.value = data.accountInfo ?? []
+    // 初始化设置第一个选择的币种
+    selectInfo.value = data.accountInfo[0] ?? {}
+    // 父组件回调
+    emit('handleSelectCallback', selectInfo.value)
+  }
+}
+
+onMounted(() => {
+  // 初始化获取币种列表
+  initCurrencyList()
+})
 </script>
 
 <style lang="scss" scoped>

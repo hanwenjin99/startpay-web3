@@ -5,7 +5,7 @@
     <!-- 条件搜索 -->
     <section class="search">
       <el-input
-        v-model="searchString"
+        v-model="search"
         placeholder="企业名、服务"
         prefix-icon="search"
         size="large"
@@ -14,7 +14,7 @@
 
       <!-- 分类 -->
       <el-select
-        v-model="selectClassify"
+        v-model="supplierCatId"
         clearable
         placeholder="分类"
         style="width: 100px; margin-right: 20px;"
@@ -22,14 +22,17 @@
       >
         <el-option
           v-for="item in classifyOptions"
-          :key="item.value"
-          :label="item.label"
-          :value="item.value"
+          :key="item.id"
+          :label="item.name"
+          :value="item.id"
         />
       </el-select>
 
+      <!-- 查询 -->
+      <el-button size="large" color="#000" type="info" round @click="paramsQuery">查询</el-button>
+
       <!-- 重置按钮 -->
-      <el-button size="large" color="#000" plain type="info" round>重置</el-button>
+      <el-button size="large" color="#000" plain type="info" round @click="resetQuery">重置</el-button>
     </section>
 
     <!-- 供应商列表 -->
@@ -46,24 +49,50 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+
+import { getSupplierCatList, getSignedSupplierList } from '@/api/account'
 import supplierHover from '@/assets/supplier_hover.png'
 
-const searchString = ref('')
-const selectClassify = ref('')
-const classifyOptions = [
-  { value: '653e213d2b92e913265063b8', label: 'RTC技术' },
-  { value: '6539111af1889a133e57dc78', label: '云服务' },
-]
+const search = ref('')
+const supplierCatId = ref('')
+const classifyOptions = ref([])
 
-const list = [{
-  catId: '653e213d2b92e913265063b8',
-  catName: 'RTC技术',
-  companyName: '声网',
-  serviceName: '全球实时互动API平台 - 覆盖全球200+国家/地区',
-  description: '在应用内构建语音通话、视频通话、互动直播、实时消息等多种实时互动场景。',
-  icon: 'https://futurespay.s3.ap-southeast-1.amazonaws.com/token/token_icon_4934d629b3d1976c1b7e265f67362c2d.png'
-}]
+const list = ref([])
+
+const initSupplierCatList = async () => {
+  const { code, data } = await getSupplierCatList()
+  if (code === 0) {
+    classifyOptions.value = data || []
+  }
+}
+
+const querySignedSupplierList = async (params) => {
+  const { code, data = {} } = await getSignedSupplierList(params)
+  if (code === 0) {
+    list.value = data.content ?? []
+  }
+}
+
+// 条件查询
+const paramsQuery = () => {
+  const params = {}
+  if (search.value) params.search = search.value
+  if (supplierCatId.value) params.supplierCatId = supplierCatId.value
+  querySignedSupplierList(params)
+}
+
+// 重置条件查询
+const resetQuery = () => {
+  search.value = ''
+  supplierCatId.value = ''
+  querySignedSupplierList()
+}
+
+onMounted(() => {
+  initSupplierCatList()
+  querySignedSupplierList()
+})
 </script>
 
 <style lang="scss" scoped>

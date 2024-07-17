@@ -3,7 +3,7 @@
     <header class="header">
       <span class="title">我的钱包</span>
       <div class="btns">
-        <el-button round color="#000">刷新</el-button>
+        <el-button round color="#000" @click="refresh">刷新</el-button>
         <el-button round color="#000" @click.stop="dialogVisible = true">新建</el-button>
       </div>
     </header>
@@ -27,6 +27,17 @@
         </template>
       </el-table-column>
     </el-table>
+
+    <!-- 分页 -->
+    <div class="footerPage">
+      <el-pagination
+        background
+        layout="prev, pager, next"
+        :current-page="currentPage"
+        :total="total"
+        @current-change="handleChangePage"
+      />
+    </div>
 
     <!-- 新建项目弹窗 -->
     <el-dialog
@@ -60,26 +71,37 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'
+import { reactive, ref, onMounted } from 'vue'
 import dayjs from 'dayjs'
 
+import { getBoundAddressList } from '@/api/apiManage'
 import { copyMessage } from '@/utils/common.js'
 
 const dialogVisible = ref(false)
 
 const formLabelAlign = reactive({})
 
-const walletList = ref([
-  {
-    "id": "66638b3850429b342b0f0139",
-    "chain": "BTC",
-    "address": "bc1qmf7w88zl8ctsryvammyjar97jjk0lg57u8qxhv",
-    "merchantAddressId": null,
-    "projectId": null,
-    "projectName": null,
-    "createTime": "2024-06-07T22:35:36.968+00:00"
+const walletList = ref([])
+const total = ref(0)
+const currentPage = ref(1)
+
+const queryList = async (page) => {
+  const { code, data = {} } = await getBoundAddressList({ page, pageSize: 20 })
+  if (code === 0) {
+    walletList.value = data.content || []
+    total.value = data.total_pages || 0
   }
-])
+}
+
+// 刷新
+const refresh = () => {
+  currentPage.value = 1
+  queryList(1)
+}
+
+onMounted(() => {
+  queryList(1)
+})
 </script>
 
 <style lang="scss" scoped>
@@ -119,5 +141,28 @@ const walletList = ref([
 :deep(.el-input__wrapper.is-focus),
 :deep(.el-select__wrapper.is-focused) {
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2);
+}
+
+.footerPage {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+:deep(.el-pagination.is-background .el-pager li),
+:deep(.el-pagination.is-background .btn-prev),
+:deep(.el-pagination.is-background .btn-next) {
+  border-radius: 24px;
+}
+
+:deep(.el-pagination.is-background .el-pager li.is-active) {
+  background-color: #000;
+}
+
+:deep(.el-pagination.is-background .el-pager li):hover {
+  color: #000;
+}
+:deep(.el-pagination.is-background .el-pager li.is-active):hover {
+  color: #fff;
 }
 </style>
