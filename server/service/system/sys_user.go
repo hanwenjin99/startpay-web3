@@ -30,7 +30,11 @@ func (userService *UserService) Register(u system.SysUser) (userInter system.Sys
 	u.Password = utils.BcryptHash(u.Password)
 	u.UUID = uuid.Must(uuid.NewV4())
 	err = global.GVA_DB.Create(&u).Error
-	return u, err
+	if err != nil {
+		return u, err
+	}
+
+	return u, nil
 }
 
 //@author: [piexlmax](https://github.com/piexlmax)

@@ -77,6 +77,12 @@ email:
     nickname: test
     port: 465
     is-ssl: true
+startpayweb3:
+    api_key: 32e78838-a81e-4172-8008-d03f5102a2e7
+    api_secret: 0B010C5D9A3BF3BC49D4CA76713ABD4C207E4E71
+    host: api.satogate.io
+    project_path: /project/create
+    secre_path: /project/secret
 excel:
     dir: ./resource/excel/
 hua-wei-obs:

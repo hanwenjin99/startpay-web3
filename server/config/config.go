@@ -1,13 +1,14 @@
 package config
 
 type Server struct {
-	JWT     JWT     `mapstructure:"jwt" json:"jwt" yaml:"jwt"`
-	Zap     Zap     `mapstructure:"zap" json:"zap" yaml:"zap"`
-	Redis   Redis   `mapstructure:"redis" json:"redis" yaml:"redis"`
-	Mongo   Mongo   `mapstructure:"mongo" json:"mongo" yaml:"mongo"`
-	Email   Email   `mapstructure:"email" json:"email" yaml:"email"`
-	System  System  `mapstructure:"system" json:"system" yaml:"system"`
-	Captcha Captcha `mapstructure:"captcha" json:"captcha" yaml:"captcha"`
+	JWT          JWT          `mapstructure:"jwt" json:"jwt" yaml:"jwt"`
+	Zap          Zap          `mapstructure:"zap" json:"zap" yaml:"zap"`
+	Redis        Redis        `mapstructure:"redis" json:"redis" yaml:"redis"`
+	Mongo        Mongo        `mapstructure:"mongo" json:"mongo" yaml:"mongo"`
+	Email        Email        `mapstructure:"email" json:"email" yaml:"email"`
+	StartpayWeb3 StartpayWeb3 `mapstructure:"startpayweb3" json:"startpayweb3" yaml:"startpayweb3"`
+	System       System       `mapstructure:"system" json:"system" yaml:"system"`
+	Captcha      Captcha      `mapstructure:"captcha" json:"captcha" yaml:"captcha"`
 	// auto
 	AutoCode Autocode `mapstructure:"autocode" json:"autocode" yaml:"autocode"`
 	// gorm
