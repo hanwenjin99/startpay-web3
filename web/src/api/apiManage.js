@@ -5,7 +5,7 @@ import service from '@/utils/request'
 export const getBoundAddressList = (params) => {
   return service({
     url: '/web3/wallet_list',
-    method: 'post',
+    method: 'get',
     data: JSON.stringify(params),
     headers: {
       'Content-Type': 'application/json'
