@@ -10,31 +10,6 @@ import (
 	"time"
 )
 
-type ProjectList struct {
-	Code int `json:"code"`
-	Data struct {
-		Content []struct {
-			AppKey          string `json:"appKey"`
-			AssembleAddress string `json:"assembleAddress"`
-			AssembleChain   string `json:"assembleChain"`
-			CallbackDomain  string `json:"callbackDomain"`
-			CallbackUrl     string `json:"callbackUrl"`
-			CreateTime      int    `json:"createTime"`
-			Id              string `json:"id"`
-			Name            string `json:"name"`
-			PaymentPageUrl  string `json:"paymentPageUrl"`
-			SettleCurrency  string `json:"settleCurrency"`
-			Status          string `json:"status"`
-		} `json:"content"`
-		Last       bool `json:"last"`
-		Page       int  `json:"page"`
-		PageSize   int  `json:"page_size"`
-		Total      int  `json:"total"`
-		TotalPages int  `json:"total_pages"`
-	} `json:"data"`
-	Message string `json:"message"`
-}
-
 type StartpayWeb3Api struct {
 	ApiKey    string
 	ApiSecret string
@@ -52,7 +27,7 @@ func NewStartpayWeb3Api() *StartpayWeb3Api {
 	}
 }
 
-func (s *StartpayWeb3Api) CeateProject(assembleChain string, projectName string, settleCurrency string) (string, error) {
+func (s *StartpayWeb3Api) CeateProject(assembleChain string, projectName string, settleCurrency string) (*Web3CreateProjectResponse, error) {
 
 	ApiKey := global.GVA_CONFIG.StartpayWeb3.ApiKey
 	Host := global.GVA_CONFIG.StartpayWeb3.Host
@@ -83,7 +58,11 @@ func (s *StartpayWeb3Api) CeateProject(assembleChain string, projectName string,
 	} else {
 		fmt.Println("POST 请求响应:", string(postResponse))
 	}
-	return string(postResponse), nil
+
+	ProjectInfo := Web3CreateProjectResponse{}
+	json.Unmarshal(postResponse, &ProjectInfo)
+
+	return &ProjectInfo, nil
 }
 
 func (s *StartpayWeb3Api) GetProjectList(pagenum string, pagesize string, status string) (*ProjectList, error) {
@@ -96,7 +75,7 @@ func (s *StartpayWeb3Api) GetProjectList(pagenum string, pagesize string, status
 	client := NewHttpClient()
 
 	srcStr := "GET" + Host + "/project/list?page=" + pagenum + "&pageSize=" + pagesize + "&status=" + status + strtm
-	signStr, err := SignMessage(srcStr)
+	signStr, err := s.SignMessage(srcStr)
 
 	if err != nil {
 		fmt.Println("SignMessage err")
@@ -120,7 +99,7 @@ func (s *StartpayWeb3Api) GetProjectList(pagenum string, pagesize string, status
 	return &pplist, nil
 }
 
-func (s *StartpayWeb3Api) GetProjectSecret(projectId string) (string, error) {
+func (s *StartpayWeb3Api) GetProjectSecret(projectId string) (*Web3GetSecretResponse, error) {
 	currentTime := time.Now()
 	timestamp := currentTime.Unix()
 	strtm := fmt.Sprintf("%d", timestamp)
@@ -131,7 +110,7 @@ func (s *StartpayWeb3Api) GetProjectSecret(projectId string) (string, error) {
 
 	projectID := projectId
 	srcStr := "GET" + Host + "/project/secret?projectId=" + projectID + strtm
-	signStr, err := SignMessage(srcStr)
+	signStr, err := s.SignMessage(srcStr)
 
 	if err != nil {
 		fmt.Println("SignMessage err")
@@ -150,7 +129,10 @@ func (s *StartpayWeb3Api) GetProjectSecret(projectId string) (string, error) {
 		fmt.Println("POST 请求响应:", string(getResponse))
 	}
 
-	return string(getResponse), nil
+	SecretInfo := Web3GetSecretResponse{}
+	json.Unmarshal(getResponse, &SecretInfo)
+
+	return &SecretInfo, nil
 }
 
 func (s *StartpayWeb3Api) SignMessage(message string) (string, error) {

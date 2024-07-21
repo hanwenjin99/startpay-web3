@@ -1,6 +1,7 @@
 package system
 
 import (
+	systemRes "github.com/flipped-aurora/gin-vue-admin/server/model/system/response"
 	"strconv"
 	"time"
 
@@ -17,21 +18,67 @@ import (
 
 type StartpayWeb3Api struct{}
 
-func (b *StartpayWeb3Api) CreateWallet(c *gin.Context) {
-	response.OkWithMessage("修改成功", c)
+func (b *StartpayWeb3Api) CreateProject(c *gin.Context) {
+	var r systemReq.CreateProject
+	err := c.ShouldBindJSON(&r)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	err = utils.Verify(r, utils.CreateProjectVerify)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+
+	project := &system.SysProject{AssembleChain: r.AssembleChain, ProName: r.Name, SettleCurrency: r.SettleCurrency, AssembleAddress: r.AssembleAddress}
+	ProjectReturn, err := StartpayWeb3Service.CreateProject(*project)
+	if err != nil {
+		global.GVA_LOG.Error("创建项目失败!", zap.Error(err))
+		response.FailWithDetailed(systemRes.SysProjectResponse{Project: ProjectReturn}, "创建项目失败", c)
+		return
+	}
+	response.OkWithDetailed(systemRes.SysProjectResponse{Project: ProjectReturn}, "创建项目成功", c)
 }
 
 // func (b*StartpayWeb3Api) GetWalletList(c *gin.Context, user system.SysUser) {
+func (b *StartpayWeb3Api) GetProjectList(c *gin.Context) {
+	/*var pageInfo request.PageInfo
+	err := c.ShouldBindJSON(&pageInfo)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	err = utils.Verify(pageInfo, utils.PageInfoVerify)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+
+	list, total, err := userService.GetUserInfoList(pageInfo)
+	if err != nil {
+		global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		response.FailWithMessage("获取失败", c)
+		return
+	}
+	response.OkWithDetailed(response.PageResult{
+		List:     list,
+		Total:    total,
+		Page:     pageInfo.Page,
+		PageSize: pageInfo.PageSize,
+	}, "获取成功", c)*/
+
+	ProjectReturn, err := StartpayWeb3Service.GetProjectList()
+	if err != nil {
+		global.GVA_LOG.Error("创建项目失败!", zap.Error(err))
+		response.FailWithDetailed(ProjectReturn, "创建项目失败", c)
+		return
+	}
+	response.OkWithDetailed(ProjectReturn, "创建项目成功", c)
+}
+
 func (b *StartpayWeb3Api) GetWalletList(c *gin.Context) {
 	response.OkWithMessage("修改成功", c)
-}
-
-func (b *StartpayWeb3Api) Register(c *gin.Context) {
-
-}
-
-func (b *StartpayWeb3Api) ChangePassword(c *gin.Context) {
-
 }
 
 // GetUserList

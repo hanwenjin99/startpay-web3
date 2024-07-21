@@ -1,43 +1,52 @@
 package system
 
 import (
-	"github.com/gofrs/uuid/v5"
+	"errors"
+	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
+	web3api "github.com/flipped-aurora/gin-vue-admin/server/utils/startpay"
+	"gorm.io/gorm"
 )
 
 type StartpayWeb3Service struct{}
 
-func (s *StartpayWeb3Service) CreateProject(uuid uuid.UUID, projectName string) (err error) {
-	/*var project system.SysProject
-
-	global.GVA_MODEL
-	UUID            uuid.UUID `json:"uuid" gorm:"index;comment:用户UUID"`
-	ProUuid         string    `json:"pro_uuid"  gorm:"index;comment:项目UUID" `
-	ProName         string    `json:"pro_name" gorm:"default:;comment:项目名称"`
-	AppKey          string    `json:"app_key" gorm:"default:;comment:appKeyid"`
-	AppSecret       string    `json:"app_secret"  gorm:"default:;comment:AppSecret"`
-	SettleCurrency  string    `json:"settle_currency" gorm:"default:;comment:settleCurrency"`
-	AssembleChain   string    `json:"assemble_chain"  gorm:"index;comment:assembleChain"`
-	AssembleAddress string    `json:"assemble_address"  gorm:"index;comment:assembleAddress"`
-	CallbackDomain  string    `json:"callback_domain"  gorm:"default:;comment:callbackDomain"`
-	CallbackUrl     string    `json:"callback_url" gorm:"default:;comment:callbackUrl"`
-	Status          string    `json:"status" gorm:"default:1;comment:用户是否被冻结 1正常 2冻结"`
-
-	user := &system.SysProject{Username: r.Username, NickName: r.NickName, Password: r.Password, HeaderImg: r.HeaderImg, AuthorityId: r.AuthorityId, Authorities: authorities, Enable: r.Enable, Phone: r.Phone, Email: r.Email}
+func (s *StartpayWeb3Service) CreateProject(u system.SysProject) (projectInter system.SysProject, err error) {
+	var project system.SysProject
+	if !errors.Is(global.GVA_DB.Where("uuid = ? and ProName=? and settle_currency=? and AssembleChain=?",
+		u.UUID, u.ProName, u.SettleCurrency, u.AssembleChain).First(&project).Error, gorm.ErrRecordNotFound) { // 判断项目名是否注册
+		return projectInter, errors.New("项目名已注册")
+	}
 
 	web3 := web3api.StartpayWeb3Api{}
 
-	web3.CeateProject("","",)
-	web3.GetProjectSecret()
+	web3DataP, err := web3.CeateProject(u.AssembleChain, u.ProName, u.SettleCurrency)
+	if err != nil {
+		return u, err
+	}
+	u.AppKey = web3DataP.Data.AppKey
+	u.AssembleAddress = web3DataP.Data.AssembleAddress
+	u.ProUuid = web3DataP.Data.Id
+	//u.CreatedAt = web3DataP.Data.CreateTime
+	u.CallbackDomain = web3DataP.Data.CallbackDomain
+	u.CallbackUrl = web3DataP.Data.CallbackUrl
+	u.Status = web3DataP.Data.Status
 
-	// 否则 附加uuid 密码hash加密 注册
-	u.Password = utils.BcryptHash(u.Password)
-	u.UUID = uuid.Must(uuid.NewV4())
+	web3Datas, err := web3.GetProjectSecret(u.ProUuid)
+	if err != nil {
+		return u, err
+	}
+
+	u.AppSecret = web3Datas.Data
+
 	err = global.GVA_DB.Create(&u).Error
-	*/
-	return nil
+	if err != nil {
+		return u, err
+	}
+
+	return u, nil
 }
 
-func (s *StartpayWeb3Service) GetProjectList() (*string, error) {
-
-	return nil, nil
+func (s *StartpayWeb3Service) GetProjectList() (*web3api.ProjectList, error) {
+	web3 := web3api.StartpayWeb3Api{}
+	return web3.GetProjectList("1", "20", "ACTIVE")
 }
