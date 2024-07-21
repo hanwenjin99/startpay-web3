@@ -9,12 +9,12 @@ import (
 type StartpayRouter struct{}
 
 func (s *StartpayRouter) InitStartpayRouter(Router *gin.RouterGroup) {
-	web3Router := Router.Group("web3").Use(middleware.OperationRecord())
-	web3RouterWithoutRecord := Router.Group("web3")
+	web3Router := Router.Group("/backend/bound_address").Use(middleware.OperationRecord())
+	web3RouterWithoutRecord := Router.Group("/backend/bound_address")
 	startpayWeb3Api := v1.ApiGroupApp.SystemApiGroup.StartpayWeb3Api
 	{
 		web3Router.POST("create_wallet", startpayWeb3Api.CreateWallet)
-		web3Router.GET("get_walletlist", startpayWeb3Api.GetWalletList)
+		web3Router.GET("list", startpayWeb3Api.GetWalletList)
 	}
 	{
 		web3RouterWithoutRecord.POST("get_projectlist", startpayWeb3Api.GetUserList)
