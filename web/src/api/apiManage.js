@@ -4,7 +4,7 @@ import service from '@/utils/request'
 // 获取我的钱包列表
 export const getBoundAddressList = (params) => {
   return service({
-    url: '/backend/bound_address/list',
+    url: '/web3/wallet_list',
     method: 'post',
     data: JSON.stringify(params),
     headers: {
