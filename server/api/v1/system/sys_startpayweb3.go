@@ -70,15 +70,21 @@ func (b *StartpayWeb3Api) GetProjectList(c *gin.Context) {
 
 	ProjectReturn, err := StartpayWeb3Service.GetProjectList()
 	if err != nil {
-		global.GVA_LOG.Error("创建项目失败!", zap.Error(err))
-		response.FailWithDetailed(ProjectReturn, "创建项目失败", c)
+		global.GVA_LOG.Error("获取项目失败!", zap.Error(err))
+		response.FailWithDetailed(ProjectReturn, "获取项目失败", c)
 		return
 	}
-	response.OkWithDetailed(ProjectReturn, "创建项目成功", c)
+	response.OkWithDetailed(ProjectReturn, "获取项目成功", c)
 }
 
 func (b *StartpayWeb3Api) GetWalletList(c *gin.Context) {
-	response.OkWithMessage("修改成功", c)
+	ProjectReturn, err := StartpayWeb3Service.GetProjectList()
+	if err != nil {
+		global.GVA_LOG.Error("获取钱包失败!", zap.Error(err))
+		response.FailWithDetailed(ProjectReturn, "获取钱包失败", c)
+		return
+	}
+	response.OkWithDetailed(ProjectReturn, "获取钱包成功", c)
 }
 
 // GetUserList
