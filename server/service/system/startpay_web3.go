@@ -79,3 +79,79 @@ func (s *StartpayWeb3Service) GetProjectList(userId uint, Page int, PageSize int
 
 	return web3.GetProjectList(Page, PageSize, "ACTIVE", stringProjectid)
 }
+
+func (s *StartpayWeb3Service) GetAccountInfo() (*web3api.GetAccountInfoRespons, error) {
+	web3 := web3api.StartpayWeb3Api{}
+	return web3.GetAccountInfo()
+}
+
+func (s *StartpayWeb3Service) GetChainListInfo() (*web3api.Web3ChainListRespons, error) {
+	web3 := web3api.StartpayWeb3Api{}
+	return web3.GetChainListInfo()
+}
+
+func (s *StartpayWeb3Service) GetDepositAddress(userId uint, Page int, PageSize int) (*web3api.ProjectList, error) {
+	web3 := web3api.StartpayWeb3Api{}
+
+	var projectlist []system.SysProject
+
+	_, err := global.GVA_DB.Where("user_id = ? ", userId).Find(&projectlist).Rows()
+
+	if err != nil {
+		return nil, errors.New("查询用户项目失败")
+	}
+
+	global.GVA_LOG.Error("test", zap.Any("userId", userId),
+		zap.Any("Page", Page),
+		zap.Any("PageSize", PageSize),
+		zap.Any("projectlist", projectlist),
+	)
+
+	stringProjectid := ""
+	for index, pvalue := range projectlist {
+		if len(projectlist)-1 == index {
+			stringProjectid += pvalue.ProUuid
+		} else {
+			stringProjectid += pvalue.ProUuid + ","
+		}
+	}
+
+	if stringProjectid == "" {
+		return nil, errors.New("没有查询到符合条件的项目")
+	}
+
+	return web3.GetProjectList(Page, PageSize, "ACTIVE", stringProjectid)
+}
+
+func (s *StartpayWeb3Service) GetAdepositOrder(userId uint, Page int, PageSize int) (*web3api.ProjectList, error) {
+	web3 := web3api.StartpayWeb3Api{}
+
+	var projectlist []system.SysProject
+
+	_, err := global.GVA_DB.Where("user_id = ? ", userId).Find(&projectlist).Rows()
+
+	if err != nil {
+		return nil, errors.New("查询用户项目失败")
+	}
+
+	global.GVA_LOG.Error("test", zap.Any("userId", userId),
+		zap.Any("Page", Page),
+		zap.Any("PageSize", PageSize),
+		zap.Any("projectlist", projectlist),
+	)
+
+	stringProjectid := ""
+	for index, pvalue := range projectlist {
+		if len(projectlist)-1 == index {
+			stringProjectid += pvalue.ProUuid
+		} else {
+			stringProjectid += pvalue.ProUuid + ","
+		}
+	}
+
+	if stringProjectid == "" {
+		return nil, errors.New("没有查询到符合条件的项目")
+	}
+
+	return web3.GetProjectList(Page, PageSize, "ACTIVE", stringProjectid)
+}

@@ -175,3 +175,83 @@ type Web3GetSecretResponse struct {
 	Data    string `json:"data"`
 	Message string `json:"message"`
 }
+
+type GetAccountInfoRespons struct {
+	Data struct {
+		AutoSettle  bool `json:"autoSettle"`
+		AccountInfo []struct {
+			Currency               string      `json:"currency"`
+			Chain                  string      `json:"chain"`
+			WithdrawEnable         bool        `json:"withdrawEnable"`
+			Balance                float64     `json:"balance"`
+			AmountUsd              float64     `json:"amountUsd"`
+			CurrencyIcon           string      `json:"currencyIcon"`
+			CurrencyName           interface{} `json:"currencyName"`
+			ChainIcon              string      `json:"chainIcon"`
+			TransferFeeRate        float64     `json:"transferFeeRate"`
+			GasToken               string      `json:"gasToken"`
+			GasTokenToUsd          float64     `json:"gasTokenToUsd"`
+			GasTokenIcon           string      `json:"gasTokenIcon"`
+			GasAmount              float64     `json:"gasAmount"`
+			UsdPrice               float64     `json:"usdPrice"`
+			WithdrawFeeBoundAmount int         `json:"withdrawFeeBoundAmount"`
+			WithdrawFeeRateDown    float64     `json:"withdrawFeeRateDown"`
+			WithdrawFeeRateUp      float64     `json:"withdrawFeeRateUp"`
+			RemittanceFeeAmount    int         `json:"remittanceFeeAmount"`
+			WithdrawFeeRate1       float64     `json:"withdrawFeeRate1"`
+			WithdrawFeeRate2       float64     `json:"withdrawFeeRate2"`
+			WithdrawFeeRate3       float64     `json:"withdrawFeeRate3"`
+			WithdrawFeeRate4       float64     `json:"withdrawFeeRate4"`
+			WithdrawFeeRate5       float64     `json:"withdrawFeeRate5"`
+			WithdrawFeeRate6       float64     `json:"withdrawFeeRate6"`
+			WithdrawFeeRate7       float64     `json:"withdrawFeeRate7"`
+		} `json:"accountInfo"`
+		AssetValuationAmount   float64 `json:"assetValuationAmount"`
+		AssetValuationCurrency string  `json:"assetValuationCurrency"`
+	} `json:"data"`
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
+type Web3ChainListRespons struct {
+	Data struct {
+		ETH []struct {
+			Symbol    string  `json:"symbol"`
+			Contract  *string `json:"contract,omitempty"`
+			Icon      string  `json:"icon"`
+			Decimals  int     `json:"decimals"`
+			MinCharge string  `json:"minCharge"`
+			Cact      string  `json:"cact,omitempty"`
+		} `json:"ETH"`
+		BSC []struct {
+			Symbol    string  `json:"symbol"`
+			Contract  *string `json:"contract"`
+			Icon      string  `json:"icon"`
+			Decimals  int     `json:"decimals"`
+			MinCharge string  `json:"minCharge"`
+		} `json:"BSC"`
+		TRON []struct {
+			Symbol    string `json:"symbol"`
+			Contract  string `json:"contract"`
+			Icon      string `json:"icon"`
+			Decimals  int    `json:"decimals"`
+			MinCharge string `json:"minCharge"`
+		} `json:"TRON"`
+		POLYGON []struct {
+			Symbol    string  `json:"symbol"`
+			Contract  *string `json:"contract"`
+			Icon      string  `json:"icon"`
+			Decimals  int     `json:"decimals"`
+			MinCharge string  `json:"minCharge"`
+		} `json:"POLYGON"`
+		BTC []struct {
+			Symbol    string      `json:"symbol"`
+			Contract  interface{} `json:"contract"`
+			Icon      string      `json:"icon"`
+			Decimals  int         `json:"decimals"`
+			MinCharge string      `json:"minCharge"`
+		} `json:"BTC"`
+	} `json:"data"`
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}

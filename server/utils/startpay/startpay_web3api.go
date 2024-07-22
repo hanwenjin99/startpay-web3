@@ -110,6 +110,88 @@ func (s *StartpayWeb3Api) GetProjectList(Page int, PageSize int, status string, 
 	return &pplist, nil
 }
 
+func (s *StartpayWeb3Api) GetChainListInfo() (*Web3ChainListRespons, error) {
+	currentTime := time.Now()
+	timestamp := currentTime.Unix()
+	strtm := fmt.Sprintf("%d", timestamp)
+
+	ApiKey := global.GVA_CONFIG.StartpayWeb3.ApiKey
+	Host := global.GVA_CONFIG.StartpayWeb3.Host
+	client := NewHttpClient()
+
+	srcStr := "GET" + Host + "currency/list" + strtm
+	signStr, err := s.SignMessage(srcStr)
+
+	if err != nil {
+		fmt.Println("SignMessage err")
+	}
+
+	getHeaders := map[string]string{
+		"FP-API-KEY":   ApiKey,
+		"FP-SIGN":      signStr,
+		"FP-TIMESTAMP": strtm,
+	}
+	getURL := "https://" + Host + "/currency/list"
+
+	global.GVA_LOG.Error("test web3",
+		zap.Any("signStr", signStr),
+		zap.Any("srcStr", srcStr),
+		zap.Any("getURL", getURL),
+	)
+
+	getResponse, err := client.Get(getURL, getHeaders)
+	if err != nil {
+		fmt.Println("GEt 请求错误:", err)
+	} else {
+		fmt.Println("GEt 请求响应:", string(getResponse))
+	}
+
+	chainlist := Web3ChainListRespons{}
+	json.Unmarshal(getResponse, &chainlist)
+	return &chainlist, nil
+}
+
+func (s *StartpayWeb3Api) GetAccountInfo() (*GetAccountInfoRespons, error) {
+	currentTime := time.Now()
+	timestamp := currentTime.Unix()
+	strtm := fmt.Sprintf("%d", timestamp)
+
+	ApiKey := global.GVA_CONFIG.StartpayWeb3.ApiKey
+	Host := global.GVA_CONFIG.StartpayWeb3.Host
+	client := NewHttpClient()
+
+	srcStr := "GET" + Host + "account/list" + strtm
+	signStr, err := s.SignMessage(srcStr)
+
+	if err != nil {
+		fmt.Println("SignMessage err")
+	}
+
+	getHeaders := map[string]string{
+		"FP-API-KEY":   ApiKey,
+		"FP-SIGN":      signStr,
+		"FP-TIMESTAMP": strtm,
+	}
+	getURL := "https://" + Host + "/account/list"
+
+	global.GVA_LOG.Error("test web3",
+		zap.Any("signStr", signStr),
+		zap.Any("srcStr", srcStr),
+		zap.Any("getURL", getURL),
+	)
+
+	getResponse, err := client.Get(getURL, getHeaders)
+	if err != nil {
+		fmt.Println("GEt 请求错误:", err)
+	} else {
+		fmt.Println("GEt 请求响应:", string(getResponse))
+	}
+
+	Accoubtlist := GetAccountInfoRespons{}
+	json.Unmarshal(getResponse, &Accoubtlist)
+	return &Accoubtlist, nil
+}
+
 func (s *StartpayWeb3Api) GetProjectSecret(projectId string) (*Web3GetSecretResponse, error) {
 	currentTime := time.Now()
 	timestamp := currentTime.Unix()

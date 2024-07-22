@@ -112,6 +112,38 @@ func main() {
 
 	client := NewHttpClient()
 
+	srcStr1 := "GETapi.satogate.io/currency/list" + strtm
+	signStr1, err := SignMessage(srcStr1)
+
+	if err != nil {
+		fmt.Println("SignMessage err")
+	}
+
+	postHeaders := map[string]string{
+		"FP-API-KEY":   apiKey,
+		"FP-SIGN":      signStr1,
+		"FP-TIMESTAMP": strtm,
+	}
+	/*postBody = map[string]interface{}{
+		"page":     1,
+		"pageSize": 20,
+		"status":   "ACTIVE",
+	}*/
+
+	postURL1 := "https://api.satogate.io/currency/list"
+
+	fmt.Println("getRL", postURL1)
+	fmt.Println("srcStr", srcStr1)
+	fmt.Println("signStr", signStr1)
+	fmt.Println("get head:", postHeaders)
+
+	postResponse, err := client.Get(postURL1, postHeaders)
+	if err != nil {
+		fmt.Println("GEt 请求错误:", err)
+	} else {
+		fmt.Println("GEt 请求响应:", string(postResponse))
+	}
+
 	// GET 请求示例
 	/*
 		url := "https://api.example.com/get"
@@ -170,62 +202,64 @@ func main() {
 			fmt.Println("POST 请求响应:", string(postResponse))
 		}*/
 
-	srcStr1 := "GETapi.satogate.io/project/list?page=1&pageSize=20&projectId=668fa8d267ad544bdc9dea86,dxxxxxx&status=ACTIVE" + strtm
-	signStr1, err := SignMessage(srcStr1)
-
-	if err != nil {
-		fmt.Println("SignMessage err")
-	}
-
-	postHeaders := map[string]string{
-		"FP-API-KEY":   apiKey,
-		"FP-SIGN":      signStr1,
-		"FP-TIMESTAMP": strtm,
-	}
-	/*postBody = map[string]interface{}{
-		"page":     1,
-		"pageSize": 20,
-		"status":   "ACTIVE",
-	}*/
-
-	postURL1 := "https://api.satogate.io/project/list?page=1&pageSize=20&projectId=668fa8d267ad544bdc9dea86,dxxxxxx&status=ACTIVE"
-
-	fmt.Println("getRL", postURL1)
-	fmt.Println("srcStr", srcStr1)
-	fmt.Println("signStr", signStr1)
-	fmt.Println("get head:", postHeaders)
-
-	postResponse, err := client.Get(postURL1, postHeaders)
-	if err != nil {
-		fmt.Println("GEt 请求错误:", err)
-	} else {
-		fmt.Println("GEt 请求响应:", string(postResponse))
-	}
-
-	pplist := ProjectList{}
-	json.Unmarshal(postResponse, &pplist)
-
-	for _, value := range pplist.Data.Content {
-
-		apiKey := apiKey
-		projectID := value.Id
-		srcStr1 := "GETapi.satogate.io/project/secret?projectId=" + projectID + strtm
+	/*
+		srcStr1 := "GETapi.satogate.io/project/list?page=1&pageSize=20&projectId=668fa8d267ad544bdc9dea86,dxxxxxx&status=ACTIVE" + strtm
 		signStr1, err := SignMessage(srcStr1)
 
 		if err != nil {
 			fmt.Println("SignMessage err")
 		}
 
-		postHeaders = map[string]string{
+		postHeaders := map[string]string{
 			"FP-API-KEY":   apiKey,
 			"FP-SIGN":      signStr1,
 			"FP-TIMESTAMP": strtm,
 		}
-		/*postBody := map[string]interface{}{
-			"projectId": projectID,
+		/*postBody = map[string]interface{}{
+			"page":     1,
+			"pageSize": 20,
+			"status":   "ACTIVE",
 		}*/
 
-		postURL := "https://api.satogate.io/project/secret?projectId=" + projectID
+	/*
+		postURL1 := "https://api.satogate.io/project/list?page=1&pageSize=20&projectId=668fa8d267ad544bdc9dea86,dxxxxxx&status=ACTIVE"
+
+		fmt.Println("getRL", postURL1)
+		fmt.Println("srcStr", srcStr1)
+		fmt.Println("signStr", signStr1)
+		fmt.Println("get head:", postHeaders)
+
+		postResponse, err := client.Get(postURL1, postHeaders)
+		if err != nil {
+			fmt.Println("GEt 请求错误:", err)
+		} else {
+			fmt.Println("GEt 请求响应:", string(postResponse))
+		}
+
+		pplist := ProjectList{}
+		json.Unmarshal(postResponse, &pplist)
+
+		for _, value := range pplist.Data.Content {
+
+			apiKey := apiKey
+			projectID := value.Id
+			srcStr1 := "GETapi.satogate.io/project/secret?projectId=" + projectID + strtm
+			signStr1, err := SignMessage(srcStr1)
+
+			if err != nil {
+				fmt.Println("SignMessage err")
+			}
+
+			postHeaders = map[string]string{
+				"FP-API-KEY":   apiKey,
+				"FP-SIGN":      signStr1,
+				"FP-TIMESTAMP": strtm,
+			}*/
+	/*postBody := map[string]interface{}{
+		"projectId": projectID,
+	}*/
+
+	/*postURL := "https://api.satogate.io/project/secret?projectId=" + projectID
 
 		fmt.Println("getRL", postURL)
 		fmt.Println("srcStr", srcStr1)
@@ -238,8 +272,7 @@ func main() {
 		} else {
 			fmt.Println("POST 请求响应:", string(postResponse))
 		}
-	}
-
+	}*/
 }
 
 func SignMessage(message string) (string, error) {
