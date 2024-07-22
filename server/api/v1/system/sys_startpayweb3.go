@@ -78,9 +78,9 @@ func (b *StartpayWeb3Api) GetWalletList(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&r)
 	if err != nil {
-		response.FailWithMessage(err.Error(), c)
+		//response.FailWithMessage(err.Error(), c)
 		global.GVA_LOG.Error("test welcome", zap.Any("err", err.Error()))
-		return
+		//return
 	}
 	global.GVA_LOG.Error("test", zap.Any("GetWalletList", r))
 	err = utils.Verify(r, utils.GetWalletVerify)
