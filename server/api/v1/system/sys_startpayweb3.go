@@ -116,6 +116,7 @@ func (b *StartpayWeb3Api) GetWalletList(c *gin.Context) {
 		wlc.ProjectId = &conv.Id
 		wlc.ProjectName = &conv.Name
 		wlc.CreateTime = time.Unix(conv.CreateTime, 0)
+		WalletResp.Content = append(WalletResp.Content, wlc)
 	}
 
 	response.OkWithDetailed(WalletResp, "获取钱包成功", c)
