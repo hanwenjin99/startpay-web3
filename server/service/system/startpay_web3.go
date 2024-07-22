@@ -77,5 +77,5 @@ func (s *StartpayWeb3Service) GetProjectList(userId uint, Page int, PageSize int
 		return nil, errors.New("没有查询到符合条件的项目")
 	}
 
-	return web3.GetProjectList(Page, PageSize, stringProjectid, "ACTIVE")
+	return web3.GetProjectList(Page, PageSize, "ACTIVE", stringProjectid)
 }
