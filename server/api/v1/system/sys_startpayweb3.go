@@ -46,6 +46,8 @@ func (b *StartpayWeb3Api) CreateProject(c *gin.Context) {
 // func (b*StartpayWeb3Api) GetWalletList(c *gin.Context, user system.SysUser) {
 func (b *StartpayWeb3Api) GetProjectList(c *gin.Context) {
 	var r systemReq.GetProjectList
+	r.Page = 1
+	r.PageSize = 20
 	err := c.ShouldBindJSON(&r)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
@@ -71,11 +73,14 @@ func (b *StartpayWeb3Api) GetProjectList(c *gin.Context) {
 
 func (b *StartpayWeb3Api) GetWalletList(c *gin.Context) {
 	var r systemReq.GetWalletList
+	r.Page = 1
+	r.PageSize = 20
 	err := c.ShouldBindJSON(&r)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
+
 	err = utils.Verify(r, utils.GetWalletVerify)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
