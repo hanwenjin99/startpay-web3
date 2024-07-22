@@ -96,7 +96,7 @@ func (b *StartpayWeb3Api) GetWalletList(c *gin.Context) {
 	ProjectReturn, err := StartpayWeb3Service.GetProjectList(userId, r.Page, r.PageSize)
 	if err != nil {
 		global.GVA_LOG.Error("获取钱包失败!", zap.Error(err))
-		response.FailWithDetailed(ProjectReturn.Data, "获取钱包失败", c)
+		response.FailWithDetailed(ProjectReturn.Message, "获取钱包失败", c)
 		return
 	}
 	WalletResp := systemRes.GetWalletRespons{}

@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	"go.uber.org/zap"
 	"strconv"
 	"time"
 )
@@ -90,6 +91,13 @@ func (s *StartpayWeb3Api) GetProjectList(Page int, PageSize int, status string, 
 		"FP-TIMESTAMP": strtm,
 	}
 	getURL := "https://" + Host + "/project/list?page=" + pagenums + "&pageSize=" + pagesizes + "&projectId=" + projectID + "&status=" + status
+
+	global.GVA_LOG.Error("test web3",
+		zap.Any("signStr", signStr),
+		zap.Any("srcStr", srcStr),
+		zap.Any("getURL", getURL),
+	)
+
 	getResponse, err := client.Get(getURL, getHeaders)
 	if err != nil {
 		fmt.Println("GEt 请求错误:", err)
