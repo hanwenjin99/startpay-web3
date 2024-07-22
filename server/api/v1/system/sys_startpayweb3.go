@@ -30,10 +30,10 @@ func (b *StartpayWeb3Api) CreateProject(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	uuid := utils.GetUserUuid(c)
+	UserId := utils.GetUserID(c)
 
 	project := &system.SysProject{AssembleChain: r.AssembleChain, ProName: r.Name, SettleCurrency: r.SettleCurrency, AssembleAddress: r.AssembleAddress}
-	project.UUID = uuid
+	project.UserId = UserId
 	ProjectReturn, err := StartpayWeb3Service.CreateProject(*project)
 	if err != nil {
 		global.GVA_LOG.Error("创建项目失败!", zap.Error(err))
@@ -57,9 +57,9 @@ func (b *StartpayWeb3Api) GetProjectList(c *gin.Context) {
 		return
 	}
 
-	uuid := utils.GetUserUuid(c)
+	userId := utils.GetUserID(c)
 
-	ProjectReturn, err := StartpayWeb3Service.GetProjectList(uuid, r.Page, r.PageSize)
+	ProjectReturn, err := StartpayWeb3Service.GetProjectList(userId, r.Page, r.PageSize)
 	if err != nil {
 		global.GVA_LOG.Error("获取项目失败!", zap.Error(err))
 		response.FailWithDetailed(ProjectReturn.Data, "获取项目失败", c)
@@ -82,9 +82,9 @@ func (b *StartpayWeb3Api) GetWalletList(c *gin.Context) {
 		return
 	}
 
-	uuid := utils.GetUserUuid(c)
+	userId := utils.GetUserID(c)
 
-	ProjectReturn, err := StartpayWeb3Service.GetProjectList(uuid, r.Page, r.PageSize)
+	ProjectReturn, err := StartpayWeb3Service.GetProjectList(userId, r.Page, r.PageSize)
 	if err != nil {
 		global.GVA_LOG.Error("获取钱包失败!", zap.Error(err))
 		response.FailWithDetailed(ProjectReturn.Data, "获取钱包失败", c)

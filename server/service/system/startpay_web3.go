@@ -5,7 +5,6 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
 	web3api "github.com/flipped-aurora/gin-vue-admin/server/utils/startpay"
-	"github.com/gofrs/uuid/v5"
 	"gorm.io/gorm"
 )
 
@@ -13,8 +12,8 @@ type StartpayWeb3Service struct{}
 
 func (s *StartpayWeb3Service) CreateProject(u system.SysProject) (projectInter system.SysProject, err error) {
 	var project system.SysProject
-	if !errors.Is(global.GVA_DB.Where("uuid = ? and ProName=? and settle_currency=? and AssembleChain=?",
-		u.UUID, u.ProName, u.SettleCurrency, u.AssembleChain).First(&project).Error, gorm.ErrRecordNotFound) { // 判断项目名是否注册
+	if !errors.Is(global.GVA_DB.Where("user_id = ? and ProName=? and settle_currency=? and AssembleChain=?",
+		u.UserId, u.ProName, u.SettleCurrency, u.AssembleChain).First(&project).Error, gorm.ErrRecordNotFound) { // 判断项目名是否注册
 		return projectInter, errors.New("项目名已注册")
 	}
 
@@ -47,12 +46,12 @@ func (s *StartpayWeb3Service) CreateProject(u system.SysProject) (projectInter s
 	return u, nil
 }
 
-func (s *StartpayWeb3Service) GetProjectList(uuid uuid.UUID, Page int, PageSize int) (*web3api.ProjectList, error) {
+func (s *StartpayWeb3Service) GetProjectList(userId uint, Page int, PageSize int) (*web3api.ProjectList, error) {
 	web3 := web3api.StartpayWeb3Api{}
 
 	var projectlist []system.SysProject
 
-	_, err := global.GVA_DB.Where("uuid = ? ", uuid).Find(&projectlist).Rows()
+	_, err := global.GVA_DB.Where("user_id = ? ", userId).Find(&projectlist).Rows()
 
 	if err != nil {
 		return nil, errors.New("查询用户项目失败")
