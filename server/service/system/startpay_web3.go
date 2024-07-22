@@ -5,6 +5,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
 	web3api "github.com/flipped-aurora/gin-vue-admin/server/utils/startpay"
+	"github.com/gofrs/uuid/v5"
 	"gorm.io/gorm"
 )
 
@@ -46,7 +47,28 @@ func (s *StartpayWeb3Service) CreateProject(u system.SysProject) (projectInter s
 	return u, nil
 }
 
-func (s *StartpayWeb3Service) GetProjectList() (*web3api.ProjectList, error) {
+func (s *StartpayWeb3Service) GetProjectList(uuid uuid.UUID, Page int, PageSize int) (*web3api.ProjectList, error) {
 	web3 := web3api.StartpayWeb3Api{}
-	return web3.GetProjectList("1", "20", "ACTIVE")
+
+	var projectlist []system.SysProject
+
+	_, err := global.GVA_DB.Where("uuid = ? ", uuid).Find(&projectlist).Rows()
+
+	if err != nil {
+		return nil, errors.New("查询用户项目失败")
+	}
+	stringProjectid := ""
+	for index, pvalue := range projectlist {
+		if len(projectlist)-1 == index {
+			stringProjectid += pvalue.ProUuid
+		} else {
+			stringProjectid += pvalue.ProUuid + ","
+		}
+	}
+
+	if stringProjectid == "" {
+		return nil, errors.New("没有查询到符合条件的项目")
+	}
+
+	return web3.GetProjectList(Page, PageSize, stringProjectid, "ACTIVE")
 }

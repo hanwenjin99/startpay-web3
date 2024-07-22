@@ -8,6 +8,8 @@ var (
 	LoginVerify            = Rules{"CaptchaId": {NotEmpty()}, "Username": {NotEmpty()}, "Password": {NotEmpty()}}
 	RegisterVerify         = Rules{"Username": {NotEmpty()}, "NickName": {NotEmpty()}, "Password": {NotEmpty()}, "AuthorityId": {NotEmpty()}}
 	CreateProjectVerify    = Rules{"AssembleChain": {NotEmpty()}, "Name": {NotEmpty()}, "SettleCurrency": {NotEmpty()}}
+	GetProjectVerify       = Rules{"Page": {NotEmpty()}, "PageSize": {NotEmpty()}}
+	GetWalletVerify        = Rules{"Page": {NotEmpty()}, "PageSize": {NotEmpty()}}
 	PageInfoVerify         = Rules{"Page": {NotEmpty()}, "PageSize": {NotEmpty()}}
 	CustomerVerify         = Rules{"CustomerName": {NotEmpty()}, "CustomerPhoneData": {NotEmpty()}}
 	AutoCodeVerify         = Rules{"Abbreviation": {NotEmpty()}, "StructName": {NotEmpty()}, "PackageName": {NotEmpty()}, "Fields": {NotEmpty()}}

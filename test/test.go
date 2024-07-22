@@ -170,7 +170,7 @@ func main() {
 			fmt.Println("POST 请求响应:", string(postResponse))
 		}*/
 
-	srcStr1 := "GETapi.satogate.io/project/list?page=1&pageSize=20&status=ACTIVE" + strtm
+	srcStr1 := "GETapi.satogate.io/project/list?page=1&pageSize=20&projectId=668fa8d267ad544bdc9dea86,dxxxxxx&status=ACTIVE" + strtm
 	signStr1, err := SignMessage(srcStr1)
 
 	if err != nil {
@@ -188,7 +188,7 @@ func main() {
 		"status":   "ACTIVE",
 	}*/
 
-	postURL1 := "https://api.satogate.io/project/list?page=1&pageSize=20&status=ACTIVE"
+	postURL1 := "https://api.satogate.io/project/list?page=1&pageSize=20&projectId=668fa8d267ad544bdc9dea86,dxxxxxx&status=ACTIVE"
 
 	fmt.Println("getRL", postURL1)
 	fmt.Println("srcStr", srcStr1)

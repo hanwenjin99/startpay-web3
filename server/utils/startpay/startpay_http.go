@@ -134,7 +134,7 @@ type ProjectList struct {
 			AssembleChain   string `json:"assembleChain"`
 			CallbackDomain  string `json:"callbackDomain"`
 			CallbackUrl     string `json:"callbackUrl"`
-			CreateTime      int    `json:"createTime"`
+			CreateTime      int64  `json:"createTime"`
 			Id              string `json:"id"`
 			Name            string `json:"name"`
 			PaymentPageUrl  string `json:"paymentPageUrl"`

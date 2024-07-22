@@ -30,8 +30,10 @@ func (b *StartpayWeb3Api) CreateProject(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
+	uuid := utils.GetUserUuid(c)
 
 	project := &system.SysProject{AssembleChain: r.AssembleChain, ProName: r.Name, SettleCurrency: r.SettleCurrency, AssembleAddress: r.AssembleAddress}
+	project.UUID = uuid
 	ProjectReturn, err := StartpayWeb3Service.CreateProject(*project)
 	if err != nil {
 		global.GVA_LOG.Error("创建项目失败!", zap.Error(err))
@@ -43,48 +45,71 @@ func (b *StartpayWeb3Api) CreateProject(c *gin.Context) {
 
 // func (b*StartpayWeb3Api) GetWalletList(c *gin.Context, user system.SysUser) {
 func (b *StartpayWeb3Api) GetProjectList(c *gin.Context) {
-	/*var pageInfo request.PageInfo
-	err := c.ShouldBindJSON(&pageInfo)
+	var r systemReq.GetProjectList
+	err := c.ShouldBindJSON(&r)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	err = utils.Verify(pageInfo, utils.PageInfoVerify)
+	err = utils.Verify(r, utils.GetProjectVerify)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
 
-	list, total, err := userService.GetUserInfoList(pageInfo)
-	if err != nil {
-		global.GVA_LOG.Error("获取失败!", zap.Error(err))
-		response.FailWithMessage("获取失败", c)
-		return
-	}
-	response.OkWithDetailed(response.PageResult{
-		List:     list,
-		Total:    total,
-		Page:     pageInfo.Page,
-		PageSize: pageInfo.PageSize,
-	}, "获取成功", c)*/
+	uuid := utils.GetUserUuid(c)
 
-	ProjectReturn, err := StartpayWeb3Service.GetProjectList()
+	ProjectReturn, err := StartpayWeb3Service.GetProjectList(uuid, r.Page, r.PageSize)
 	if err != nil {
 		global.GVA_LOG.Error("获取项目失败!", zap.Error(err))
-		response.FailWithDetailed(ProjectReturn, "获取项目失败", c)
+		response.FailWithDetailed(ProjectReturn.Data, "获取项目失败", c)
 		return
 	}
-	response.OkWithDetailed(ProjectReturn, "获取项目成功", c)
+
+	response.OkWithDetailed(ProjectReturn.Data, "获取项目成功", c)
 }
 
 func (b *StartpayWeb3Api) GetWalletList(c *gin.Context) {
-	ProjectReturn, err := StartpayWeb3Service.GetProjectList()
+	var r systemReq.GetWalletList
+	err := c.ShouldBindJSON(&r)
 	if err != nil {
-		global.GVA_LOG.Error("获取钱包失败!", zap.Error(err))
-		response.FailWithDetailed(ProjectReturn, "获取钱包失败", c)
+		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	response.OkWithDetailed(ProjectReturn, "获取钱包成功", c)
+	err = utils.Verify(r, utils.GetWalletVerify)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+
+	uuid := utils.GetUserUuid(c)
+
+	ProjectReturn, err := StartpayWeb3Service.GetProjectList(uuid, r.Page, r.PageSize)
+	if err != nil {
+		global.GVA_LOG.Error("获取钱包失败!", zap.Error(err))
+		response.FailWithDetailed(ProjectReturn.Data, "获取钱包失败", c)
+		return
+	}
+	WalletResp := systemRes.GetWalletRespons{}
+
+	WalletResp.Page = ProjectReturn.Data.Page
+	WalletResp.PageSize = ProjectReturn.Data.PageSize
+	WalletResp.Last = ProjectReturn.Data.Last
+	WalletResp.TotalPages = ProjectReturn.Data.TotalPages
+	WalletResp.Total = ProjectReturn.Data.Total
+
+	for _, conv := range ProjectReturn.Data.Content {
+		wlc := systemRes.WalletInfo{}
+		wlc.Id = conv.Id
+		wlc.Address = conv.AssembleAddress
+		wlc.Chain = conv.AssembleChain
+		wlc.MerchantAddressId = ""
+		wlc.ProjectId = &conv.Id
+		wlc.ProjectName = &conv.Name
+		wlc.CreateTime = time.Unix(conv.CreateTime, 0)
+	}
+
+	response.OkWithDetailed(WalletResp, "获取钱包成功", c)
 }
 
 // GetUserList

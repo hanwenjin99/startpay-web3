@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	"strconv"
 	"time"
 )
 
@@ -65,7 +66,7 @@ func (s *StartpayWeb3Api) CeateProject(assembleChain string, projectName string,
 	return &ProjectInfo, nil
 }
 
-func (s *StartpayWeb3Api) GetProjectList(pagenum string, pagesize string, status string) (*ProjectList, error) {
+func (s *StartpayWeb3Api) GetProjectList(Page int, PageSize int, status string, projectID string) (*ProjectList, error) {
 	currentTime := time.Now()
 	timestamp := currentTime.Unix()
 	strtm := fmt.Sprintf("%d", timestamp)
@@ -74,7 +75,9 @@ func (s *StartpayWeb3Api) GetProjectList(pagenum string, pagesize string, status
 	Host := global.GVA_CONFIG.StartpayWeb3.Host
 	client := NewHttpClient()
 
-	srcStr := "GET" + Host + "/project/list?page=" + pagenum + "&pageSize=" + pagesize + "&status=" + status + strtm
+	pagenums := strconv.Itoa(Page)
+	pagesizes := strconv.Itoa(PageSize)
+	srcStr := "GET" + Host + "/project/list?page=" + pagenums + "&pageSize=" + pagesizes + "&projectId=" + projectID + "&status=" + status + strtm
 	signStr, err := s.SignMessage(srcStr)
 
 	if err != nil {
@@ -86,7 +89,7 @@ func (s *StartpayWeb3Api) GetProjectList(pagenum string, pagesize string, status
 		"FP-SIGN":      signStr,
 		"FP-TIMESTAMP": strtm,
 	}
-	getURL := "https://" + Host + "/project/list?page=1&pageSize=20&status=ACTIVE"
+	getURL := "https://" + Host + "/project/list?page=" + pagenums + "&pageSize=" + pagesizes + "&projectId=" + projectID + "&status=" + status
 	getResponse, err := client.Get(getURL, getHeaders)
 	if err != nil {
 		fmt.Println("GEt 请求错误:", err)
