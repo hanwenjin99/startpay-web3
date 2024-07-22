@@ -1,6 +1,14 @@
 // 获取公共数据 - 网络列表/币种列表等
 import service from '@/utils/request'
 
+// 获取链类型
+export const getChainsList = () => {
+  return service({
+    url: '/backend/options/chains?currencies=USDT,CUSDC',
+    method: 'get'
+  })
+}
+
 // 获取网络列表
 export const getChainsInfo = () => {
   return service({

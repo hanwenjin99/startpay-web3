@@ -13,7 +13,7 @@
         size="large"
       >
         <el-option
-          v-for="item in commonStore.chainsList"
+          v-for="item in commonStore.chainsInfoList"
           :key="item.chain"
           :label="item.chain"
           :value="item.chain"
@@ -185,7 +185,7 @@ const resetQuery = () => {
 }
 
 onMounted(() => {
-  if (commonStore.chainsList.length === 0) {
+  if (commonStore.chainsInfoList.length === 0) {
     commonStore.GetChainsInfo()
   }
 

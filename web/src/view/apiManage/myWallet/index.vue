@@ -93,6 +93,12 @@ const queryList = async (page) => {
   }
 }
 
+// 翻页
+const handleChangePage = (page) => {
+  currentPage.value = page
+  queryList(page)
+}
+
 // 刷新
 const refresh = () => {
   currentPage.value = 1

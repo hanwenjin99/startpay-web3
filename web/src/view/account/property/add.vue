@@ -30,7 +30,7 @@
         size="large"
       >
         <el-option
-          v-for="item in commonStore.chainsList"
+          v-for="item in commonStore.chainsInfoList"
           :key="item.chain"
           :label="item.chain"
           :value="item.chain"
@@ -78,7 +78,7 @@ const initCurrencyList = async (params) => {
 }
 
 onMounted(() => {
-  if (commonStore.chainsList.length === 0) {
+  if (commonStore.chainsInfoList.length === 0) {
     // 更新网络列表
     commonStore.GetChainsInfo()
   }
