@@ -58,7 +58,11 @@ func (s *StartpayWeb3Service) GetProjectList(userId uint, Page int, PageSize int
 		return nil, errors.New("查询用户项目失败")
 	}
 
-	global.GVA_LOG.Error("test", zap.Any("userId", userId))
+	global.GVA_LOG.Error("test", zap.Any("userId", userId),
+		zap.Any("Page", Page),
+		zap.Any("PageSize", PageSize),
+		zap.Any("projectlist", projectlist),
+	)
 
 	stringProjectid := ""
 	for index, pvalue := range projectlist {

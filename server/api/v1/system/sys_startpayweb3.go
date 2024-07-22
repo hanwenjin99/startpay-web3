@@ -75,12 +75,14 @@ func (b *StartpayWeb3Api) GetWalletList(c *gin.Context) {
 	var r systemReq.GetWalletList
 	r.Page = 1
 	r.PageSize = 20
+
+	global.GVA_LOG.Error("test welcome")
 	err := c.ShouldBindJSON(&r)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-
+	global.GVA_LOG.Error("test", zap.Any("GetWalletList", r))
 	err = utils.Verify(r, utils.GetWalletVerify)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
@@ -88,6 +90,8 @@ func (b *StartpayWeb3Api) GetWalletList(c *gin.Context) {
 	}
 
 	userId := utils.GetUserID(c)
+
+	global.GVA_LOG.Error("test", zap.Any("userId111", userId))
 
 	ProjectReturn, err := StartpayWeb3Service.GetProjectList(userId, r.Page, r.PageSize)
 	if err != nil {
