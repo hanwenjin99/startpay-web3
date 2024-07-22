@@ -5,6 +5,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
 	web3api "github.com/flipped-aurora/gin-vue-admin/server/utils/startpay"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
@@ -56,6 +57,9 @@ func (s *StartpayWeb3Service) GetProjectList(userId uint, Page int, PageSize int
 	if err != nil {
 		return nil, errors.New("查询用户项目失败")
 	}
+
+	global.GVA_LOG.Error("test", zap.Any("userId", userId))
+
 	stringProjectid := ""
 	for index, pvalue := range projectlist {
 		if len(projectlist)-1 == index {
