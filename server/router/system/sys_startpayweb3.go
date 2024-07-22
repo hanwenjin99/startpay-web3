@@ -18,6 +18,6 @@ func (s *StartpayRouter) InitStartpayRouter(Router *gin.RouterGroup) {
 		web3RouterWithoutRecord.GET("wallet_list", startpayWeb3Api.GetWalletList)
 	}
 	{
-		web3RouterWithoutRecord.POST("get_projectlist", startpayWeb3Api.GetProjectList)
+		web3Router.POST("get_projectlist", startpayWeb3Api.GetProjectList)
 	}
 }
