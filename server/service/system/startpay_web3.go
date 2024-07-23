@@ -13,7 +13,7 @@ type StartpayWeb3Service struct{}
 
 func (s *StartpayWeb3Service) CreateProject(u system.SysProject) (projectInter system.SysProject, err error) {
 	var project system.SysProject
-	if !errors.Is(global.GVA_DB.Where("user_id = ? and ProName=? and settle_currency=? and AssembleChain=?",
+	if !errors.Is(global.GVA_DB.Where("user_id = ? and pro_name=? and settle_currency=? and assemble_chain=?",
 		u.UserId, u.ProName, u.SettleCurrency, u.AssembleChain).First(&project).Error, gorm.ErrRecordNotFound) { // 判断项目名是否注册
 		return projectInter, errors.New("项目名已注册")
 	}

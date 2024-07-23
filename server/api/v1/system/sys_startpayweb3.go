@@ -56,6 +56,9 @@ func (b *StartpayWeb3Api) GetProjectList(c *gin.Context) {
 	r.PageSize = 20
 	err := c.ShouldBindJSON(&r)
 	if err != nil {
+		global.GVA_LOG.Error("test", zap.Any("GetProjectList", r),
+			zap.Any("err", err.Error()),
+		)
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
