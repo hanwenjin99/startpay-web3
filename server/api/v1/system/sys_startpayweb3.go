@@ -125,7 +125,7 @@ func (b *StartpayWeb3Api) GetWalletList(c *gin.Context) {
 		wlc.Id = conv.Id
 		wlc.Address = conv.AssembleAddress
 		wlc.Chain = conv.AssembleChain
-		wlc.MerchantAddressId = ""
+		wlc.MerchantAddressId = userId
 		wlc.ProjectId = &conv.Id
 		wlc.ProjectName = &conv.Name
 		wlc.CreateTime = time.Unix(conv.CreateTime, 0)
