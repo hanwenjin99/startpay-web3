@@ -84,7 +84,6 @@ func (s *StartpayWeb3Api) GetProjectList(Page int, PageSize int, status string, 
 	if err != nil {
 		fmt.Println("SignMessage err")
 	}
-
 	getHeaders := map[string]string{
 		"FP-API-KEY":   ApiKey,
 		"FP-SIGN":      signStr,

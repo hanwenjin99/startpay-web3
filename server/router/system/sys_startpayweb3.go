@@ -20,6 +20,12 @@ func (s *StartpayRouter) InitStartpayRouter(Router *gin.RouterGroup) {
 		web3RouterWithoutRecord.GET("chain_list", startpayWeb3Api.GetChainListInfo)
 		web3RouterWithoutRecord.GET("deposit_address", startpayWeb3Api.GetDepositAddress)
 		web3RouterWithoutRecord.GET("deposit_order", startpayWeb3Api.GetAdepositOrder)
+		web3RouterWithoutRecord.GET("merchant/bankAccount/list", startpayWeb3Api.GetbankAccountList)
+		web3RouterWithoutRecord.POST("merchant/bankAccount/create", startpayWeb3Api.BankAccountCreate)
+		web3RouterWithoutRecord.POST("merchant/bankAccount/delete", startpayWeb3Api.BankAccountDelete)
+		web3RouterWithoutRecord.GET("merchant/contact/list", startpayWeb3Api.UserContactList)
+		web3RouterWithoutRecord.POST("merchant/contact/create", startpayWeb3Api.UserContactCreate)
+		web3RouterWithoutRecord.POST("merchant/contact/delete", startpayWeb3Api.UserContactDelete)
 
 	}
 	{

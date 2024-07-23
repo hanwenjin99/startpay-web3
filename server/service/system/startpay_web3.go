@@ -170,3 +170,70 @@ func (s *StartpayWeb3Service) GetAdepositOrder(userId uint, Page int, PageSize i
 
 	return web3.GetProjectList(Page, PageSize, "ACTIVE", stringProjectid)
 }
+
+func (s *StartpayWeb3Service) GetbankAccountList(userId uint, Page int, PageSize int) (list []system.UserBank, total int64, err error) {
+
+	limit := PageSize
+	offset := PageSize * (Page - 1)
+	db := global.GVA_DB.Model(&system.UserBank{})
+	var bankList []system.UserBank
+	err = db.Count(&total).Error
+	if err != nil {
+		return
+	}
+	err = db.Limit(limit).Offset(offset).Where("merchantId = ?", userId).Find(&bankList).Error
+	return bankList, total, err
+}
+
+func (s *StartpayWeb3Service) UserContactList(userId uint, Page int, PageSize int) (list []system.Userwallet, total int64, err error) {
+
+	limit := PageSize
+	offset := PageSize * (Page - 1)
+	db := global.GVA_DB.Model(&system.Userwallet{})
+	var walletList []system.Userwallet
+	err = db.Count(&total).Error
+	if err != nil {
+		return
+	}
+	err = db.Limit(limit).Offset(offset).Where("merchantId = ?", userId).Find(&walletList).Error
+	return walletList, total, err
+}
+
+func (s *StartpayWeb3Service) BankAccountCreate(ub *system.UserBank) error {
+	var userBank system.UserBank
+	if !errors.Is(global.GVA_DB.Where(" merchantId = ? and region= ? and bankCode = ? and bankTitle = ? and receiverNumber = ? ", ub.MerchantId, ub.Region, ub.BankCode, ub.BankTitle, ub.ReceiverNumber).First(&userBank).Error, gorm.ErrRecordNotFound) {
+		return errors.New("银行账户已添加")
+	}
+	err := global.GVA_DB.Create(&ub).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *StartpayWeb3Service) BankAccountDelete(ub *system.UserBank) error {
+	if err := global.GVA_DB.Where("id = ? ", ub.ID).Delete(&system.UserBank{}).Error; err != nil {
+		return errors.New("删除bank信息失败")
+	}
+	return nil
+}
+
+func (s *StartpayWeb3Service) UserContactCreate(uw *system.Userwallet) error {
+	var userWallet system.Userwallet
+	if !errors.Is(global.GVA_DB.Where(" merchantId = ? and address = ? and chain = ? and name=? ", uw.MerchantId, uw.Address, uw.Chain, uw.Name).First(&userWallet).Error, gorm.ErrRecordNotFound) {
+		return errors.New("收款地址已添加")
+	}
+	err := global.GVA_DB.Create(&uw).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func (s *StartpayWeb3Service) UserContactDelete(uw *system.Userwallet) error {
+
+	if err := global.GVA_DB.Where("id = ? ", uw.ID).Delete(&system.Userwallet{}).Error; err != nil {
+		return errors.New("删除收款地址失败")
+	}
+
+	return nil
+}

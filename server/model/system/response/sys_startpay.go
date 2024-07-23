@@ -142,3 +142,38 @@ type Web3ChainListRespons struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
 }
+
+type UserWalletRespons struct {
+	Content    []UserDEsposit `json:"content"`
+	TotalPages int            `json:"total_pages"`
+	Last       bool           `json:"last"`
+	Page       int            `json:"page"`
+	PageSize   int            `json:"page_size"`
+	Total      interface{}    `json:"total"`
+}
+
+type UserDEsposit struct {
+	Id         string `json:"id"`
+	Name       string `json:"name"`
+	Address    string `json:"address"`
+	Chain      string `json:"chain"`
+	ChainIcon  string `json:"chainIcon"`
+	IsInternal bool   `json:"isInternal"`
+}
+
+type UserBankRespons struct {
+	Id              string      `json:"id"`
+	MerchantId      string      `json:"merchantId"`
+	Region          string      `json:"region"`
+	RemittanceType  string      `json:"remittanceType"`
+	EnterpriseTitle string      `json:"enterpriseTitle"`
+	BankTitle       string      `json:"bankTitle"`
+	BankCode        string      `json:"bankCode"`
+	FedWire         string      `json:"fedWire"`
+	ReceiverNumber  string      `json:"receiverNumber"`
+	ReceiverName    string      `json:"receiverName"`
+	ReceiverAddress string      `json:"receiverAddress"`
+	ReferenceField  interface{} `json:"referenceField"`
+	CreateTime      time.Time   `json:"createTime"`
+	UpdateTime      time.Time   `json:"updateTime"`
+}

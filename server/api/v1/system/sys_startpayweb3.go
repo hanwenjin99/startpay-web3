@@ -13,6 +13,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"strconv"
 )
 
 type StartpayWeb3Api struct{}
@@ -51,7 +52,7 @@ func (b *StartpayWeb3Api) CreateProject(c *gin.Context) {
 
 // func (b*StartpayWeb3Api) GetWalletList(c *gin.Context, user system.SysUser) {
 func (b *StartpayWeb3Api) GetProjectList(c *gin.Context) {
-	var r systemReq.GetProjectList
+	var r systemReq.GetCommonPageInfo
 	r.Page = 1
 	r.PageSize = 20
 	err := c.ShouldBindJSON(&r)
@@ -85,7 +86,7 @@ func (b *StartpayWeb3Api) GetProjectList(c *gin.Context) {
 }
 
 func (b *StartpayWeb3Api) GetWalletList(c *gin.Context) {
-	var r systemReq.GetWalletList
+	var r systemReq.GetCommonPageInfo
 	r.Page = 1
 	r.PageSize = 20
 
@@ -194,7 +195,211 @@ func (b *StartpayWeb3Api) GetChainListInfo(c *gin.Context) {
 
 func (b *StartpayWeb3Api) GetDepositAddress(c *gin.Context) {
 
+	//userId := utils.GetUserID(c)
 }
 func (b *StartpayWeb3Api) GetAdepositOrder(c *gin.Context) {
+	//userId := utils.GetUserID(c)
+}
 
+func (b *StartpayWeb3Api) GetbankAccountList(c *gin.Context) {
+	var r systemReq.GetCommonPageInfo
+	r.Page = 1
+	r.PageSize = 20
+
+	err := c.ShouldBindJSON(&r)
+	if err != nil {
+		global.GVA_LOG.Error("xxx ShouldBindJSON fail", zap.Any("err", err.Error()))
+	}
+
+	global.GVA_LOG.Error("GetbankAccountList web3 db before", zap.Any("GetbankAccountList", r))
+	userId := utils.GetUserID(c)
+	list, _, err := StartpayWeb3Service.GetbankAccountList(userId, r.Page, r.PageSize)
+
+	if err != nil {
+		global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		response.FailWithMessage("获取失败", c)
+		return
+	}
+
+	blist := make([]systemRes.UserBankRespons, 0)
+
+	for _, uwvalue := range list {
+		ubs := systemRes.UserBankRespons{}
+		ubs.ReceiverNumber = uwvalue.ReceiverNumber
+		ubs.Id = strconv.FormatInt(int64(uwvalue.ID), 10)
+		ubs.MerchantId = strconv.FormatInt(int64(uwvalue.MerchantId), 10)
+		ubs.BankTitle = uwvalue.BankTitle
+		ubs.BankCode = uwvalue.BankCode
+		ubs.Region = uwvalue.Region
+		ubs.FedWire = uwvalue.FedWire
+		ubs.EnterpriseTitle = uwvalue.EnterpriseTitle
+		ubs.ReceiverAddress = uwvalue.ReceiverAddress
+		ubs.ReceiverName = uwvalue.ReceiverName
+		ubs.CreateTime = uwvalue.CreatedAt
+		ubs.ReferenceField = uwvalue.ReferenceField
+		ubs.RemittanceType = uwvalue.RemittanceType
+		ubs.UpdateTime = uwvalue.UpdatedAt
+		blist = append(blist, ubs)
+	}
+
+	response.OkWithDetailed(blist, "获取成功", c)
+}
+
+func (b *StartpayWeb3Api) BankAccountCreate(c *gin.Context) {
+	var r systemReq.CreateBank
+	err := c.ShouldBindJSON(&r)
+	if err != nil {
+		global.GVA_LOG.Error("xxx ShouldBindJSON fail", zap.Any("err", err.Error()))
+	}
+
+	/*err = utils.Verify(r, utils.PageInfoVerify)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}*/
+
+	global.GVA_LOG.Error("GetbankAccountList web3 db before", zap.Any("GetbankAccountList", r))
+	userId := utils.GetUserID(c)
+
+	userBank := &system.UserBank{BankTitle: r.BankTitle, ReceiverName: r.ReceiverName, ReceiverAddress: r.ReceiverAddress, BankCode: r.BankCode,
+		EnterpriseTitle: r.EnterpriseTitle, FedWire: r.FedWire, ReceiverNumber: r.ReceiverNumber, Region: r.Region, RemittanceType: r.RemittanceType}
+	userBank.MerchantId = int64(userId)
+
+	err = StartpayWeb3Service.BankAccountCreate(userBank)
+	if err != nil {
+		global.GVA_LOG.Error("获取 xxx 失败!", zap.Error(err))
+		response.FailWithDetailed("false", "添加 bank 失败", c)
+		return
+	}
+	response.OkWithDetailed("true", "添加bank成功", c)
+}
+
+func (b *StartpayWeb3Api) BankAccountDelete(c *gin.Context) {
+	var r systemReq.DeleteDBank
+	err := c.ShouldBindJSON(&r)
+	if err != nil {
+		global.GVA_LOG.Error("xxx ShouldBindJSON fail", zap.Any("err", err.Error()))
+	}
+
+	/*err = utils.Verify(r, utils.PageInfoVerify)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}*/
+
+	global.GVA_LOG.Error("BankAccountDelete web3 db before", zap.Any("BankAccountDelete", r))
+	userbank := &system.UserBank{}
+	u64, err := strconv.ParseUint(r.Id, 10, 64)
+	if err != nil {
+		global.GVA_LOG.Error("删除bank id错误!", zap.Error(err))
+		response.FailWithDetailed("false", "删除bank id错误", c)
+		return
+	}
+	userbank.ID = uint(u64)
+
+	err = StartpayWeb3Service.BankAccountDelete(userbank)
+	if err != nil {
+		global.GVA_LOG.Error("删除bank失败!", zap.Error(err))
+		response.FailWithDetailed("false", "删除bank 失败", c)
+		return
+	}
+	response.OkWithDetailed("true", "删除bank成功", c)
+}
+
+func (b *StartpayWeb3Api) UserContactList(c *gin.Context) {
+	var r systemReq.GetCommonPageInfo
+	r.Page = 1
+	r.PageSize = 20
+
+	err := c.ShouldBindJSON(&r)
+	if err != nil {
+		global.GVA_LOG.Error("xxx ShouldBindJSON fail", zap.Any("err", err.Error()))
+	}
+
+	global.GVA_LOG.Error("GetbankAccountList web3 db before", zap.Any("GetbankAccountList", r))
+	userId := utils.GetUserID(c)
+	list, total, err := StartpayWeb3Service.UserContactList(userId, r.Page, r.PageSize)
+
+	if err != nil {
+		global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		response.FailWithMessage("获取失败", c)
+		return
+	}
+
+	uws := systemRes.UserWalletRespons{}
+
+	for _, uwvalue := range list {
+		uds := systemRes.UserDEsposit{}
+		uds.Chain = uwvalue.Chain
+		uds.Name = uwvalue.Name
+		uds.Id = strconv.FormatInt(int64(uwvalue.ID), 10)
+		uds.Address = uwvalue.Address
+		uds.IsInternal = false
+		uws.Content = append(uws.Content, uds)
+	}
+	uws.Page = r.Page
+	uws.PageSize = r.PageSize
+	uws.Total = total
+	uws.TotalPages = int(total)/r.PageSize + 1
+	uws.Last = false
+	response.OkWithDetailed(uws, "获取成功", c)
+}
+func (b *StartpayWeb3Api) UserContactCreate(c *gin.Context) {
+	var r systemReq.CreateDespoitAddress
+	err := c.ShouldBindJSON(&r)
+	if err != nil {
+		global.GVA_LOG.Error("xxx ShouldBindJSON fail", zap.Any("err", err.Error()))
+	}
+
+	/*err = utils.Verify(r, utils.PageInfoVerify)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}*/
+
+	global.GVA_LOG.Error("UserContactCreate web3 db before", zap.Any("UserContactCreate", r))
+	userId := utils.GetUserID(c)
+
+	userAddress := &system.Userwallet{Address: r.Address, Name: r.Name, Chain: r.Chain}
+	userAddress.MerchantId = int64(userId)
+
+	err = StartpayWeb3Service.UserContactCreate(userAddress)
+	if err != nil {
+		global.GVA_LOG.Error("获取 xxx 失败!", zap.Error(err))
+		response.FailWithDetailed("false", "添加 bank 失败", c)
+		return
+	}
+	response.OkWithDetailed("true", "添加bank成功", c)
+}
+func (b *StartpayWeb3Api) UserContactDelete(c *gin.Context) {
+	var r systemReq.DeleteDespoitAddress
+	err := c.ShouldBindJSON(&r)
+	if err != nil {
+		global.GVA_LOG.Error("xxx ShouldBindJSON fail", zap.Any("err", err.Error()))
+	}
+
+	/*err = utils.Verify(r, utils.PageInfoVerify)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}*/
+
+	global.GVA_LOG.Error("UserContactDelete web3 db before", zap.Any("UserContactDelete", r))
+
+	userAddress := &system.Userwallet{}
+	u64, err := strconv.ParseUint(r.Id, 10, 64)
+	if err != nil {
+		global.GVA_LOG.Error("删除收款地址id错误!", zap.Error(err))
+		response.FailWithDetailed("false", "删除收款地址id错误", c)
+		return
+	}
+	userAddress.ID = uint(u64)
+
+	err = StartpayWeb3Service.UserContactDelete(userAddress)
+	if err != nil {
+		global.GVA_LOG.Error("删除收款地址失败!", zap.Error(err))
+		response.FailWithDetailed("false", "删除收款地址k 失败", c)
+		return
+	}
+	response.OkWithDetailed("true", "删除收款地址成功", c)
 }
