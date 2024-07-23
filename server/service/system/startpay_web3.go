@@ -18,9 +18,15 @@ func (s *StartpayWeb3Service) CreateProject(u system.SysProject) (projectInter s
 		return projectInter, errors.New("项目名已注册")
 	}
 
+	global.GVA_LOG.Error("test", zap.Any("SysProject", u),
+		zap.Any("project", project),
+	)
+
 	web3 := web3api.StartpayWeb3Api{}
 
 	web3DataP, err := web3.CeateProject(u.AssembleChain, u.ProName, u.SettleCurrency)
+
+	global.GVA_LOG.Error("test", zap.Any("web3DataP", web3DataP))
 	if err != nil {
 		return u, err
 	}
@@ -33,6 +39,9 @@ func (s *StartpayWeb3Service) CreateProject(u system.SysProject) (projectInter s
 	u.Status = web3DataP.Data.Status
 
 	web3Datas, err := web3.GetProjectSecret(u.ProUuid)
+
+	global.GVA_LOG.Error("test", zap.Any("web3DataP", web3Datas))
+
 	if err != nil {
 		return u, err
 	}
@@ -41,6 +50,7 @@ func (s *StartpayWeb3Service) CreateProject(u system.SysProject) (projectInter s
 
 	err = global.GVA_DB.Create(&u).Error
 	if err != nil {
+		global.GVA_LOG.Error("test", zap.Any("create project db err", err.Error()))
 		return u, err
 	}
 

@@ -24,6 +24,7 @@ func (b *StartpayWeb3Api) CreateProject(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
+	global.GVA_LOG.Error("test", zap.Any("CreateProject", r))
 	err = utils.Verify(r, utils.CreateProjectVerify)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
@@ -33,7 +34,13 @@ func (b *StartpayWeb3Api) CreateProject(c *gin.Context) {
 
 	project := &system.SysProject{AssembleChain: r.AssembleChain, ProName: r.Name, SettleCurrency: r.SettleCurrency, AssembleAddress: r.AssembleAddress}
 	project.UserId = UserId
+
+	global.GVA_LOG.Error("test", zap.Any("project", project))
+
 	ProjectReturn, err := StartpayWeb3Service.CreateProject(*project)
+
+	global.GVA_LOG.Error("test", zap.Any("ProjectReturn", ProjectReturn))
+
 	if err != nil {
 		global.GVA_LOG.Error("创建项目失败!", zap.Error(err))
 		response.FailWithDetailed(systemRes.SysProjectResponse{Project: ProjectReturn}, "创建项目失败", c)
@@ -52,9 +59,13 @@ func (b *StartpayWeb3Api) GetProjectList(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
+
+	global.GVA_LOG.Error("test", zap.Any("GetProjectList", r))
+
 	err = utils.Verify(r, utils.GetProjectVerify)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
+		global.GVA_LOG.Error("test", zap.Any("Verify", err.Error()))
 		return
 	}
 
