@@ -28,12 +28,13 @@
         <span>银行账户</span>
         <el-icon><ArrowRightBold /></el-icon>
       </div>
-      <span class="split">/</span>
+      <!-- TODO 隐藏签约供应商选择入口 -->
+      <!-- <span class="split">/</span>
       <div class="bankSelectorItem" @click="router.push('supplier')">
         <el-icon><Checked /></el-icon>
         <span>签约供应商</span>
         <el-icon><ArrowRightBold /></el-icon>
-      </div>
+      </div> -->
     </div>
     <span class="payee">交易附言</span>
     <input class="remakeInput">

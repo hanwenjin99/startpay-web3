@@ -6,47 +6,83 @@
       <div class="formItem">
         <span class="formTitle">名称</span>
         <div class="inputDiv">
-          <input class="input">
+          <input v-model="addForm.name" class="input">
         </div>
       </div>
       <div class="formItem">
         <span class="formTitle">网络</span>
-        <SelectInter />
+        <SelectInter @handle-select-chain="handleSelectChain" />
       </div>
       <div class="formItem">
         <span class="formTitle">地址</span>
         <div class="inputDiv">
-          <input class="input">
+          <input v-model="addForm.address" class="input">
         </div>
       </div>
       <div class="formItem">
         <span class="formTitle">邮箱验证码</span>
         <div class="inputDiv">
-          <input class="input">
+          <input v-model="addForm.emailCode" class="input">
           <span class="sendBtn">发送验证码</span>
         </div>
       </div>
       <div class="formItem">
         <span class="formTitle">谷歌验证码</span>
         <div class="inputDiv">
-          <input class="input">
+          <input v-model="addForm.googleCode" class="input">
         </div>
       </div>
     </section>
 
     <footer class="footer">
       <el-button text @click.stop="router.go(-1)">返回</el-button>
-      <el-button size="large" color="#000" plain type="info" round>添加</el-button>
+      <el-button
+        :disabled="!isCanSubmit"
+        size="large"
+        color="#000"
+        plain
+        type="info"
+        round
+        @click="submitAddPayee"
+      >
+        添加
+      </el-button>
     </footer>
   </main>
 </template>
 
 <script setup>
+import { reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 
+import { addMerchantContact } from '@/api/accountInfo'
 import SelectInter from '@/components/selectInter/index.vue'
 
 const router = useRouter()
+
+const addForm = reactive({
+  name: '', // 名称
+  chain: '', // 网络
+  address: '', // 地址
+  emailCode: '', // 邮箱验证码
+  googleCode: '', // 谷歌验证码
+})
+
+const isCanSubmit = computed(() => addForm.name && addForm.chain && addForm.address && addForm.emailCode && addForm.googleCode)
+
+const handleSelectChain = (selected) => {
+  addForm.chain = selected.chain
+}
+
+// 新增收款人
+const submitAddPayee = async () => {
+  const { code } = await addMerchantContact(addForm)
+  if (code === 0) {
+    ElMessage.success('创建收款人成功')
+    router.push('payee')
+  }
+}
 </script>
 
 <style lang="scss" scoped>

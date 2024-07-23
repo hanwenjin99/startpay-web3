@@ -145,6 +145,18 @@
                     >修改密码</a>
                   </p>
                 </li>
+                <!-- 新增虚拟MFA绑定/解绑 -->
+                <li class="borderd pt-2.5">
+                  <p class="pb-2.5 text-xl text-gray-600">虚拟MFA</p>
+                  <p class="pb-2.5 text-lg text-gray-400">
+                    绑定虚拟MFA后，您可以在登录时通过他来进行二次校验，为了方便您获取虚拟MFA动态码，绑定前请确保您已下载MFA设备
+                    <a
+                      href="javascript:void(0)"
+                      class="float-right text-blue-400"
+                      @click="showMfa = true"
+                    >{{ isBindMfa ? '前往解绑' : '前往绑定' }}</a>
+                  </p>
+                </li>
               </ul>
             </el-tab-pane>
           </el-tabs>
@@ -311,6 +323,87 @@
         </span>
       </template>
     </el-dialog>
+
+    <!-- 绑定MFA -->
+    <el-dialog
+      v-model="showMfa"
+      :title="`${ isBindMfa ? '需要验证您的身份' : '绑定虚拟MFA' }`"
+      width="600px"
+    >
+      <template v-if="isBindMfa">
+        <div class="unbind">
+          <span>为确认是您本人操作，请进行身份验证。</span>
+          <span style="margin: 20px 0;">请输入从已绑定的虚拟 MFA 应用中获取的 6 位数字验证码</span>
+          <div class="input-box">
+            <div
+              v-for="item in [0, 1, 2, 3, 4, 5]"
+              :key="item"
+              :class="['code-item', codeValue.length === item && inputFocus ? 'code-item-active' : '']"
+            >
+              {{ codeValue[item] }}
+            </div>
+            <el-input
+              class="input-code"
+              :model-value="codeValue"
+              maxlength="6"
+              @input="codeInputChange"
+              @blur="inputFocus = fasle"
+              @focus="inputFocus = true"
+            />
+          </div>
+        </div>
+      </template>
+      <template v-else>
+        <div style="height: 450px">
+          <el-steps direction="vertical">
+            <el-step title="第一步：下载应用" description="在手机上安装支持虚拟 MFA 的应用。" />
+            <el-step title="第二步：获取动态码">
+              <template #description>
+                <div class="mfaCode">
+                  打开应用，通过扫描下方二维码或手动输入下方密钥信息添加帐号，获取虚拟 MFA 动态码。
+                  <div class="qrcode-box">
+                    <img class="qrcode-img" src="" alt="">
+                    <div class="qrcode-desc">
+                      <div class="columnFlex">
+                        <span>帐号名</span>
+                        <span>haohaohuaihuai</span>
+                      </div>
+                      
+                      <div class="columnFlex">
+                        <span>密钥</span>
+                        <span>UJAXPTVWRS4OVA26Y77ZIIXLS4Q7PAFXEZJYDGGKG6PUCMYUNUPR2KKDEV56B3VU</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </el-step>
+            <el-step title="第三步：输入动态码">
+              <template #description>
+                请输入从虚拟 MFA 应用中获取的连续两组 6 位数字验证码。
+                <el-form
+                  label-position="right"
+                  label-width="auto"
+                  :model="formLabelAlign"
+                  style="max-width: 400px; margin-top: 10px;"
+                >
+                  <el-form-item label="第一组验证码">
+                    <el-input v-model="formLabelAlign.firstIdentityCode" placeholder="6位数字验证码" />
+                  </el-form-item>
+                  <el-form-item label="第二组验证码">
+                    <el-input v-model="formLabelAlign.secondIdentityCode" placeholder="6位数字验证码" />
+                  </el-form-item>
+                </el-form>
+              </template>
+            </el-step>
+          </el-steps>
+        </div>
+      </template>
+      <template #footer>
+        <el-button plain color="#000">取消</el-button>
+        <el-button color="#000">确定</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -324,6 +417,25 @@ import SelectImage from '@/components/selectImage/selectImage.vue'
 defineOptions({
   name: 'Person',
 })
+
+const isBindMfa = ref(true)
+const showMfa = ref(false)
+const formLabelAlign = reactive({
+  firstIdentityCode: '',
+  secondIdentityCode: ''
+})
+const codeValue = ref('')
+const inputFocus = ref(false)
+// 解绑时输入验证码
+const codeInputChange = (e) => {
+  if (e) {
+    if (/^\+?[0-9][0-9]*$/.test(e)) {
+      codeValue.value = e
+    }
+  } else {
+    codeValue.value = ''
+  }
+}
 
 const activeName = ref('second')
 const rules = reactive({
@@ -491,6 +603,106 @@ const changeEmail = async() => {
 }
 
 </script>
+
+<style lang="scss" scoped>
+.mfaCode {
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+
+  .qrcode-box {
+    margin: 10px 0;
+    background: #f2f2f2;
+    padding: 15px;
+    border-radius: 8px;
+    display: flex;
+
+    .qrcode-img {
+      margin-right: 10px;
+      width: 115px;
+      height: 115px;
+    }
+
+    .qrcode-desc {
+      display: flex;
+      flex-direction: column;
+
+      .columnFlex {
+        display: flex;
+        flex-direction: column;
+        max-width: 330px;
+        font-size: 12px;
+
+        &:first-child {
+          margin-bottom: 15px
+        }
+      }
+    }
+  }
+}
+
+.unbind {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 12px
+}
+
+.input-box {
+  position: relative;
+  display: flex;
+  margin-bottom: 10px;
+  .input-code {
+    position: absolute;
+  }
+  .code-item {
+    width: 64px;
+    height: 64px;
+    border-radius: 8px;
+    margin-right: 10px;
+    line-height: 64px;
+    text-align: center;
+    font-size: 24px;
+    color: #000;
+    background-color: rgba(0, 0, 0, 0.05);
+    border: 1px solid transparent;
+  }
+
+  .code-item-active {
+    border: 1px solid rgba(0, 0, 0, 0.2);
+  }
+
+  :deep(.el-input__wrapper) {
+    width: 444px;
+    height: 64px;
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+  }
+
+  :deep(.el-input__inner) {
+    color: transparent;
+  }
+}
+
+:deep(.el-step__head.is-wait) {
+  color: #000 !important;
+  border-color: #000 !important;
+}
+
+:deep(.el-step__line) {
+  background-color: #000 !important;
+}
+
+:deep(.el-step__title.is-wait) {
+  color: #000 !important;
+  font-weight: bold;
+}
+
+:deep(.el-step__description.is-wait) {
+  color: #000 !important;
+}
+</style>
 
 <style lang="scss">
 .borderd {

@@ -22,9 +22,9 @@
         >
           <el-option
             v-for="item in commonStore.chainsInfoList"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
+            :key="item.chain"
+            :label="item.chain"
+            :value="item.chain"
           />
         </el-select>
 
@@ -60,7 +60,19 @@
       </el-table-column>
       <el-table-column align="right">
         <template #default="scope">
-          <el-button icon="delete" type="danger" circle />
+          <!-- 删除 -->
+          <el-popconfirm
+            confirm-button-text="确定"
+            cancel-button-text="取消"
+            icon="infoFilled"
+            icon-color="#626AEF"
+            title="确认删除此条数据？"
+            @confirm="deleteContact(scope.row)"
+          >
+            <template #reference>
+              <el-button icon="delete" type="danger" circle />
+            </template>
+          </el-popconfirm>
           <el-button color="#000" plain round @click.stop="selectPayee">转账</el-button>
         </template>
       </el-table-column>
@@ -71,9 +83,10 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 
 import { useCommonStore } from '@/pinia/modules/common'
-import { getMerchantContactList } from '@/api/accountInfo'
+import { getMerchantContactList, deleteMerchantContact } from '@/api/accountInfo'
 
 const router = useRouter()
 const commonStore = useCommonStore()
@@ -91,6 +104,16 @@ const queryList = async (params) => {
   const { code, data = {} } = await getMerchantContactList({ ...params, page: 0, pageSize: 200 })
   if (code === 0) {
     list.value = data.content || []
+  }
+}
+
+// 删除收款人
+const deleteContact = async (item) => {
+  const { id } = item
+  const { code } = await deleteMerchantContact({ id })
+  if (code === 0) {
+    ElMessage.success('删除收款人成功！')
+    queryList(1) // 重新查询列表数据
   }
 }
 

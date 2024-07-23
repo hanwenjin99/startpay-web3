@@ -12,7 +12,7 @@
     <el-dialog v-model="dialogVisible" title="选择网络" width="800">
       <el-radio-group v-model="radioInter" class="groupStyle" @change="handleChange">
         <el-radio
-          v-for="item in interData"
+          v-for="item in commonStore.chainsInfoList"
           :key="item.chain"
           :value="item.chain"
           size="large"
@@ -29,23 +29,42 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 
-const interData = [{
-  chain: "ETH",
-  chainIcon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/eth.png"
-}]
+import { useCommonStore } from '@/pinia/modules/common'
 
-const radioInter = ref('')
-const selectInfo = ref(interData[0])
+const commonStore = useCommonStore()
+
+const emits = defineEmits('handleSelectChain')
+
+const radioInter = ref(commonStore.chainsInfoList[0].chain)
+const selectInfo = ref(commonStore.chainsInfoList[0])
 
 const dialogVisible = ref(false)
 
 const handleChange = (key) => {
-  selectInfo.value = interData.filter(item => item.chain === key)[0]
+  selectInfo.value = commonStore.chainsInfoList.filter(item => item.chain === key)[0]
+  emits('handleSelectChain', selectInfo.value)
   dialogVisible.value = false
 }
 
+onMounted(async () => {
+  let initList = []
+  if (commonStore.chainsInfoList.length === 0) {
+    // 更新网络列表
+    const chainList = await commonStore.GetChainsInfo()
+    if (Array.isArray(chainList) && chainList.length > 0) {
+      initList = [...chainList]
+    }
+  } else {
+    initList = [...commonStore.chainsInfoList]
+  }
+  // 更新默认选择的网络信息
+  radioInter.value = initList[0].chain
+  selectInfo.value = initList[0]
+  // 返回给父组件
+  emits('handleSelectChain', initList[0])
+})
 </script>
 
 <style lang="scss" scoped>
