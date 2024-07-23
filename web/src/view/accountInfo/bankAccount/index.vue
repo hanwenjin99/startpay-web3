@@ -3,18 +3,6 @@
     <h1 class="title">银行账户</h1>
 
     <section class="top">
-      <section class="search">
-        <el-input
-          v-model="searchString"
-          placeholder="名称、地址"
-          prefix-icon="search"
-          size="large"
-          style="width: 600px; margin-right: 16px;"
-        />
-
-        <!-- 重置按钮 -->
-        <el-button size="large" color="#000" plain type="info" round>重置</el-button>
-      </section>
       <el-button color="#000" icon="plus" type="info" round @click="router.push('addBankAccount')">添加银行账户</el-button>
     </section>
 
@@ -33,7 +21,19 @@
       </el-table-column>
       <el-table-column align="right">
         <template #default="scope">
-          <el-button icon="delete" type="danger" circle />
+          <!-- 删除 -->
+          <el-popconfirm
+            confirm-button-text="确定"
+            cancel-button-text="取消"
+            icon="infoFilled"
+            icon-color="#626AEF"
+            title="确认删除此条数据？"
+            @confirm="deleteBank(scope.row)"
+          >
+            <template #reference>
+              <el-button icon="delete" type="danger" circle />
+            </template>
+          </el-popconfirm>
           <el-button icon="edit" type="info" circle />
           <el-button color="#000" plain round @click="router.push('/layout/account/pay')">支付</el-button>
         </template>
@@ -45,11 +45,11 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 
-import { getBankAccountList } from '@/api/accountInfo'
+import { getBankAccountList, deleteBankAccount } from '@/api/accountInfo'
 
 const router = useRouter()
-const searchString = ref('')
 
 const listData = ref([])
 
@@ -57,6 +57,16 @@ const queryList = async () => {
   const { code, data } = await getBankAccountList()
   if (code === 0) {
     listData.value = data || []
+  }
+}
+
+// 删除银行账户
+const deleteBank = async (item) => {
+  const { id } = item
+  const { code } = await deleteBankAccount({ id })
+  if (code === 0) {
+    ElMessage.success('删除银行账户成功！')
+    queryList(1) // 重新查询列表数据
   }
 }
 
@@ -86,7 +96,7 @@ onMounted(() => {
     margin-bottom: 40px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
 
     .search {
       display: flex;

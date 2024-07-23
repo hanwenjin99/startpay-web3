@@ -4,7 +4,7 @@
     <!-- 银行/地区 -->
     银行国家/地区
     <el-select
-      clearable
+      v-model="addForm.region"
       class="selectStyle"
       style="width: 568px;"
       size="large"
@@ -26,50 +26,92 @@
 
     <!-- 企业名称 -->
     <span class="smallTitle">企业名称</span>
-    <el-input style="width: 568px;" />
+    <el-input v-model="addForm.enterpriseTitle" style="width: 568px;" />
 
     <!-- 银行信息 -->
     <div class="rowFlex">
       <div class="columnFlex">
         <span class="smallTitle">银行名称</span>
-        <el-input style="width: 272px;" />
+        <el-input v-model="addForm.bankTitle" style="width: 272px;" />
       </div>
 
       <div class="columnFlex">
         <span class="smallTitle">银行代码(SWIFT / BIC)</span>
-        <el-input style="width: 272px;" />
+        <el-input v-model="addForm.bankCode" style="width: 272px;" />
       </div>
     </div>
+
+    <!-- 路由号 -->
+    <span class="smallTitle">Fedwire汇款路由号</span>
+    <el-input v-model="addForm.fedWire" style="width: 568px;" />
 
     <!-- 账号信息 -->
     <div class="rowFlex">
       <div class="columnFlex">
         <span class="smallTitle">收款人银行账号</span>
-        <el-input style="width: 272px;" />
+        <el-input v-model="addForm.receiverNumber" style="width: 272px;" />
       </div>
 
       <div class="columnFlex">
         <span class="smallTitle">银行账户名</span>
-        <el-input style="width: 272px;" />
+        <el-input v-model="addForm.receiverName" style="width: 272px;" />
       </div>
     </div>
 
     <!-- 地址 -->
     <span class="smallTitle">收款人地址</span>
-    <el-input style="width: 568px;" />
+    <el-input v-model="addForm.receiverAddress" style="width: 568px;" />
 
     <footer class="footer">
       <el-button text @click.stop="router.go(-1)">返回</el-button>
-      <el-button size="large" color="#000" plain type="info" round>确认</el-button>
+      <el-button
+        size="large"
+        color="#000"
+        plain
+        type="info"
+        round
+        @click="submitAddForm"
+      >
+        确认
+      </el-button>
     </footer>
   </main>
 </template>
 
 <script setup>
+import { reactive } from 'vue'
 import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
+
+import { createBankAccount } from '@/api/accountInfo'
 import swiftBank from '@/assets/swift-bank.png'
 
 const router = useRouter()
+const addForm = reactive({
+  region: 'US', // 银行国家/地区
+  enterpriseTitle: '', // 企业名称
+  bankTitle: '', // 银行名称
+  bankCode: '', // 银行代码
+  receiverNumber: '', // 收款人银行账户
+  receiverName: '', // 银行账户名
+  receiverAddress: '', // 收款人地址
+  fedWire: '', // Fedwire汇款路由号
+  remittanceType: "SWIFT" // 汇款方式
+})
+
+// 提交创建银行账户
+const submitAddForm = async () => {
+  if (!/^[A-Za-z0-9]{3,33}$/.test(addForm.receiverNumber)) {
+    ElMessage.warning('收款人银行账号必须为3-33 位英文，数字')
+    return
+  }
+  const { code } = await createBankAccount(addForm)
+  if (code === 0) {
+    ElMessage.success('创建银行账户成功！')
+    router.push('bankAccount')
+  }
+}
+
 </script>
 
 <style lang="scss" scoped>

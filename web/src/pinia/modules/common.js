@@ -5,7 +5,10 @@ import { getChainsInfo, getCurrencyOptions, getDepositOrderStatus, getChainsList
 
 export const useCommonStore = defineStore('common', () => {
   const chainsList = ref(["ETH", "BSC", "TRON", "POLYGON"]) // 链类型
-  const chainsInfoList = ref([]) // 网络类型
+  const chainsInfoList = ref([{
+    chain: "ETH",
+    chainIcon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/eth.png"
+  }]) // 网络类型
   const currencyOptions = ref([]) // 币种类型
   const depositOrderStatus = ref([])
 
@@ -39,6 +42,7 @@ export const useCommonStore = defineStore('common', () => {
     const { code, data } = await getChainsInfo()
     if (code === 0) {
       setChainsInfoList(data || [])
+      return data || []
     }
   }
   
