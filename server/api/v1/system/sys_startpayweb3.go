@@ -59,8 +59,8 @@ func (b *StartpayWeb3Api) GetProjectList(c *gin.Context) {
 		global.GVA_LOG.Error("test", zap.Any("GetProjectList", r),
 			zap.Any("err", err.Error()),
 		)
-		response.FailWithMessage(err.Error(), c)
-		return
+		//response.FailWithMessage(err.Error(), c)
+		//return
 	}
 
 	global.GVA_LOG.Error("test", zap.Any("GetProjectList", r))

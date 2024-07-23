@@ -36,7 +36,12 @@ func (s *StartpayWeb3Service) CreateProject(u system.SysProject) (projectInter s
 	//u.CreatedAt = web3DataP.Data.CreateTime
 	u.CallbackDomain = web3DataP.Data.CallbackDomain
 	u.CallbackUrl = web3DataP.Data.CallbackUrl
-	u.Status = web3DataP.Data.Status
+
+	if web3DataP.Data.Status == "ACTIVE" {
+		u.Status = 1
+	} else {
+		u.Status = 2
+	}
 
 	web3Datas, err := web3.GetProjectSecret(u.ProUuid)
 

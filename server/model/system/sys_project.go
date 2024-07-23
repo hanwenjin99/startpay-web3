@@ -17,7 +17,7 @@ type SysProject struct {
 	AssembleAddress string `json:"assemble_address"  gorm:"index;comment:assembleAddress"`
 	CallbackDomain  string `json:"callback_domain"  gorm:"default:;comment:callbackDomain"`
 	CallbackUrl     string `json:"callback_url" gorm:"default:;comment:callbackUrl"`
-	Status          string `json:"status" gorm:"default:1;comment:用户是否被冻结 1正常 2冻结"`
+	Status          int    `json:"status" gorm:"default:1;comment:用户是否被冻结 1正常 2冻结"`
 }
 
 func (SysProject) TableName() string {
