@@ -177,6 +177,8 @@ func (s *StartpayWeb3Api) GetAccountInfo() (*GetAccountInfoRespons, error) {
 		zap.Any("signStr", signStr),
 		zap.Any("srcStr", srcStr),
 		zap.Any("getURL", getURL),
+		zap.Any("ApiKey", ApiKey),
+		zap.Any("ApiSecret", s.ApiSecret),
 	)
 
 	getResponse, err := client.Get(getURL, getHeaders)
