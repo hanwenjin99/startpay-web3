@@ -13,6 +13,10 @@ type GetCommonPageInfo struct {
 	PageSize int `json:"pageSize" example:"pageSize"`
 }
 
+type GetTokenInfoReq struct {
+	Chain string `json:"chain" example:"chain"`
+}
+
 type CreateBank struct {
 	BankCode        string `json:"bankCode" example:"bankCode"`
 	BankTitle       string `json:"bankTitle" example:"bankTitle"`

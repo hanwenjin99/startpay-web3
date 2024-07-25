@@ -183,11 +183,13 @@ type GetAccountInfoRespons struct {
 }
 
 type GetAccountInfo struct {
-	Address  string `json:"address"`
-	Balance  string `json:"balance"`
-	Chain    string `json:"chain"`
-	Currency string `json:"currency"`
-	Id       string `json:"id"`
+	Address   string `json:"address"`
+	Balance   string `json:"balance"`
+	Chain     string `json:"chain"`
+	Currency  string `json:"currency"`
+	UsdtPrice string `json:"usdtPrice"`
+	Id        string `json:"id"`
+	Name      string `json:"name"`
 }
 
 type Web3ChainListRespons struct {

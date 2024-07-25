@@ -99,7 +99,7 @@ func (s *StartpayWeb3Service) GetProjectList(userId uint, Page int, PageSize int
 	return web3.GetProjectList(Page, PageSize, "ACTIVE", stringProjectid)
 }
 
-func (s *StartpayWeb3Service) GetAccountInfo(userId uint) (map[string]web3api.GetAccountInfo, error) {
+func (s *StartpayWeb3Service) GetAccountInfo(userId uint) ([]web3api.GetAccountInfo, error) {
 
 	var projectlist []system.SysProject
 	_, err := global.GVA_DB.Where("user_id = ? ", userId).Find(&projectlist).Rows()
@@ -108,7 +108,7 @@ func (s *StartpayWeb3Service) GetAccountInfo(userId uint) (map[string]web3api.Ge
 		return nil, errors.New("查询用户项目失败")
 	}
 
-	web3AccountList := make(map[string]web3api.GetAccountInfo, 0)
+	web3AccountList := make([]web3api.GetAccountInfo, 0)
 	for _, pvalue := range projectlist {
 		web3 := web3api.StartpayWeb3Api{ApiKey: pvalue.AppKey, ApiSecret: pvalue.AppSecret}
 		webrResp, err := web3.GetAccountInfo()
@@ -116,8 +116,8 @@ func (s *StartpayWeb3Service) GetAccountInfo(userId uint) (map[string]web3api.Ge
 			continue
 		}
 		for _, data := range webrResp.Data {
-			key := data.Chain + "-" + data.Currency
-			web3AccountList[key] = data
+			data.Name = pvalue.ProName
+			web3AccountList = append(web3AccountList, data)
 		}
 
 	}

@@ -21,6 +21,145 @@ const GLOBAL_Fee = 0.04
 const RemittanceFee = 50
 const MaxRemittanceFee = 100000
 
+var WEB3CHAINLIST map[string]string = map[string]string{
+	"ETH":     "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/eth.png",
+	"BSC":     "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/png",
+	"TRON":    "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/TRX.png",
+	"POLYGON": "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/MATIC.png",
+	"BTC":     "https://token-talk.oss-cn-shenzhen.aliyuncs.com/icon/wallet-btc.png?x-oss-process=image/resize,w_150",
+}
+
+var WEB3TOKENLISTAll = map[string]string{
+	"USDT":  "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/usdt.png",
+	"USDC":  "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/usdc.png",
+	"BNB":   "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/bnb.png",
+	"MATIC": "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/MATIC.png",
+	"BTC":   "https://token-talk.oss-cn-shenzhen.aliyuncs.com/icon/wallet-btc.png?x-oss-process=image/resize,w_150",
+	"ETH":   "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/eth.png",
+}
+
+var WEB3TOKENLIST = map[string][]Web3Chain{
+	"ETH": {
+		{
+			Chain:     "ETH",
+			Chainicon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/eth.png",
+			Symbol:    "ETH",
+			Contract:  "",
+			Icon:      "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/eth.png",
+			Decimals:  18,
+			MinCharge: "1",
+		},
+		{
+			Chain:     "ETH",
+			Chainicon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/eth.png",
+			Symbol:    "USDT",
+			Contract:  "0xdac17f958d2ee523a2206206994597c13d831ec7",
+			Icon:      "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/usdt.png",
+			Decimals:  6,
+			MinCharge: "3000",
+		},
+		{
+			Chain:     "ETH",
+			Chainicon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/eth.png",
+			Symbol:    "USDC",
+			Contract:  "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+			Icon:      "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/usdc.png",
+			Decimals:  6,
+			MinCharge: "3000",
+		},
+	},
+
+	"BNB": {
+		{
+			Chain:     "BSC",
+			Chainicon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/png",
+			Symbol:    "BNB",
+			Contract:  "",
+			Icon:      "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/bnb.png",
+			Decimals:  18,
+			MinCharge: "1",
+		},
+		{
+			Chain:     "BSC",
+			Chainicon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/png",
+			Symbol:    "USDT",
+			Contract:  "0x55d398326f99059ff775485246999027b3197955",
+			Icon:      "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/usdt.png",
+			Decimals:  18,
+			MinCharge: "100",
+		},
+		{
+			Chain:     "BSC",
+			Chainicon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/png",
+			Symbol:    "USDC",
+			Contract:  "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d",
+			Icon:      "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/usdc.png",
+			Decimals:  18,
+			MinCharge: "100",
+		},
+	},
+	"TRON": {
+		{
+			Chain:     "TRON",
+			Chainicon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/TRX.png",
+			Symbol:    "USDT",
+			Contract:  "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",
+			Icon:      "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/usdt.png",
+			Decimals:  6,
+			MinCharge: "1000",
+		},
+		{
+			Chain:     "TRON",
+			Chainicon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/TRX.png",
+			Symbol:    "USDC",
+			Contract:  "TEkxiTehnzSmSe2XqrBj4w32RUN966rdz8",
+			Icon:      "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/usdc.png",
+			Decimals:  6,
+			MinCharge: "1000",
+		},
+	},
+	"POLYGON": {
+		{
+			Chain:     "POLYGON",
+			Chainicon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/MATIC.png",
+			Symbol:    "MATIC",
+			Contract:  "",
+			Icon:      "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/MATIC.png",
+			Decimals:  18,
+			MinCharge: "170",
+		},
+		{
+			Chain:     "POLYGON",
+			Chainicon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/MATIC.png",
+			Symbol:    "USDT",
+			Contract:  "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+			Icon:      "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/usdt.png",
+			Decimals:  6,
+			MinCharge: "100",
+		},
+		{
+			Chain:     "POLYGON",
+			Chainicon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/MATIC.png",
+			Symbol:    "USDC",
+			Contract:  "0x3c499c542cef5e3811e1192ce70d8cc03d5c3359",
+			Icon:      "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/usdc.png",
+			Decimals:  6,
+			MinCharge: "100",
+		},
+	},
+	"BTC": {
+		{
+			Chain:     "BTC",
+			Chainicon: "https://token-talk.oss-cn-shenzhen.aliyuncs.com/icon/wallet-btc.png?x-oss-process=image/resize,w_150",
+			Symbol:    "BTC",
+			Contract:  "",
+			Icon:      "https://token-talk.oss-cn-shenzhen.aliyuncs.com/icon/wallet-btc.png?x-oss-process=image/resize,w_150",
+			Decimals:  8,
+			MinCharge: "0.0005",
+		},
+	},
+}
+
 var WEB3TOKENINFO map[string]Web3Chain = map[string]Web3Chain{
 	"ETH-ETH": {
 		Chain:     "ETH",
@@ -309,19 +448,22 @@ func (b *StartpayWeb3Api) GetAccountInfo(c *gin.Context) {
 
 	aacountResp := systemRes.GetAccountInfoRespons{}
 
-	for akey, avalue := range WEB3TOKENINFO {
+	for _, avalue := range AccountReturn {
 		accountres := systemRes.Web3AccountInfo{}
-		if data, OK := AccountReturn[akey]; OK {
-			accountres.Balance, _ = strconv.ParseFloat(data.Balance, 64)
-			accountres.UsdPrice = 0
-			accountres.AmountUsd = accountres.UsdPrice * accountres.Balance
-			accountres.Address = data.Address
-		}
+		accountres.Balance, _ = strconv.ParseFloat(avalue.Balance, 64)
+		accountres.UsdPrice, _ = strconv.ParseFloat(avalue.UsdtPrice, 64)
+		accountres.AmountUsd = accountres.UsdPrice * accountres.Balance
+		accountres.Address = avalue.Address
+		accountres.WalletName = avalue.Name
+
+		keys := avalue.Chain + "-" + avalue.Currency
+		SymbolInfo := WEB3TOKENINFO[keys]
+
 		accountres.Chain = avalue.Chain
-		accountres.Currency = avalue.Symbol
-		accountres.ChainIcon = avalue.Chainicon
-		accountres.CurrencyIcon = avalue.Icon
-		accountres.CurrencyName = avalue.Symbol
+		accountres.Currency = avalue.Currency
+		accountres.ChainIcon = SymbolInfo.Chainicon
+		accountres.CurrencyIcon = SymbolInfo.Icon
+		accountres.CurrencyName = SymbolInfo.Symbol
 		accountres.WithdrawEnable = true
 		accountres.RemittanceFeeAmount = RemittanceFee
 		accountres.WithdrawFeeBoundAmount = MaxRemittanceFee
@@ -339,13 +481,38 @@ func (b *StartpayWeb3Api) GetAccountInfo(c *gin.Context) {
 }
 
 func (b *StartpayWeb3Api) GetChainListInfo(c *gin.Context) {
-	ChainReturn, err := StartpayWeb3Service.GetChainListInfo()
-	if err != nil {
-		global.GVA_LOG.Error("获取链列表失败!", zap.Error(err))
-		response.FailWithDetailed("获取链列表失败!", "获取链列表失败!", c)
-		return
+	chainList := make([]systemRes.Web3ChainListRespons, 0)
+	for key, value := range WEB3CHAINLIST {
+		chainInfo := systemRes.Web3ChainListRespons{Name: key, Icon: value}
+		chainList = append(chainList, chainInfo)
 	}
-	response.OkWithDetailed(ChainReturn.Data, "获取链列表成功", c)
+	response.OkWithDetailed(chainList, "获取链列表成功", c)
+}
+func (b *StartpayWeb3Api) GetTokenListInfo(c *gin.Context) {
+	var r systemReq.GetTokenInfoReq
+	err := c.ShouldBindJSON(&r)
+	if err != nil {
+		//response.FailWithMessage(err.Error(), c)
+		global.GVA_LOG.Error("test welcome", zap.Any("err", err.Error()))
+		//return
+	}
+	TokenList := make([]systemRes.Web3ChainListRespons, 0)
+	if r.Chain != "" {
+		if data, ok := WEB3TOKENLIST[r.Chain]; ok {
+			for _, value := range data {
+				tokenInfo := systemRes.Web3ChainListRespons{Name: value.Symbol, Icon: value.Icon}
+				TokenList = append(TokenList, tokenInfo)
+			}
+		}
+
+	} else {
+		for key, value := range WEB3TOKENLISTAll {
+			tokenInfo := systemRes.Web3ChainListRespons{Name: key, Icon: value}
+			TokenList = append(TokenList, tokenInfo)
+		}
+	}
+
+	response.OkWithDetailed(TokenList, "获取token列表成功", c)
 }
 
 func (b *StartpayWeb3Api) GetDepositAddress(c *gin.Context) {

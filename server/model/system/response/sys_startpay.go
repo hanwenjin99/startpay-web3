@@ -75,6 +75,7 @@ type GetAccountInfoRespons struct {
 }
 
 type Web3AccountInfo struct {
+	WalletName             string  `json:"Walletname"`
 	Currency               string  `json:"currency"`
 	Chain                  string  `json:"chain"`
 	WithdrawEnable         bool    `json:"withdrawEnable"`
@@ -104,46 +105,8 @@ type Web3AccountInfo struct {
 }
 
 type Web3ChainListRespons struct {
-	Data struct {
-		ETH []struct {
-			Symbol    string  `json:"symbol"`
-			Contract  *string `json:"contract,omitempty"`
-			Icon      string  `json:"icon"`
-			Decimals  int     `json:"decimals"`
-			MinCharge string  `json:"minCharge"`
-			Cact      string  `json:"cact,omitempty"`
-		} `json:"ETH"`
-		BSC []struct {
-			Symbol    string  `json:"symbol"`
-			Contract  *string `json:"contract"`
-			Icon      string  `json:"icon"`
-			Decimals  int     `json:"decimals"`
-			MinCharge string  `json:"minCharge"`
-		} `json:"BSC"`
-		TRON []struct {
-			Symbol    string `json:"symbol"`
-			Contract  string `json:"contract"`
-			Icon      string `json:"icon"`
-			Decimals  int    `json:"decimals"`
-			MinCharge string `json:"minCharge"`
-		} `json:"TRON"`
-		POLYGON []struct {
-			Symbol    string  `json:"symbol"`
-			Contract  *string `json:"contract"`
-			Icon      string  `json:"icon"`
-			Decimals  int     `json:"decimals"`
-			MinCharge string  `json:"minCharge"`
-		} `json:"POLYGON"`
-		BTC []struct {
-			Symbol    string      `json:"symbol"`
-			Contract  interface{} `json:"contract"`
-			Icon      string      `json:"icon"`
-			Decimals  int         `json:"decimals"`
-			MinCharge string      `json:"minCharge"`
-		} `json:"BTC"`
-	} `json:"data"`
-	Code    int    `json:"code"`
-	Message string `json:"message"`
+	Name string `json:"name"`
+	Icon string `json:"icon"`
 }
 
 type UserWalletRespons struct {
