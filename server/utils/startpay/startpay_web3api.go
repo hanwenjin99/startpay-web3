@@ -159,7 +159,7 @@ func (s *StartpayWeb3Api) GetAccountInfo() (*GetAccountInfoRespons, error) {
 	Host := global.GVA_CONFIG.StartpayWeb3.Host
 	client := NewHttpClient()
 
-	srcStr := "GET" + Host + "/wallet/project/account" + strtm
+	srcStr := "GET" + Host + "/wallet/project/account?" + strtm
 	signStr, err := s.SignMessage2(srcStr)
 
 	if err != nil {
