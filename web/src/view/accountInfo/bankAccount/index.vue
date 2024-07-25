@@ -35,7 +35,7 @@
             </template>
           </el-popconfirm>
           <el-button icon="edit" type="info" circle />
-          <el-button color="#000" plain round @click="router.push('/layout/account/pay')">支付</el-button>
+          <el-button color="#000" plain round @click="comfirmSelect(scope.row)">支付</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -44,14 +44,31 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 
+import { useCommonStore } from '@/pinia/modules/common'
 import { getBankAccountList, deleteBankAccount } from '@/api/accountInfo'
 
+const commonStore = useCommonStore()
 const router = useRouter()
+const route = useRoute()
+console.log(route)
 
 const listData = ref([])
+
+// 选择银行账户
+const comfirmSelect = (item) => {
+  commonStore.ChangePageInitPay({
+    ...commonStore.pageInitPay,
+    bankInfo: {
+      enterpriseTitle: item.enterpriseTitle,
+      id: item.id
+    },
+    isSelectedBankAccount: true,
+  })
+  router.go(-1)
+}
 
 const queryList = async () => {
   const { code, data } = await getBankAccountList()

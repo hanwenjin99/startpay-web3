@@ -33,13 +33,28 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import ShowCurrency from '@/components/showCurrency/index.vue'
 import { getAccountInfo } from '@/api/account'
+
+const props = defineProps({
+  initData: {
+    type: Object,
+    default: () => {}
+  }
+})
 
 const emit = defineEmits(['handleSelectCallback'])
 const radioCurrency = ref('')
 const selectInfo = ref({})
+
+watch(props, (newVal) => {
+  radioCurrency.value = `${newVal?.initData?.currency}_${newVal?.initData?.chain}`
+  selectInfo.value = newVal?.initData
+}, {
+  immediate: true,
+  deep: true
+})
 
 const dialogVisible = ref(false)
 
