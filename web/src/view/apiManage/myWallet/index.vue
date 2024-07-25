@@ -39,30 +39,50 @@
       />
     </div>
 
-    <!-- 新建项目弹窗 -->
+    <!-- 新建钱包弹窗 -->
     <el-dialog
       v-model="dialogVisible"
       title="新建钱包"
       width="800"
     >
       <el-form
+        ref="ruleFormRef"
         label-position="top"
+        :rules="formRules"
         :model="formLabelAlign"
       >
-        <el-form-item label="链类型">
-          <el-select />
+        <el-form-item label="项目名称" prop="name">
+          <el-input v-model="formLabelAlign.name" />
         </el-form-item>
-        <el-form-item label="商户关联ID">
-          <el-input />
+        <el-form-item label="链类型" prop="assembleChain">
+          <el-select
+            v-model="formLabelAlign.assembleChain"
+            clearable
+            placeholder="请选择"
+          >
+            <el-option
+              v-for="item in commonStore.chainsList"
+              :key="item.name"
+              :label="item.name"
+              :value="item.name"
+            />
+          </el-select>
         </el-form-item>
-        <el-form-item label="关联项目">
-          <el-select />
+        <el-form-item label="结算币种" prop="settleCurrency">
+          <el-select v-model="formLabelAlign.settleCurrency">
+            <el-option
+              v-for="item in commonStore.currencyOptions"
+              :key="item.name"
+              :label="item.name"
+              :value="item.name"
+            />
+          </el-select>
         </el-form-item>
       </el-form>
 
       <template #footer>
-        <el-button plain color="#010101" @click="dialogVisible = false">取消</el-button>
-        <el-button color="#000" @click="dialogVisible = false">
+        <el-button plain color="#010101" @click="resetForm(ruleFormRef)">取消</el-button>
+        <el-button color="#000" @click="submitForm(ruleFormRef)">
           确定
         </el-button>
       </template>
@@ -73,13 +93,27 @@
 <script setup>
 import { reactive, ref, onMounted } from 'vue'
 import dayjs from 'dayjs'
+import { ElMessage } from 'element-plus'
 
-import { getBoundAddressList } from '@/api/apiManage'
+import { useCommonStore } from '@/pinia/modules/common'
+import { getBoundAddressList, addProject } from '@/api/apiManage'
 import { copyMessage } from '@/utils/common.js'
+
+const commonStore = useCommonStore()
 
 const dialogVisible = ref(false)
 
-const formLabelAlign = reactive({})
+const ruleFormRef = ref('')
+const formLabelAlign = reactive({
+  name: '', // 项目名称
+  assembleChain: '', // 链类型
+  settleCurrency: '' // 结算币种
+})
+const formRules = reactive({
+  name: [{ required: true, message: '请输入钱包名称', trigger: 'change', }],
+  assembleChain: [{ required: true, message: '请输入链类型', trigger: 'change', }],
+  settleCurrency: [{ required: true, message: '请选择结算币种', trigger: 'change', }]
+})
 
 const walletList = ref([])
 const total = ref(0)
@@ -99,6 +133,30 @@ const handleChangePage = (page) => {
   queryList(page)
 }
 
+// 取消创建提交
+const resetForm = (formEl) => {
+  if (!formEl) return
+  formEl.resetFields()
+  dialogVisible.value = false // 关闭弹窗
+}
+
+// 提交创建项目
+const submitForm = async (formEl) => {
+  if (!formEl) return
+  await formEl.validate(async (valid, fields) => {
+    if (valid) {
+      const { code } = await addProject(formLabelAlign)
+      if (code === 0) {
+        ElMessage.success('创建钱包成功！')
+        dialogVisible.value = false // 关闭弹窗
+        queryList(1) // 重新获取列表数据
+      }
+    } else {
+      console.log('error submit!', fields)
+    }
+  })
+}
+
 // 刷新
 const refresh = () => {
   currentPage.value = 1
@@ -106,6 +164,13 @@ const refresh = () => {
 }
 
 onMounted(() => {
+  if (commonStore.chainsList.length === 0) {
+    // 更新链类型
+    commonStore.GetChainsList()
+  }
+  if (commonStore.currencyOptions.length === 0) {
+    commonStore.QueryCurrencyOptions()
+  }
   queryList(1)
 })
 </script>

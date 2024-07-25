@@ -50,17 +50,17 @@ const handleChange = (key) => {
 
 onMounted(async () => {
   let initList = []
-  if (commonStore.chainsInfoList.length === 0) {
+  if (commonStore.chainsList.length === 0) {
     // 更新网络列表
-    const chainList = await commonStore.GetChainsInfo()
+    const chainList = await commonStore.GetChainsList()
     if (Array.isArray(chainList) && chainList.length > 0) {
       initList = [...chainList]
     }
   } else {
-    initList = [...commonStore.chainsInfoList]
+    initList = [...commonStore.chainsList]
   }
   // 更新默认选择的网络信息
-  radioInter.value = initList[0].chain
+  radioInter.value = initList[0].name
   selectInfo.value = initList[0]
   // 返回给父组件
   emits('handleSelectChain', initList[0])

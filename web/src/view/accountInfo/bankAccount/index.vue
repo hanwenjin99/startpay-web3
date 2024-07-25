@@ -35,7 +35,7 @@
             </template>
           </el-popconfirm>
           <el-button icon="edit" type="info" circle />
-          <el-button color="#000" plain round @click="comfirmSelect(scope.row)">支付</el-button>
+          <el-button color="#000" plain round @click="comfirmSelect(scope.row)">提现</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -62,7 +62,7 @@ const comfirmSelect = (item) => {
   commonStore.ChangePageInitPay({
     ...commonStore.pageInitPay,
     bankInfo: {
-      enterpriseTitle: item.enterpriseTitle,
+      receiverName: item.receiverName,
       id: item.id
     },
     isSelectedBankAccount: true,

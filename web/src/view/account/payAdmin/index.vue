@@ -1,6 +1,6 @@
 <template>
   <main class="content_container">
-    <h1 class="title">支付管理</h1>
+    <h1 class="title">提现管理</h1>
 
     <!-- 表格 -->
     <el-table :data="recordData" style="width: 100%">
@@ -76,7 +76,7 @@ const queryList = async (page) => {
   }
 }
 
-// 管理后台审核支付记录
+// 管理后台审核提现记录
 const reviewWithdraw = async (item) => {
   const { code } = await reviewAdminWithdrawOrder({
     id: item.id,

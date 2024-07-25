@@ -1,26 +1,19 @@
 // 公共数据存储 - 网络列表/币种列表等
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { getChainsInfo, getCurrencyOptions, getDepositOrderStatus, getChainsList } from '@/api/common'
+import { getCurrencyOptions, getDepositOrderStatus, getChainsList } from '@/api/common'
 
 export const useCommonStore = defineStore('common', () => {
-  const chainsList = ref(["ETH", "BSC", "TRON", "POLYGON"]) // 链类型
-  const chainsInfoList = ref([{
-    chain: "ETH",
-    chainIcon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/eth.png"
-  }]) // 网络类型
+  const chainsList = ref([]) // 链类型
+  
   const currencyOptions = ref([]) // 币种类型
   const depositOrderStatus = ref([])
 
   // 页面初始化数据
-  const pageInitPay = ref({}) // 支付页面
+  const pageInitPay = ref({}) //提现页面
 
   const ChangePageInitPay = (newVal) => {
     pageInitPay.value = { ...newVal }
-  }
-
-  const setChainsInfoList = (val) => {
-    chainsInfoList.value = val
   }
 
   const setChainsList = (val) => {
@@ -42,15 +35,6 @@ export const useCommonStore = defineStore('common', () => {
       setChainsList(data || [])
     }
   }
-
-  /* 获取网络列表信息*/
-  const GetChainsInfo = async () => {
-    const { code, data } = await getChainsInfo()
-    if (code === 0) {
-      setChainsInfoList(data || [])
-      return data || []
-    }
-  }
   
   // 获取币种列表
   const QueryCurrencyOptions = async () => {
@@ -69,9 +53,7 @@ export const useCommonStore = defineStore('common', () => {
   }
 
   return {
-    GetChainsInfo,
     GetChainsList,
-    chainsInfoList,
     QueryCurrencyOptions,
     QueryDepositOrderStatus,
     chainsList,

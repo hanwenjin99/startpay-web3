@@ -5,7 +5,7 @@ import service from '@/utils/request'
 // 获取资产信息
 export const getAccountInfo = () => {
   return service({
-    url: '/backend/account/info',
+    url: '/web3/account_info',
     method: 'get'
   })
 }
@@ -20,18 +20,6 @@ export const getAccountCurrencyCreatableList = (params) => {
       page: 0,
       pageSize: 200
     }),
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  })
-}
-
-// 根据币种查询地址
-export const getDepositAddress = (params) => {
-  return service({
-    url: '/backend/deposit_address/get',
-    method: 'post',
-    data: JSON.stringify(params),
     headers: {
       'Content-Type': 'application/json'
     }
