@@ -155,12 +155,12 @@ func (s *StartpayWeb3Api) GetAccountInfo() (*GetAccountInfoRespons, error) {
 	timestamp := currentTime.Unix()
 	strtm := fmt.Sprintf("%d", timestamp)
 
-	ApiKey := global.GVA_CONFIG.StartpayWeb3.ApiKey
+	ApiKey := s.ApiKey
 	Host := global.GVA_CONFIG.StartpayWeb3.Host
 	client := NewHttpClient()
 
 	srcStr := "GET" + Host + "account/list" + strtm
-	signStr, err := s.SignMessage(srcStr)
+	signStr, err := s.SignMessage2(srcStr)
 
 	if err != nil {
 		fmt.Println("SignMessage err")
@@ -229,6 +229,16 @@ func (s *StartpayWeb3Api) GetProjectSecret(projectId string) (*Web3GetSecretResp
 
 func (s *StartpayWeb3Api) SignMessage(message string) (string, error) {
 	apiSecret := global.GVA_CONFIG.StartpayWeb3.ApiSecret
+	mac := hmac.New(sha1.New, []byte(apiSecret))
+	mac.Write([]byte(message))
+	macHex := mac.Sum(nil)
+	// 转为 Base64 编码
+	signStr := base64.StdEncoding.EncodeToString(macHex)
+	return signStr, nil
+}
+
+func (s *StartpayWeb3Api) SignMessage2(message string) (string, error) {
+	apiSecret := s.ApiSecret
 	mac := hmac.New(sha1.New, []byte(apiSecret))
 	mac.Write([]byte(message))
 	macHex := mac.Sum(nil)

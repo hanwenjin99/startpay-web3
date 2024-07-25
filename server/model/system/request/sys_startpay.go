@@ -48,3 +48,32 @@ type DeleteDespoitAddress struct {
 	Id         string `json:"id"`
 	Language   string `json:"language"`
 }
+
+type GetWithdrawOrderRequst struct {
+	PageSize      int    `json:"pageSize"`
+	Page          int    `json:"page"`
+	ContactSearch string `json:"contactSearch"`
+	Txid          string `json:"txid"`
+	Currency      string `json:"currency"`
+}
+
+type CreateWithdrawOrderRequst struct {
+	Amount        string `json:"amount"`
+	BankAccountId string `json:"bankAccountId"`
+	Chain         string `json:"chain"`
+	Currency      string `json:"currency"`
+	EmailCode     string `json:"emailCode"`
+	GoogleCode    string `json:"googleCode"`
+	Language      string `json:"language"`
+	Note          string `json:"note"`
+	PayPassword   string `json:"payPassword"`
+}
+
+type UpdateWithdrawOrderRequst struct {
+	Id          string `json:"id"`
+	EmailCode   string `json:"emailCode"`
+	GoogleCode  string `json:"googleCode"`
+	Status      string `json:"status"`
+	Memo        string `json:"memo"`
+	PayPassword string `json:"payPassword"`
+}

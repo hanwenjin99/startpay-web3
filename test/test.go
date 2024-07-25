@@ -100,7 +100,7 @@ type ProjectList struct {
 }
 
 func main() {
-	apiKey := "32e78838-a81e-4172-8008-d03f5102a2e7"
+	/*apiKey := "32e78838-a81e-4172-8008-d03f5102a2e7"
 	//apiSecret := "0B010C5D9A3BF3BC49D4CA76713ABD4C207E4E71"
 	currentTime := time.Now()
 	timestamp := currentTime.Unix()
@@ -130,7 +130,51 @@ func main() {
 		"status":   "ACTIVE",
 	}*/
 
-	postURL1 := "https://api.satogate.io/currency/list"
+	/*postURL1 := "https://api.satogate.io/currency/list"
+
+	fmt.Println("getRL", postURL1)
+	fmt.Println("srcStr", srcStr1)
+	fmt.Println("signStr", signStr1)
+	fmt.Println("get head:", postHeaders)
+
+	postResponse, err := client.Get(postURL1, postHeaders)
+	if err != nil {
+		fmt.Println("GEt 请求错误:", err)
+	} else {
+		fmt.Println("GEt 请求响应:", string(postResponse))
+	}*/
+
+	apiKey := "32e78838-a81e-4172-8008-d03f5102a2e7"
+	//apiSecret := "0B010C5D9A3BF3BC49D4CA76713ABD4C207E4E71"
+	currentTime := time.Now()
+	timestamp := currentTime.Unix()
+	strtm := fmt.Sprintf("%d", timestamp)
+
+	// alohaschen@foxmail.com
+	// AppKey=32e78838-a81e-4172-8008-d03f5102a2e7
+	// AppSecret=0B010C5D9A3BF3BC49D4CA76713ABD4C207E4E71
+
+	client := NewHttpClient()
+
+	srcStr1 := "GETapi.satogate.io/currency/chains" + strtm
+	signStr1, err := SignMessage(srcStr1)
+
+	if err != nil {
+		fmt.Println("SignMessage err")
+	}
+
+	postHeaders := map[string]string{
+		"FP-API-KEY":   apiKey,
+		"FP-SIGN":      signStr1,
+		"FP-TIMESTAMP": strtm,
+	}
+	/*postBody = map[string]interface{}{
+		"page":     1,
+		"pageSize": 20,
+		"status":   "ACTIVE",
+	}*/
+
+	postURL1 := "https://api.satogate.io/currency/chains"
 
 	fmt.Println("getRL", postURL1)
 	fmt.Println("srcStr", srcStr1)
