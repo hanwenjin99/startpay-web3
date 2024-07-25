@@ -6,7 +6,7 @@ import (
 
 type UserBank struct {
 	global.GVA_MODEL
-	MerchantId      int64  `json:"merchantId"  gorm:"index;comment:merchantId" `
+	MerchantId      int64  `json:"merchantId"  gorm:"column:merchantId" `
 	Region          string `json:"region" gorm:"default:;comment:region"`
 	RemittanceType  string `json:"remittanceType" gorm:"default:;comment:remittanceType"`
 	EnterpriseTitle string `json:"enterpriseTitle"  gorm:"default:;comment:enterpriseTitle"`
