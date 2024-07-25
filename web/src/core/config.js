@@ -4,7 +4,7 @@
 import chalk from "chalk";
 
 const config = {
-  appName: 'Gin-Vue-Admin',
+  appName: 'StartPay',
   appLogo: 'logo.png',
   showViteLogo: true,
   logs: [],

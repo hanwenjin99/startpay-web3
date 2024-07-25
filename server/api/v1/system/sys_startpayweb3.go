@@ -1,6 +1,7 @@
 package system
 
 import (
+	"fmt"
 	systemRes "github.com/flipped-aurora/gin-vue-admin/server/model/system/response"
 	"time"
 
@@ -13,8 +14,134 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"strconv"
 )
 
+const GLOBAL_Fee = 0.04
+const RemittanceFee = 50
+const MaxRemittanceFee = 100000
+
+var WEB3TOKENINFO map[string]Web3Chain = map[string]Web3Chain{
+	"ETH-ETH": {
+		Chain:     "ETH",
+		Chainicon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/eth.png",
+		Symbol:    "ETH",
+		Contract:  "",
+		Icon:      "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/eth.png",
+		Decimals:  18,
+		MinCharge: "1",
+	},
+	"ETH-USDT": {
+		Chain:     "ETH",
+		Chainicon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/eth.png",
+		Symbol:    "USDT",
+		Contract:  "0xdac17f958d2ee523a2206206994597c13d831ec7",
+		Icon:      "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/usdt.png",
+		Decimals:  6,
+		MinCharge: "3000",
+	},
+	"ETH-USDC": {
+		Chain:     "ETH",
+		Chainicon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/eth.png",
+		Symbol:    "USDC",
+		Contract:  "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+		Icon:      "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/usdc.png",
+		Decimals:  6,
+		MinCharge: "3000",
+	},
+	"BSC-BNB": {
+		Chain:     "BSC",
+		Chainicon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/png",
+		Symbol:    "BNB",
+		Contract:  "",
+		Icon:      "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/bnb.png",
+		Decimals:  18,
+		MinCharge: "1",
+	},
+	"BSC-USDT": {
+		Chain:     "BSC",
+		Chainicon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/png",
+		Symbol:    "USDT",
+		Contract:  "0x55d398326f99059ff775485246999027b3197955",
+		Icon:      "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/usdt.png",
+		Decimals:  18,
+		MinCharge: "100",
+	},
+	"BSC-USDC": {
+		Chain:     "BSC",
+		Chainicon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/png",
+		Symbol:    "USDC",
+		Contract:  "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d",
+		Icon:      "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/usdc.png",
+		Decimals:  18,
+		MinCharge: "100",
+	},
+	"TRON-USDT": {
+		Chain:     "TRON",
+		Chainicon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/TRX.png",
+		Symbol:    "USDT",
+		Contract:  "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",
+		Icon:      "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/usdt.png",
+		Decimals:  6,
+		MinCharge: "1000",
+	},
+	"TRON-USDC": {
+		Chain:     "TRON",
+		Chainicon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/TRX.png",
+		Symbol:    "USDC",
+		Contract:  "TEkxiTehnzSmSe2XqrBj4w32RUN966rdz8",
+		Icon:      "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/usdc.png",
+		Decimals:  6,
+		MinCharge: "1000",
+	},
+	"POLYGON-MATIC": {
+		Chain:     "POLYGON",
+		Chainicon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/MATIC.png",
+		Symbol:    "MATIC",
+		Contract:  "",
+		Icon:      "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/MATIC.png",
+		Decimals:  18,
+		MinCharge: "170",
+	},
+	"POLYGON-USDT": {
+		Chain:     "POLYGON",
+		Chainicon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/MATIC.png",
+		Symbol:    "USDT",
+		Contract:  "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+		Icon:      "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/usdt.png",
+		Decimals:  6,
+		MinCharge: "100",
+	},
+	"POLYGON-USDC": {
+		Chain:     "POLYGON",
+		Chainicon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/MATIC.png",
+		Symbol:    "USDC",
+		Contract:  "0x3c499c542cef5e3811e1192ce70d8cc03d5c3359",
+		Icon:      "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/usdc.png",
+		Decimals:  6,
+		MinCharge: "100",
+	},
+	"BTC-BTC": {
+		Chain:     "BTC",
+		Chainicon: "https://token-talk.oss-cn-shenzhen.aliyuncs.com/icon/wallet-btc.png?x-oss-process=image/resize,w_150",
+		Symbol:    "BTC",
+		Contract:  "",
+		Icon:      "https://token-talk.oss-cn-shenzhen.aliyuncs.com/icon/wallet-btc.png?x-oss-process=image/resize,w_150",
+		Decimals:  8,
+		MinCharge: "0.0005",
+	},
+}
+
+type Web3Chain struct {
+	Chain     string `json:"chain"`
+	Chainicon string `json:"chainicon"`
+	Symbol    string `json:"symbol"`
+	Contract  string `json:"contract,omitempty"`
+	Icon      string `json:"icon"`
+	Decimals  int    `json:"decimals"`
+	MinCharge string `json:"minCharge"`
+	Cact      string `json:"cact,omitempty"`
+}
 type StartpayWeb3Api struct{}
 
 func (b *StartpayWeb3Api) CreateProject(c *gin.Context) {
@@ -43,7 +170,7 @@ func (b *StartpayWeb3Api) CreateProject(c *gin.Context) {
 
 	if err != nil {
 		global.GVA_LOG.Error("创建项目失败!", zap.Error(err))
-		response.FailWithDetailed(systemRes.SysProjectResponse{Project: ProjectReturn}, "创建项目失败", c)
+		response.FailWithDetailed("创建项目失败", "创建项目失败", c)
 		return
 	}
 	response.OkWithDetailed(systemRes.SysProjectResponse{Project: ProjectReturn}, "创建项目成功", c)
@@ -51,7 +178,7 @@ func (b *StartpayWeb3Api) CreateProject(c *gin.Context) {
 
 // func (b*StartpayWeb3Api) GetWalletList(c *gin.Context, user system.SysUser) {
 func (b *StartpayWeb3Api) GetProjectList(c *gin.Context) {
-	var r systemReq.GetProjectList
+	var r systemReq.GetCommonPageInfo
 	r.Page = 1
 	r.PageSize = 20
 	err := c.ShouldBindJSON(&r)
@@ -77,7 +204,7 @@ func (b *StartpayWeb3Api) GetProjectList(c *gin.Context) {
 	ProjectReturn, err := StartpayWeb3Service.GetProjectList(userId, r.Page, r.PageSize)
 	if err != nil {
 		global.GVA_LOG.Error("获取项目失败!", zap.Error(err))
-		response.FailWithDetailed(ProjectReturn.Data, "获取项目失败", c)
+		response.FailWithDetailed("获取项目失败", "获取项目失败", c)
 		return
 	}
 
@@ -85,7 +212,7 @@ func (b *StartpayWeb3Api) GetProjectList(c *gin.Context) {
 }
 
 func (b *StartpayWeb3Api) GetWalletList(c *gin.Context) {
-	var r systemReq.GetWalletList
+	var r systemReq.GetCommonPageInfo
 	r.Page = 1
 	r.PageSize = 20
 
@@ -109,7 +236,7 @@ func (b *StartpayWeb3Api) GetWalletList(c *gin.Context) {
 	ProjectReturn, err := StartpayWeb3Service.GetProjectList(userId, r.Page, r.PageSize)
 	if err != nil {
 		global.GVA_LOG.Error("获取钱包失败!", zap.Error(err))
-		response.FailWithDetailed(ProjectReturn.Message, "获取钱包失败", c)
+		response.FailWithDetailed("获取钱包失败!", "获取钱包失败", c)
 		return
 	}
 	WalletResp := systemRes.GetWalletRespons{}
@@ -171,22 +298,51 @@ func (b *StartpayWeb3Api) GetUserList(c *gin.Context) {
 }
 
 func (b *StartpayWeb3Api) GetAccountInfo(c *gin.Context) {
+	userId := utils.GetUserID(c)
 
-	AccountReturn, err := StartpayWeb3Service.GetAccountInfo()
+	AccountReturn, err := StartpayWeb3Service.GetAccountInfo(userId)
 	if err != nil {
 		global.GVA_LOG.Error("获取account失败!", zap.Error(err))
-		response.FailWithDetailed(AccountReturn.Message, "获取account失败", c)
+		response.FailWithDetailed("获取account失败", "获取account失败", c)
 		return
 	}
-	//AccountInfoResp := systemRes.GetAccountInfoRespons{}
-	response.OkWithDetailed(AccountReturn.Data, "获取account成功", c)
+
+	aacountResp := systemRes.GetAccountInfoRespons{}
+
+	for akey, avalue := range WEB3TOKENINFO {
+		accountres := systemRes.Web3AccountInfo{}
+		if data, OK := AccountReturn[akey]; OK {
+			accountres.Balance, _ = strconv.ParseFloat(data.Balance, 64)
+			accountres.UsdPrice = 0
+			accountres.AmountUsd = accountres.UsdPrice * accountres.Balance
+			accountres.Address = data.Address
+		}
+		accountres.Chain = avalue.Chain
+		accountres.Currency = avalue.Symbol
+		accountres.ChainIcon = avalue.Chainicon
+		accountres.CurrencyIcon = avalue.Icon
+		accountres.CurrencyName = avalue.Symbol
+		accountres.WithdrawEnable = true
+		accountres.RemittanceFeeAmount = RemittanceFee
+		accountres.WithdrawFeeBoundAmount = MaxRemittanceFee
+		accountres.WithdrawFeeRate1 = GLOBAL_Fee
+		accountres.WithdrawFeeRate2 = GLOBAL_Fee
+		accountres.WithdrawFeeRate3 = GLOBAL_Fee
+		accountres.WithdrawFeeRate4 = GLOBAL_Fee
+		accountres.WithdrawFeeRate5 = GLOBAL_Fee
+		accountres.WithdrawFeeRate6 = GLOBAL_Fee
+		accountres.WithdrawFeeRate7 = GLOBAL_Fee
+
+		aacountResp.AccountInfo = append(aacountResp.AccountInfo, accountres)
+	}
+	response.OkWithDetailed(aacountResp, "获取account成功", c)
 }
 
 func (b *StartpayWeb3Api) GetChainListInfo(c *gin.Context) {
 	ChainReturn, err := StartpayWeb3Service.GetChainListInfo()
 	if err != nil {
 		global.GVA_LOG.Error("获取链列表失败!", zap.Error(err))
-		response.FailWithDetailed(ChainReturn.Message, "获取链列表失败!", c)
+		response.FailWithDetailed("获取链列表失败!", "获取链列表失败!", c)
 		return
 	}
 	response.OkWithDetailed(ChainReturn.Data, "获取链列表成功", c)
@@ -194,7 +350,347 @@ func (b *StartpayWeb3Api) GetChainListInfo(c *gin.Context) {
 
 func (b *StartpayWeb3Api) GetDepositAddress(c *gin.Context) {
 
+	//userId := utils.GetUserID(c)
 }
 func (b *StartpayWeb3Api) GetAdepositOrder(c *gin.Context) {
+	//userId := utils.GetUserID(c)
+}
 
+func (b *StartpayWeb3Api) GetbankAccountList(c *gin.Context) {
+	var r systemReq.GetCommonPageInfo
+	r.Page = 1
+	r.PageSize = 20
+
+	err := c.ShouldBindJSON(&r)
+	if err != nil {
+		global.GVA_LOG.Error("xxx ShouldBindJSON fail", zap.Any("err", err.Error()))
+	}
+
+	global.GVA_LOG.Error("GetbankAccountList web3 db before", zap.Any("GetbankAccountList", r))
+	userId := utils.GetUserID(c)
+	list, _, err := StartpayWeb3Service.GetbankAccountList(userId, r.Page, r.PageSize)
+
+	if err != nil {
+		global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		response.FailWithMessage("获取失败", c)
+		return
+	}
+
+	blist := make([]systemRes.UserBankRespons, 0)
+
+	for _, uwvalue := range list {
+		ubs := systemRes.UserBankRespons{}
+		ubs.ReceiverNumber = uwvalue.ReceiverNumber
+		ubs.Id = strconv.FormatInt(int64(uwvalue.ID), 10)
+		ubs.MerchantId = strconv.FormatInt(int64(uwvalue.MerchantId), 10)
+		ubs.BankTitle = uwvalue.BankTitle
+		ubs.BankCode = uwvalue.BankCode
+		ubs.Region = uwvalue.Region
+		ubs.FedWire = uwvalue.FedWire
+		ubs.EnterpriseTitle = uwvalue.EnterpriseTitle
+		ubs.ReceiverAddress = uwvalue.ReceiverAddress
+		ubs.ReceiverName = uwvalue.ReceiverName
+		ubs.CreateTime = uwvalue.CreatedAt
+		ubs.ReferenceField = uwvalue.ReferenceField
+		ubs.RemittanceType = uwvalue.RemittanceType
+		ubs.UpdateTime = uwvalue.UpdatedAt
+		blist = append(blist, ubs)
+	}
+
+	response.OkWithDetailed(blist, "获取成功", c)
+}
+
+func (b *StartpayWeb3Api) BankAccountCreate(c *gin.Context) {
+	var r systemReq.CreateBank
+	err := c.ShouldBindJSON(&r)
+	if err != nil {
+		global.GVA_LOG.Error("xxx ShouldBindJSON fail", zap.Any("err", err.Error()))
+	}
+
+	/*err = utils.Verify(r, utils.PageInfoVerify)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}*/
+
+	global.GVA_LOG.Error("GetbankAccountList web3 db before", zap.Any("GetbankAccountList", r))
+	userId := utils.GetUserID(c)
+
+	userBank := &system.UserBank{BankTitle: r.BankTitle, ReceiverName: r.ReceiverName, ReceiverAddress: r.ReceiverAddress, BankCode: r.BankCode,
+		EnterpriseTitle: r.EnterpriseTitle, FedWire: r.FedWire, ReceiverNumber: r.ReceiverNumber, Region: r.Region, RemittanceType: r.RemittanceType}
+	userBank.MerchantId = int64(userId)
+
+	err = StartpayWeb3Service.BankAccountCreate(userBank)
+	if err != nil {
+		global.GVA_LOG.Error("创建失败!", zap.Error(err))
+		response.FailWithDetailed("false", "创建失败", c)
+		return
+	}
+	response.OkWithDetailed("true", "创建成功", c)
+}
+
+func (b *StartpayWeb3Api) BankAccountDelete(c *gin.Context) {
+	var r systemReq.DeleteDBank
+	err := c.ShouldBindJSON(&r)
+	if err != nil {
+		global.GVA_LOG.Error("xxx ShouldBindJSON fail", zap.Any("err", err.Error()))
+	}
+
+	/*err = utils.Verify(r, utils.PageInfoVerify)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}*/
+
+	global.GVA_LOG.Error("BankAccountDelete web3 db before", zap.Any("BankAccountDelete", r))
+	userbank := &system.UserBank{}
+	u64, err := strconv.ParseUint(r.Id, 10, 64)
+	if err != nil {
+		global.GVA_LOG.Error("删除bank id错误!", zap.Error(err))
+		response.FailWithDetailed("false", "删除bank id错误", c)
+		return
+	}
+	userbank.ID = uint(u64)
+
+	err = StartpayWeb3Service.BankAccountDelete(userbank)
+	if err != nil {
+		global.GVA_LOG.Error("删除bank失败!", zap.Error(err))
+		response.FailWithDetailed("false", "删除bank 失败", c)
+		return
+	}
+	response.OkWithDetailed("true", "删除bank成功", c)
+}
+
+func (b *StartpayWeb3Api) UserContactList(c *gin.Context) {
+	var r systemReq.GetCommonPageInfo
+	r.Page = 1
+	r.PageSize = 20
+
+	err := c.ShouldBindJSON(&r)
+	if err != nil {
+		global.GVA_LOG.Error("xxx ShouldBindJSON fail", zap.Any("err", err.Error()))
+	}
+
+	global.GVA_LOG.Error("GetbankAccountList web3 db before", zap.Any("GetbankAccountList", r))
+	userId := utils.GetUserID(c)
+	list, total, err := StartpayWeb3Service.UserContactList(userId, r.Page, r.PageSize)
+
+	if err != nil {
+		global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		response.FailWithMessage("获取失败", c)
+		return
+	}
+
+	uws := systemRes.UserWalletRespons{}
+
+	for _, uwvalue := range list {
+		uds := systemRes.UserDEsposit{}
+		uds.Chain = uwvalue.Chain
+		uds.Name = uwvalue.Name
+		uds.Id = strconv.FormatInt(int64(uwvalue.ID), 10)
+		uds.Address = uwvalue.Address
+		uds.IsInternal = false
+		uws.Content = append(uws.Content, uds)
+	}
+	uws.Page = r.Page
+	uws.PageSize = r.PageSize
+	uws.Total = total
+	uws.TotalPages = int(total)/r.PageSize + 1
+	uws.Last = false
+	response.OkWithDetailed(uws, "获取成功", c)
+}
+func (b *StartpayWeb3Api) UserContactCreate(c *gin.Context) {
+	var r systemReq.CreateDespoitAddress
+	err := c.ShouldBindJSON(&r)
+	if err != nil {
+		global.GVA_LOG.Error("xxx ShouldBindJSON fail", zap.Any("err", err.Error()))
+	}
+
+	/*err = utils.Verify(r, utils.PageInfoVerify)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}*/
+
+	global.GVA_LOG.Error("UserContactCreate web3 db before", zap.Any("UserContactCreate", r))
+	userId := utils.GetUserID(c)
+
+	userAddress := &system.Userwallet{Address: r.Address, Name: r.Name, Chain: r.Chain}
+	userAddress.MerchantId = int64(userId)
+
+	err = StartpayWeb3Service.UserContactCreate(userAddress)
+	if err != nil {
+		global.GVA_LOG.Error("创建失败!", zap.Error(err))
+		response.FailWithDetailed("false", "创建失败", c)
+		return
+	}
+	response.OkWithDetailed("true", "创建成功", c)
+}
+func (b *StartpayWeb3Api) UserContactDelete(c *gin.Context) {
+	var r systemReq.DeleteDespoitAddress
+	err := c.ShouldBindJSON(&r)
+	if err != nil {
+		global.GVA_LOG.Error("xxx ShouldBindJSON fail", zap.Any("err", err.Error()))
+	}
+
+	/*err = utils.Verify(r, utils.PageInfoVerify)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}*/
+
+	global.GVA_LOG.Error("UserContactDelete web3 db before", zap.Any("UserContactDelete", r))
+
+	userAddress := &system.Userwallet{}
+	u64, err := strconv.ParseUint(r.Id, 10, 64)
+	if err != nil {
+		global.GVA_LOG.Error("删除收款地址id错误!", zap.Error(err))
+		response.FailWithDetailed("false", "删除收款地址id错误", c)
+		return
+	}
+	userAddress.ID = uint(u64)
+
+	err = StartpayWeb3Service.UserContactDelete(userAddress)
+	if err != nil {
+		global.GVA_LOG.Error("删除收款地址失败!", zap.Error(err))
+		response.FailWithDetailed("false", "删除收款地址k 失败", c)
+		return
+	}
+	response.OkWithDetailed("true", "删除收款地址成功", c)
+}
+
+func (b *StartpayWeb3Api) WithdrawOrderList(c *gin.Context) {
+
+	var r systemReq.GetWithdrawOrderRequst
+	r.Page = 1
+	r.PageSize = 20
+
+	err := c.ShouldBindJSON(&r)
+	if err != nil {
+		global.GVA_LOG.Error("xxx ShouldBindJSON fail", zap.Any("err", err.Error()))
+	}
+
+	global.GVA_LOG.Error("GetbankAccountList web3 db before", zap.Any("GetbankAccountList", r))
+	userId := utils.GetUserID(c)
+
+	struserId := fmt.Sprintf("%u", userId)
+
+	list, _, err := StartpayWeb3Service.WithdrawOrderList(struserId, &r)
+
+	if err != nil {
+		global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		response.FailWithMessage("获取失败", c)
+		return
+	}
+
+	uws := systemRes.UserWithdrawOrderRespons{}
+
+	for _, uwvalue := range list {
+		uds := systemRes.UserWithdrawOrder{}
+		uds.Id = fmt.Sprintf("%u", uwvalue.ID)
+		uds.BankInfo = uwvalue.BankTitle
+		uds.Currency = uwvalue.Currency
+		uds.Chain = uwvalue.Chain
+		uds.Memo = uwvalue.Memo
+		uds.AdminMemo = uwvalue.AdminMemo
+		uds.InputNote = uwvalue.InputNote
+		uds.TxInfo = uwvalue.TxInfo
+		uds.StatusName = uwvalue.StatusName
+		uds.CreateTime = uwvalue.UpdatedAt
+		uds.Status = fmt.Sprintf("%v", uwvalue.Status)
+		uds.MerchantId = fmt.Sprintf("%v", uwvalue.MerchantId)
+		uds.RemittanceFee = uwvalue.RemittanceFee
+		uds.Amount = uwvalue.Amount
+		uds.TotalAmount = uwvalue.TotalAmount
+		uws.Data.Content = append(uws.Data.Content, uds)
+	}
+	response.OkWithDetailed(uws, "获取成功", c)
+
+}
+
+func (b *StartpayWeb3Api) WithdrawOrderCreate(c *gin.Context) {
+
+	var r systemReq.CreateWithdrawOrderRequst
+	err := c.ShouldBindJSON(&r)
+	if err != nil {
+		global.GVA_LOG.Error("xxx ShouldBindJSON fail", zap.Any("err", err.Error()))
+	}
+
+	/*err = utils.Verify(r, utils.PageInfoVerify)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}*/
+
+	global.GVA_LOG.Error("UserContactCreate web3 db before", zap.Any("UserContactCreate", r))
+	userId := utils.GetUserID(c)
+
+	Iamount, _ := strconv.ParseFloat(r.Amount, 10)
+
+	uwo := &system.UserWithDrawOrder{
+		Currency:      r.Currency,
+		Chain:         r.Chain,
+		Amount:        Iamount,
+		BankId:        r.BankAccountId,
+		InputNote:     r.Note,
+		Fee:           GLOBAL_Fee,
+		RemittanceFee: RemittanceFee,
+		TotalAmount:   Iamount*(1+GLOBAL_Fee) + RemittanceFee,
+	}
+	uwo.MerchantId = int64(userId)
+
+	err = StartpayWeb3Service.WithdrawOrderCreate(uwo)
+	if err != nil {
+		global.GVA_LOG.Error("创建取现订单失败!", zap.Error(err))
+		response.FailWithDetailed("false", "创建取现订单失败", c)
+		return
+	}
+	response.OkWithDetailed("true", "创建取现订单成功", c)
+
+}
+
+func (b *StartpayWeb3Api) AdminWithdrawOrderUpdate(c *gin.Context) {
+
+	var r systemReq.UpdateWithdrawOrderRequst
+	err := c.ShouldBindJSON(&r)
+	if err != nil {
+		global.GVA_LOG.Error("xxx ShouldBindJSON fail", zap.Any("err", err.Error()))
+	}
+
+	/*err = utils.Verify(r, utils.PageInfoVerify)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}*/
+
+	err = StartpayWeb3Service.AdminWithdrawOrderUpdate(&r)
+	if err != nil {
+		global.GVA_LOG.Error("更新取现订单失败!", zap.Error(err))
+		response.FailWithDetailed("false", "更新取现订单失败", c)
+		return
+	}
+	response.OkWithDetailed("true", "更新取现订单成功", c)
+
+}
+
+func (b *StartpayWeb3Api) WithdrawOrderUpdate(c *gin.Context) {
+	var r systemReq.UpdateWithdrawOrderRequst
+	err := c.ShouldBindJSON(&r)
+	if err != nil {
+		global.GVA_LOG.Error("xxx ShouldBindJSON fail", zap.Any("err", err.Error()))
+	}
+
+	/*err = utils.Verify(r, utils.PageInfoVerify)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}*/
+
+	err = StartpayWeb3Service.WithdrawOrderUpdate(&r)
+	if err != nil {
+		global.GVA_LOG.Error("更新取现订单失败!", zap.Error(err))
+		response.FailWithDetailed("false", "更新取现订单失败", c)
+		return
+	}
+	response.OkWithDetailed("true", "更新取现订单成功", c)
 }

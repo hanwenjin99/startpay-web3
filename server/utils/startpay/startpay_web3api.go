@@ -84,7 +84,6 @@ func (s *StartpayWeb3Api) GetProjectList(Page int, PageSize int, status string, 
 	if err != nil {
 		fmt.Println("SignMessage err")
 	}
-
 	getHeaders := map[string]string{
 		"FP-API-KEY":   ApiKey,
 		"FP-SIGN":      signStr,
@@ -156,12 +155,12 @@ func (s *StartpayWeb3Api) GetAccountInfo() (*GetAccountInfoRespons, error) {
 	timestamp := currentTime.Unix()
 	strtm := fmt.Sprintf("%d", timestamp)
 
-	ApiKey := global.GVA_CONFIG.StartpayWeb3.ApiKey
+	ApiKey := s.ApiKey
 	Host := global.GVA_CONFIG.StartpayWeb3.Host
 	client := NewHttpClient()
 
-	srcStr := "GET" + Host + "account/list" + strtm
-	signStr, err := s.SignMessage(srcStr)
+	srcStr := "GET" + Host + "/wallet/project/account?" + strtm
+	signStr, err := s.SignMessage2(srcStr)
 
 	if err != nil {
 		fmt.Println("SignMessage err")
@@ -172,12 +171,14 @@ func (s *StartpayWeb3Api) GetAccountInfo() (*GetAccountInfoRespons, error) {
 		"FP-SIGN":      signStr,
 		"FP-TIMESTAMP": strtm,
 	}
-	getURL := "https://" + Host + "/account/list"
+	getURL := "https://" + Host + "/wallet/project/account"
 
 	global.GVA_LOG.Error("test web3",
 		zap.Any("signStr", signStr),
 		zap.Any("srcStr", srcStr),
 		zap.Any("getURL", getURL),
+		zap.Any("ApiKey", ApiKey),
+		zap.Any("ApiSecret", s.ApiSecret),
 	)
 
 	getResponse, err := client.Get(getURL, getHeaders)
@@ -230,6 +231,16 @@ func (s *StartpayWeb3Api) GetProjectSecret(projectId string) (*Web3GetSecretResp
 
 func (s *StartpayWeb3Api) SignMessage(message string) (string, error) {
 	apiSecret := global.GVA_CONFIG.StartpayWeb3.ApiSecret
+	mac := hmac.New(sha1.New, []byte(apiSecret))
+	mac.Write([]byte(message))
+	macHex := mac.Sum(nil)
+	// 转为 Base64 编码
+	signStr := base64.StdEncoding.EncodeToString(macHex)
+	return signStr, nil
+}
+
+func (s *StartpayWeb3Api) SignMessage2(message string) (string, error) {
+	apiSecret := s.ApiSecret
 	mac := hmac.New(sha1.New, []byte(apiSecret))
 	mac.Write([]byte(message))
 	macHex := mac.Sum(nil)

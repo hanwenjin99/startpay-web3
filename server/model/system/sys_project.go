@@ -6,7 +6,6 @@ import (
 
 type SysProject struct {
 	global.GVA_MODEL
-
 	UserId          uint   `json:"user_id" gorm:"index;comment:用户user_id"`
 	ProUuid         string `json:"pro_uuid"  gorm:"index;comment:项目ID" `
 	ProName         string `json:"pro_name" gorm:"default:;comment:项目名称"`

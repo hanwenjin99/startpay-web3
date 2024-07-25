@@ -9,8 +9,8 @@
       <span>
         <a
           class="font-bold text-active"
-          href="https://github.com/flipped-aurora/gin-vue-admin"
-        >Gin-Vue-Admin</a>
+          href="https://www.startpay.ai"
+        >Start Pay Technology Limited</a>
       </span>
     </div>
     <slot />
@@ -20,7 +20,7 @@
         <a
           class="font-bold text-active"
           href="https://github.com/flipped-aurora"
-        >flipped-aurora团队</a>
+        >Start Pay Technology Limited</a>
       </span>
     </div>
   </div>
