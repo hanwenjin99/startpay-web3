@@ -10,7 +10,7 @@ type UserBank struct {
 	Region          string `json:"region" gorm:"default:;comment:region"`
 	RemittanceType  string `json:"remittanceType" gorm:"column:remittanceType"`
 	EnterpriseTitle string `json:"enterpriseTitle"  gorm:"column:enterpriseTitle"`
-	BankTitle       string `json:"bankTitle" gorm:"default:;comment:bankTitle"`
+	BankTitle       string `json:"bankTitle" gorm:"column:bankTitle"`
 	BankCode        string `json:"bankCode"  gorm:"column:bankCode"`
 	FedWire         string `json:"fedWire"  gorm:"column:fedWire"`
 	ReceiverNumber  string `json:"receiverNumber"  gorm:"column:receiverNumber"`
