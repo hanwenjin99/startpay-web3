@@ -8,15 +8,15 @@ type UserBank struct {
 	global.GVA_MODEL
 	MerchantId      int64  `json:"merchantId"  gorm:"column:merchantId" `
 	Region          string `json:"region" gorm:"default:;comment:region"`
-	RemittanceType  string `json:"remittanceType" gorm:"default:;comment:remittanceType"`
-	EnterpriseTitle string `json:"enterpriseTitle"  gorm:"default:;comment:enterpriseTitle"`
+	RemittanceType  string `json:"remittanceType" gorm:"column:remittanceType"`
+	EnterpriseTitle string `json:"enterpriseTitle"  gorm:"column:enterpriseTitle"`
 	BankTitle       string `json:"bankTitle" gorm:"default:;comment:bankTitle"`
-	BankCode        string `json:"bankCode"  gorm:"index;comment:bankCode"`
-	FedWire         string `json:"fedWire"  gorm:"index;comment:fedWire"`
-	ReceiverNumber  string `json:"receiverNumber"  gorm:"default:;comment:receiverNumber"`
-	ReceiverName    string `json:"receiverName" gorm:"default:;comment:receiverName"`
-	ReceiverAddress string `json:"receiverAddress" gorm:"default:;comment:receiverAddress"`
-	ReferenceField  string `json:"referenceField" gorm:"default:;comment:referenceField"`
+	BankCode        string `json:"bankCode"  gorm:"column:bankCode"`
+	FedWire         string `json:"fedWire"  gorm:"column:fedWire"`
+	ReceiverNumber  string `json:"receiverNumber"  gorm:"column:receiverNumber"`
+	ReceiverName    string `json:"receiverName" gorm:"column:receiverName"`
+	ReceiverAddress string `json:"receiverAddress" gorm:"column:receiverAddress"`
+	ReferenceField  string `json:"referenceField" gorm:"column:referenceField"`
 }
 
 func (UserBank) TableName() string {
