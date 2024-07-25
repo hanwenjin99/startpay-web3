@@ -29,14 +29,45 @@
 
     <!-- 表格 -->
     <el-table :data="recordData" style="width: 100%">
-      <el-table-column label="时间"></el-table-column>
-      <el-table-column label="状态"></el-table-column>
-      <el-table-column label="到"></el-table-column>
-      <el-table-column label="币种"></el-table-column>
-      <el-table-column label="服务费"></el-table-column>
-      <el-table-column label="手续费"></el-table-column>
-      <el-table-column label="扣款金额"></el-table-column>
-      <el-table-column label="到账金额"></el-table-column>
+      <el-table-column label="时间">
+        <template #default="scope">
+          <div class="tableItemColumn">
+            {{ dayjs(scope.row.createTime).format('YYYY-MM-DD') }}
+            <span>{{ dayjs(scope.row.createTime).format('HH:mm') }}</span>
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column label="状态" prop="statusName" />
+      <el-table-column label="到">
+        <template #default="scope">{{ scope.row.bankAccount.bankTitle }}</template>
+      </el-table-column>
+      <el-table-column label="币种" prop="currency" />
+      <el-table-column label="服务费">
+        <template #default="scope">
+          {{ `${Number(scope.row.fee ?? 0).toFixed(2)}${scope.row.currency}` }}
+        </template>
+      </el-table-column>
+      <el-table-column label="手续费">
+        <template #default="scope">
+          {{ `${scope.row.remittanceFee}${scope.row.currency}` }}
+        </template>
+      </el-table-column>
+      <el-table-column label="扣款金额">
+        <template #default="scope">
+          <div class="tableItemColumn">
+            {{ `-${scope.row.totalAmount}` }}
+            <span>{{ `$${scope.row.totalAmount}` }}</span>
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column label="到账金额">
+        <template #default="scope">
+          <div class="tableItemColumn">
+            {{ scope.row.amount }}
+            <span>{{ scope.row.amount }}</span>
+          </div>
+        </template>
+      </el-table-column>
     </el-table>
 
     <!-- 分页 -->
@@ -54,6 +85,8 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import dayjs from 'dayjs'
+
 import { useCommonStore } from '@/pinia/modules/common'
 import { getWithdrawOrderList } from '@/api/account'
 
@@ -100,7 +133,6 @@ onMounted(() => {
   if (commonStore.currencyOptions.length === 0) {
     commonStore.QueryCurrencyOptions()
   }
-
   queryList({ page: 1 })
 })
 </script>
@@ -127,6 +159,21 @@ onMounted(() => {
     align-items: center;
     
     margin-bottom: 40px;
+  }
+
+  .tableItemColumn {
+    display: flex;
+    flex-direction: column;
+    font-size: 16px;
+    color: #000;
+    line-height: 1.25;
+    font-family: -inter;
+
+    span {
+      margin-top: 4px;
+      color: grey;
+      font-size: 14px;
+    }
   }
 }
 

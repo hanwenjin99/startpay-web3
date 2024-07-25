@@ -93,10 +93,50 @@ export const getBatchPayoutTemplate = () => {
   })
 }
 
-// 获取支付列表
+// 管理后台 - 获取支付列表
+export const getAdminWithdrawOrderList = (params) => {
+  return service({
+    url: `/web3/admin/withdraw/list?${qs.stringify(params)}`,
+    method: 'get'
+  })
+}
+
+// 管理后台 - 支付审核
+export const reviewAdminWithdrawOrder = (params) => {
+  return service({
+    url: '/web3/admin/withdraw/update',
+    method: 'post',
+    data: JSON.stringify(params),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+}
+
+// 商户端 - 获取支付列表
 export const getWithdrawOrderList = (params) => {
   return service({
-    url: '/backend/withdraw_order/list',
+    url: `/web3/merchant/withdraw/list?${qs.stringify(params)}`,
+    method: 'get'
+  })
+}
+
+// 商户端 - 支付撤销
+export const revokeMerchantWithdraw = (params) => {
+  return service({
+    url: '/web3/merchant/withdraw/update',
+    method: 'post',
+    data: JSON.stringify(params),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+}
+
+// 商户端 - 支付提交
+export const createMerchantWithdraw = (params) => {
+  return service({
+    url: '/web3/merchant/withdraw/create',
     method: 'post',
     data: JSON.stringify(params),
     headers: {

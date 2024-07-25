@@ -12,6 +12,12 @@ export const useCommonStore = defineStore('common', () => {
   const currencyOptions = ref([]) // 币种类型
   const depositOrderStatus = ref([])
 
+  // 页面初始化数据
+  const pageInitPay = ref({}) // 支付页面
+
+  const ChangePageInitPay = (newVal) => {
+    pageInitPay.value = { ...newVal }
+  }
 
   const setChainsInfoList = (val) => {
     chainsInfoList.value = val
@@ -70,6 +76,8 @@ export const useCommonStore = defineStore('common', () => {
     QueryDepositOrderStatus,
     chainsList,
     currencyOptions,
-    depositOrderStatus
+    depositOrderStatus,
+    ChangePageInitPay,
+    pageInitPay
   }
 })
