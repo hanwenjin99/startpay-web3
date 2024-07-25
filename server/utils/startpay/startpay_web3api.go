@@ -159,7 +159,7 @@ func (s *StartpayWeb3Api) GetAccountInfo() (*GetAccountInfoRespons, error) {
 	Host := global.GVA_CONFIG.StartpayWeb3.Host
 	client := NewHttpClient()
 
-	srcStr := "GET" + Host + "/account/list" + strtm
+	srcStr := "GET" + Host + "/wallet/project/account" + strtm
 	signStr, err := s.SignMessage2(srcStr)
 
 	if err != nil {
@@ -171,7 +171,7 @@ func (s *StartpayWeb3Api) GetAccountInfo() (*GetAccountInfoRespons, error) {
 		"FP-SIGN":      signStr,
 		"FP-TIMESTAMP": strtm,
 	}
-	getURL := "https://" + Host + "/account/list"
+	getURL := "https://" + Host + "/wallet/project/account"
 
 	global.GVA_LOG.Error("test web3",
 		zap.Any("signStr", signStr),
