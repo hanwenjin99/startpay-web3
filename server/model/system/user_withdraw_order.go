@@ -6,7 +6,7 @@ import (
 
 type UserWithDrawOrder struct {
 	global.GVA_MODEL
-	MerchantId   int64  `json:"merchantId"  gorm:"index;comment:merchantId" `
+	MerchantId   int64  `json:"merchantId"  gorm:"column:merchantId" `
 	MerchantName string `json:"merchantName" gorm:"default:;comment:merchantName"`
 	BankId       string `json:"bankId" gorm:"default:;comment:bankId"`
 	BankTitle    string `json:"bankTitle"  gorm:"default:;comment:bankTitle"`

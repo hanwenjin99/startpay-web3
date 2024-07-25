@@ -6,7 +6,7 @@ import (
 
 type Userwallet struct {
 	global.GVA_MODEL
-	MerchantId int64  `json:"merchantId"  gorm:"index;comment:merchantId" `
+	MerchantId int64  `json:"merchantId"  gorm:"column:merchantId" `
 	Name       string `json:"name" gorm:"default:;comment:name"`
 	Address    string `json:"address" gorm:"default:;comment:address"`
 	Chain      string `json:"chain"  gorm:"default:;comment:chain"`
