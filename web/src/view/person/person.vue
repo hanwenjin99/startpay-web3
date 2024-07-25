@@ -78,14 +78,14 @@
                 <el-tooltip
                   class="item"
                   effect="light"
-                  content="GoLang/JavaScript/Vue/Gorm"
+                  content="web3/BlockChain/sport"
                   placement="top"
                 >
                   <li class="info-list">
                     <el-icon>
                       <medal />
                     </el-icon>
-                    GoLang/JavaScript/Vue/Gorm
+                    web3/BlockChain/sport
                   </li>
                 </el-tooltip>
               </ul>
