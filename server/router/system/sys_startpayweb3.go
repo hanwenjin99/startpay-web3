@@ -18,7 +18,6 @@ func (s *StartpayRouter) InitStartpayRouter(Router *gin.RouterGroup) {
 		web3RouterWithoutRecord.GET("wallet_list", startpayWeb3Api.GetWalletList)
 		web3RouterWithoutRecord.GET("account_info", startpayWeb3Api.GetAccountInfo)
 		web3RouterWithoutRecord.GET("chain_list", startpayWeb3Api.GetChainListInfo)
-		web3RouterWithoutRecord.GET("deposit_address", startpayWeb3Api.GetDepositAddress)
 		web3RouterWithoutRecord.GET("deposit_order", startpayWeb3Api.GetAdepositOrder)
 		web3RouterWithoutRecord.GET("merchant/bankAccount/list", startpayWeb3Api.GetbankAccountList)
 		web3RouterWithoutRecord.POST("merchant/bankAccount/create", startpayWeb3Api.BankAccountCreate)

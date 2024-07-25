@@ -170,7 +170,7 @@ func (b *StartpayWeb3Api) CreateProject(c *gin.Context) {
 
 	if err != nil {
 		global.GVA_LOG.Error("创建项目失败!", zap.Error(err))
-		response.FailWithDetailed(systemRes.SysProjectResponse{Project: ProjectReturn}, "创建项目失败", c)
+		response.FailWithDetailed("创建项目失败", "创建项目失败", c)
 		return
 	}
 	response.OkWithDetailed(systemRes.SysProjectResponse{Project: ProjectReturn}, "创建项目成功", c)
@@ -204,7 +204,7 @@ func (b *StartpayWeb3Api) GetProjectList(c *gin.Context) {
 	ProjectReturn, err := StartpayWeb3Service.GetProjectList(userId, r.Page, r.PageSize)
 	if err != nil {
 		global.GVA_LOG.Error("获取项目失败!", zap.Error(err))
-		response.FailWithDetailed(ProjectReturn.Data, "获取项目失败", c)
+		response.FailWithDetailed("获取项目失败", "获取项目失败", c)
 		return
 	}
 
@@ -236,7 +236,7 @@ func (b *StartpayWeb3Api) GetWalletList(c *gin.Context) {
 	ProjectReturn, err := StartpayWeb3Service.GetProjectList(userId, r.Page, r.PageSize)
 	if err != nil {
 		global.GVA_LOG.Error("获取钱包失败!", zap.Error(err))
-		response.FailWithDetailed(ProjectReturn.Message, "获取钱包失败", c)
+		response.FailWithDetailed("获取钱包失败!", "获取钱包失败", c)
 		return
 	}
 	WalletResp := systemRes.GetWalletRespons{}
@@ -342,7 +342,7 @@ func (b *StartpayWeb3Api) GetChainListInfo(c *gin.Context) {
 	ChainReturn, err := StartpayWeb3Service.GetChainListInfo()
 	if err != nil {
 		global.GVA_LOG.Error("获取链列表失败!", zap.Error(err))
-		response.FailWithDetailed(ChainReturn.Message, "获取链列表失败!", c)
+		response.FailWithDetailed("获取链列表失败!", "获取链列表失败!", c)
 		return
 	}
 	response.OkWithDetailed(ChainReturn.Data, "获取链列表成功", c)
@@ -422,11 +422,11 @@ func (b *StartpayWeb3Api) BankAccountCreate(c *gin.Context) {
 
 	err = StartpayWeb3Service.BankAccountCreate(userBank)
 	if err != nil {
-		global.GVA_LOG.Error("获取 xxx 失败!", zap.Error(err))
-		response.FailWithDetailed("false", "添加 bank 失败", c)
+		global.GVA_LOG.Error("创建失败!", zap.Error(err))
+		response.FailWithDetailed("false", "创建失败", c)
 		return
 	}
-	response.OkWithDetailed("true", "添加bank成功", c)
+	response.OkWithDetailed("true", "创建成功", c)
 }
 
 func (b *StartpayWeb3Api) BankAccountDelete(c *gin.Context) {
@@ -520,11 +520,11 @@ func (b *StartpayWeb3Api) UserContactCreate(c *gin.Context) {
 
 	err = StartpayWeb3Service.UserContactCreate(userAddress)
 	if err != nil {
-		global.GVA_LOG.Error("获取 xxx 失败!", zap.Error(err))
-		response.FailWithDetailed("false", "添加 bank 失败", c)
+		global.GVA_LOG.Error("创建失败!", zap.Error(err))
+		response.FailWithDetailed("false", "创建失败", c)
 		return
 	}
-	response.OkWithDetailed("true", "添加bank成功", c)
+	response.OkWithDetailed("true", "创建成功", c)
 }
 func (b *StartpayWeb3Api) UserContactDelete(c *gin.Context) {
 	var r systemReq.DeleteDespoitAddress
