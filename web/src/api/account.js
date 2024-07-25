@@ -26,18 +26,6 @@ export const getAccountCurrencyCreatableList = (params) => {
   })
 }
 
-// 根据币种查询地址
-export const getDepositAddress = (params) => {
-  return service({
-    url: '/web3/deposit_address',
-    method: 'get',
-    data: JSON.stringify(params),
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  })
-}
-
 // 查询收款记录
 export const getDepositOrderList = (params) => {
   return service({

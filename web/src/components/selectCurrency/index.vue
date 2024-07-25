@@ -71,10 +71,13 @@ const initCurrencyList = async () => {
   const { code, data } = await getAccountInfo()
   if (code === 0) {
     currencyData.value = data.accountInfo ?? []
-    // 初始化设置第一个选择的币种
-    selectInfo.value = data.accountInfo[0] ?? {}
-    // 父组件回调
-    emit('handleSelectCallback', selectInfo.value)
+    if (!props.initData?.currency) {
+      // 初始化设置第一个选择的币种
+      selectInfo.value = data.accountInfo[0] ?? {}
+      radioCurrency.value = `${selectInfo.value?.currency}_${selectInfo.value?.chain}`
+      // 父组件回调
+      emit('handleSelectCallback', selectInfo.value)
+    }
   }
 }
 

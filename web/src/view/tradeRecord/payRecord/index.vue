@@ -1,9 +1,16 @@
 <template>
   <main class="content_container">
-    <h1 class="title">支付记录</h1>
+    <h1 class="title">提现记录</h1>
 
     <!-- 搜索 -->
     <section class="search">
+      <el-input
+        v-model="contactSearch"
+        placeholder="地址,Txid"
+        size="large"
+        style="width: 568px;"
+        prefix-icon="search"
+      />
       <!-- 币种 -->
       <el-select
         v-model="currency"
@@ -14,9 +21,9 @@
       >
         <el-option
           v-for="item in commonStore.currencyOptions"
-          :key="item.value"
-          :label="item.label"
-          :value="item.value"
+          :key="item.name"
+          :label="item.name"
+          :value="item.name"
         />
       </el-select>
 
@@ -93,6 +100,7 @@ import { getWithdrawOrderList } from '@/api/account'
 const commonStore = useCommonStore()
 
 const currency = ref('')
+const contactSearch = ref('')
 
 const recordData = ref([])
 const total = ref(0)
@@ -103,6 +111,10 @@ const handleChangePage = (page) => {
   currentPage.value = page
   const params = { page }
   if (currency.value) params.currency = currency.value
+  if (contactSearch.value) {
+    params.contactSearch = contactSearch.value
+    params.txid = contactSearch.value
+  }
   queryList(params)
 }
 
@@ -111,6 +123,10 @@ const paramsQuery = () => {
   currentPage.value = 1
   const params = { page: 1 }
   if (currency.value) params.currency = currency.value
+  if (contactSearch.value) {
+    params.contactSearch = contactSearch.value
+    params.txid = contactSearch.value
+  }
   queryList(params)
 }
 
@@ -118,6 +134,7 @@ const paramsQuery = () => {
 const resetQuery = () => {
   currentPage.value = 1
   currency.value = ''
+  contactSearch.value = ''
   queryList({ page: 1 })
 }
 

@@ -4,7 +4,7 @@
 
     <!-- 选择币种组件 -->
     <span class="selectTitle">币种</span>
-    <SelectCurrency @handle-select-callback="queryAddress" />
+    <SelectCurrency @handle-select-callback="showAddress" />
 
     <!-- 地址 -->
     <span class="smallTitle">地址</span>
@@ -14,8 +14,8 @@
       </div>
       <span class="line" />
       <div class="addressBottom">
-        <span>{{ addressValue }}</span>
-        <el-icon @click.stop="copyMessage(addressValue)"><CopyDocument /></el-icon>
+        <span>{{ selectOneCurrency.address }}</span>
+        <el-icon @click.stop="copyMessage(selectOneCurrency.address)"><CopyDocument /></el-icon>
       </div>
     </section>
 
@@ -106,23 +106,21 @@ import QRCode from 'qrcode'
 import dayjs from 'dayjs'
 import { useRouter } from 'vue-router'
 
-import { getDepositAddress, getDepositOrderList } from '@/api/account'
+import { getDepositOrderList } from '@/api/account'
 import SelectCurrency from '@/components/selectCurrency/index.vue'
 import { copyMessage } from '@/utils/common.js'
 
 const router = useRouter()
 const qrCanvas = ref(null)
-const addressValue = ref('')
 
 const recordData = ref([])
 const total = ref(0)
 
-// 根据选择的币种查询地址
-const queryAddress = async ({currency, chain}) => {
-  const { code, data } = await getDepositAddress({ asset: currency, chain })
-  if (code === 0) {
-    addressValue.value = data
-  }
+const selectOneCurrency = ref({})
+
+// 根据选择的币种 - 展示地址信息
+const showAddress = (selectInfo) => {
+  selectOneCurrency.value = selectInfo
 }
 
 const queryDepositList = async (page) => {
@@ -139,7 +137,7 @@ const handleChangePage = (page) => {
 }
 
 onMounted(() => {
-  QRCode.toCanvas(qrCanvas.value, addressValue.value, error => {
+  QRCode.toCanvas(qrCanvas.value, selectOneCurrency.value.address, error => {
     if (error) console.error(error);
   });
   // 初始化查询收款记录

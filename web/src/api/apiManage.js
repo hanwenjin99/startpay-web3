@@ -18,7 +18,7 @@ export const getProjectList = (params) => {
   })
 }
 
-// 新建项目
+// 新建钱包
 export const addProject = (params) => {
   return service({
     url: '/web3/create_project',

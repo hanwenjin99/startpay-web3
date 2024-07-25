@@ -37,7 +37,7 @@
         <template #default="scope">
           <el-button color="#000" plain type="info" icon="bottom" round>收款</el-button>
           <el-button color="#000" plain type="info" icon="top" round>转账</el-button>
-          <el-button color="#000" plain type="info" icon="topRight" round>支付</el-button>
+          <el-button color="#000" plain type="info" icon="topRight" round>提现</el-button>
         </template>
       </el-table-column>
     </el-table>

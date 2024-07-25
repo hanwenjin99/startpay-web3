@@ -1,6 +1,6 @@
 <template>
   <main class="content_container">
-    <h1 class="title">支付</h1>
+    <h1 class="title">提现</h1>
     <!-- 选择币种组件 -->
     <SelectCurrency :init-data="selectOneCurrency" @handle-select-callback="handleSelect" />
     <div class="inputTitle">
@@ -30,8 +30,8 @@
     <div class="bankSelector">
       <template v-if="creatForm.bankAccountId">
         <div class="selectBA">
-          <span class="icon">{{ selectBAInfo.enterpriseTitle.slice(0, 1) }}</span>
-          <span class="title">{{ selectBAInfo.enterpriseTitle }}</span>
+          <span class="icon">{{ selectBAInfo.receiverName.slice(0, 1) }}</span>
+          <span class="title">{{ selectBAInfo.receiverName }}</span>
           <span class="btn" @click.stop="resetSelectBank">
             重新选择
             <img :src="reset" alt="">
@@ -68,10 +68,10 @@
       继续
     </el-button>
 
-    <!-- 支付记录 -->
+    <!-- 提现记录 -->
     <section class="record">
       <div class="title">
-        <span>支付记录</span>
+        <span>记录</span>
         <el-button link @click="router.push('/layout/tradeRecord/payRecord')">查看全部</el-button>
       </div>
 
@@ -228,7 +228,7 @@ const handleChangePage = (page) => {
   queryList(page)
 }
 
-// 创建支付提交
+// 创建提现提交
 const submitCreate = () => {
   if (Number(creatForm.value.amount) === 0) {
     ElMessage.warning('提现金额需大于0！')
@@ -241,7 +241,7 @@ const submitCreate = () => {
   }
   // 二次确认
   ElMessageBox.confirm(
-    '确认创建支付记录吗？',
+    '确认创建提现记录吗？',
     '二次确认',
     {
       confirmButtonText: '确认',
@@ -251,7 +251,7 @@ const submitCreate = () => {
   ).then(async () => {
     const { code } = await createMerchantWithdraw(creatForm.value)
     if (code === 0) {
-      ElMessage.success('创建支付成功')
+      ElMessage.success('创建提现成功')
       // 刷新列表数据
       queryList(1)
     }
@@ -267,7 +267,7 @@ const selectBankAccount = () => {
   router.push({ name: 'bankAccount' })
 }
 
-// 商户端 - 撤销支付
+// 商户端 - 撤销提现
 const revokeWithdraw = async (item) => {
   const { code } = await revokeMerchantWithdraw({
     id: item.id,
@@ -276,7 +276,7 @@ const revokeWithdraw = async (item) => {
     status: item.status
   })
   if (code === 0) {
-    ElMessage.success('撤销支付成功！')
+    ElMessage.success('撤销提现成功！')
     // 刷新列表
     queryList(1)
   }
