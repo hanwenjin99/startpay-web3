@@ -459,11 +459,11 @@ func (b *StartpayWeb3Api) GetWeb3Announcement(c *gin.Context) {
 
 	war.TotalCount = 3
 
-	aa1 := systemRes.Web3AnnouncementInfo{Id: "1", Title: "2023年8月StartPay 品牌正式启动", Content: "欢迎有识之士加入"}
-	aa2 := systemRes.Web3AnnouncementInfo{Id: "1", Title: "2024年4月StartPay 启动web3 2B业务", Content: "给予跨海企业跨境业务支持"}
+	aa1 := systemRes.Web3AnnouncementInfo{Id: "1", Title: "2023年8月StartPay 品牌正式启动", Content: "欢迎有识之士加入", Time: "2024-01-18 15:18:02"}
+	aa2 := systemRes.Web3AnnouncementInfo{Id: "1", Title: "2024年4月StartPay 启动web3 2B业务", Content: "给予跨海企业跨境业务支持", Time: "2024-03-18 15:18:02"}
 	war.AnnouncementList = append(war.AnnouncementList, aa1)
 	war.AnnouncementList = append(war.AnnouncementList, aa2)
-	aa3 := systemRes.Web3AnnouncementInfo{Id: "1", Title: "2024年8月StartPay 期待web3业务正式上线", Content: "欢迎欢迎!!!!!"}
+	aa3 := systemRes.Web3AnnouncementInfo{Id: "1", Title: "2024年8月StartPay 期待web3业务正式上线", Content: "欢迎欢迎!!!!!", Time: "2024-07-18 15:18:02"}
 	war.AnnouncementList = append(war.AnnouncementList, aa3)
 
 	response.OkWithDetailed(war, "获取account成功", c)

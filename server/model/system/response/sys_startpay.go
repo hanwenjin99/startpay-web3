@@ -293,14 +293,14 @@ type Web3AnnouncementRespons struct {
 }
 
 type Web3AnnouncementInfo struct {
-	Id       string    `json:"id"`
-	Title    string    `json:"title"`
-	Content  string    `json:"content"`
-	ImageUrl string    `json:"imageUrl"`
-	Url      string    `json:"url"`
-	Language string    `json:"language"`
-	Time     time.Time `json:"time"`
-	Order    int       `json:"order"`
-	Group    string    `json:"group"`
-	Enable   bool      `json:"enable"`
+	Id       string `json:"id"`
+	Title    string `json:"title"`
+	Content  string `json:"content"`
+	ImageUrl string `json:"imageUrl"`
+	Url      string `json:"url"`
+	Language string `json:"language"`
+	Time     string `json:"time"`
+	Order    int    `json:"order"`
+	Group    string `json:"group"`
+	Enable   bool   `json:"enable"`
 }
