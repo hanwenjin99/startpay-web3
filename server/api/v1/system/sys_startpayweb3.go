@@ -443,6 +443,60 @@ func (b *StartpayWeb3Api) GetWalletList(c *gin.Context) {
 	response.OkWithDetailed(WalletResp, "获取钱包成功", c)
 }
 
+func (b *StartpayWeb3Api) GetWeb3Announcement(c *gin.Context) {
+	var r systemReq.GetCommonPageInfo
+	r.Page = 1
+	r.PageSize = 20
+
+	err := c.ShouldBindJSON(&r)
+	if err != nil {
+		//response.FailWithMessage(err.Error(), c)
+		global.GVA_LOG.Error("test welcome", zap.Any("err", err.Error()))
+		//return
+	}
+
+	war := systemRes.Web3AnnouncementRespons{}
+
+	war.TotalCount = 3
+
+	aa1 := systemRes.Web3AnnouncementInfo{Id: "1", Title: "2023年8月StartPay 品牌正式启动", Content: "欢迎有识之士加入"}
+	aa2 := systemRes.Web3AnnouncementInfo{Id: "1", Title: "2024年4月StartPay 启动web3 2B业务", Content: "给予跨海企业跨境业务支持"}
+	war.AnnouncementList = append(war.AnnouncementList, aa1)
+	war.AnnouncementList = append(war.AnnouncementList, aa2)
+	aa3 := systemRes.Web3AnnouncementInfo{Id: "1", Title: "2024年8月StartPay 期待web3业务正式上线", Content: "欢迎欢迎!!!!!"}
+	war.AnnouncementList = append(war.AnnouncementList, aa3)
+
+	response.OkWithDetailed(war, "获取account成功", c)
+}
+
+func (b *StartpayWeb3Api) GetWeb3Dashboard(c *gin.Context) {
+	userId := utils.GetUserID(c)
+
+	AccountReturn, err := StartpayWeb3Service.GetAccountInfo(userId)
+	if err != nil {
+		global.GVA_LOG.Error("获取account失败!", zap.Error(err))
+		response.FailWithDetailed("获取account失败", "获取account失败", c)
+		return
+	}
+	aacountResp := systemRes.Web3Dashboard{}
+	totalUsdPrice := float64(0)
+	for _, avalue := range AccountReturn {
+		Balance, _ := strconv.ParseFloat(avalue.Balance, 64)
+		UsdPrice, _ := strconv.ParseFloat(avalue.UsdtPrice, 64)
+		totalUsdPrice += UsdPrice * Balance
+	}
+	aacountResp.AssetValuationAmount = totalUsdPrice
+	aacountResp.AssetValuationCurrency = "USTD"
+	aacountResp.TotalDepositAmountToday = 0
+	aacountResp.TotalDepositAmountYesterday = 0
+	aacountResp.TotalDepositAmount7Days = 0
+	aacountResp.TotalDepositAmount30Days = 0
+	aacountResp.TotalWithdrawAmountToday = 0
+	aacountResp.TotalWithdrawAmountYesterday = 0
+	aacountResp.TotalWithdrawAmount7Days = 0
+	aacountResp.TotalWithdrawAmount30Days = 0
+	response.OkWithDetailed(aacountResp, "获取account成功", c)
+}
 func (b *StartpayWeb3Api) GetAccountInfo(c *gin.Context) {
 	userId := utils.GetUserID(c)
 

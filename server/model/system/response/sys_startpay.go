@@ -273,3 +273,34 @@ type TransferRecordInfo struct {
 	UpdateTime      uint    `json:"updateTime"`
 	AuditRecordId   string  `json:"auditRecordId"`
 }
+
+type Web3Dashboard struct {
+	TotalDepositAmountToday      int     `json:"totalDepositAmountToday"`
+	TotalDepositAmountYesterday  int     `json:"totalDepositAmountYesterday"`
+	TotalDepositAmount7Days      float64 `json:"totalDepositAmount7Days"`
+	TotalDepositAmount30Days     float64 `json:"totalDepositAmount30Days"`
+	TotalWithdrawAmountToday     int     `json:"totalWithdrawAmountToday"`
+	TotalWithdrawAmountYesterday int     `json:"totalWithdrawAmountYesterday"`
+	TotalWithdrawAmount7Days     float64 `json:"totalWithdrawAmount7Days"`
+	TotalWithdrawAmount30Days    float64 `json:"totalWithdrawAmount30Days"`
+	AssetValuationAmount         float64 `json:"assetValuationAmount"`
+	AssetValuationCurrency       string  `json:"assetValuationCurrency"`
+}
+
+type Web3AnnouncementRespons struct {
+	TotalCount       int                    `json:"totalCount"`
+	AnnouncementList []Web3AnnouncementInfo `json:"announcementList"`
+}
+
+type Web3AnnouncementInfo struct {
+	Id       string    `json:"id"`
+	Title    string    `json:"title"`
+	Content  string    `json:"content"`
+	ImageUrl string    `json:"imageUrl"`
+	Url      string    `json:"url"`
+	Language string    `json:"language"`
+	Time     time.Time `json:"time"`
+	Order    int       `json:"order"`
+	Group    string    `json:"group"`
+	Enable   bool      `json:"enable"`
+}
