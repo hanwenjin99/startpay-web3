@@ -41,7 +41,7 @@ export const getDepositOrderList = (params) => {
 // 单笔转账 - 转化接口
 export const postBackendQuote = (chain) => {
   return service({
-    url: '/backend/quote',
+    url: '/web3/quote',
     method: 'post',
     data: JSON.stringify({ chain }),
     headers: {

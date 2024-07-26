@@ -143,6 +143,65 @@ var WEB3TOKENLIST = map[string][]Web3Chain{
 	},
 }
 
+type GasQuoteList struct {
+	TransferCountGradeInfo []struct {
+		TransferCountGrade int     `json:"transferCountGrade"`
+		GasTotalAmount     float64 `json:"gasTotalAmount"`
+		GasTotalAmountUsd  float64 `json:"gasTotalAmountUsd"`
+		UsdtTotalAmount    float64 `json:"usdtTotalAmount"`
+		UsdtTotalAmountUsd float64 `json:"usdtTotalAmountUsd"`
+	} `json:"transferCountGradeInfo"`
+	GasToken                     string  `json:"gasToken"`
+	GasOnceAmount                float64 `json:"gasOnceAmount"`
+	GasUSDAmount                 float64 `json:"gasUSDAmount"`
+	GasTokenIcon                 string  `json:"gasTokenIcon"`
+	ChainIcon                    string  `json:"chainIcon"`
+	UsdtIcon                     string  `json:"usdtIcon"`
+	MerchantGasBalance           int     `json:"merchantGasBalance"`
+	MerchantGasLeftTransferCount int     `json:"merchantGasLeftTransferCount"`
+}
+
+var GASQUOTELIST = map[string]interface{}{
+	"transferCountGradeInfo": []map[string]interface{}{
+		{
+			"transferCountGrade": 5,
+			"gasTotalAmount":     0.001440,
+			"gasTotalAmountUsd":  4.685306400,
+			"usdtTotalAmount":    4.6872000,
+			"usdtTotalAmountUsd": 4.6872000,
+		},
+		{
+			"transferCountGrade": 20,
+			"gasTotalAmount":     0.005760,
+			"gasTotalAmountUsd":  18.741225600,
+			"usdtTotalAmount":    18.7488000,
+			"usdtTotalAmountUsd": 18.7488000,
+		},
+		{
+			"transferCountGrade": 50,
+			"gasTotalAmount":     0.014400,
+			"gasTotalAmountUsd":  46.853064000,
+			"usdtTotalAmount":    46.8720000,
+			"usdtTotalAmountUsd": 46.8720000,
+		},
+		{
+			"transferCountGrade": 100,
+			"gasTotalAmount":     0.028800,
+			"gasTotalAmountUsd":  93.706128000,
+			"usdtTotalAmount":    93.7440000,
+			"usdtTotalAmountUsd": 93.7440000,
+		},
+	},
+	"gasToken":                     "ETH",
+	"gasOnceAmount":                0.000288,
+	"gasUSDAmount":                 0.937061280,
+	"gasTokenIcon":                 "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/eth.png",
+	"chainIcon":                    "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/eth.png",
+	"usdtIcon":                     "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/usdt.png",
+	"merchantGasBalance":           0,
+	"merchantGasLeftTransferCount": 0,
+}
+
 var WEB3TOKENINFO map[string]Web3Chain = map[string]Web3Chain{
 	"ETH-ETH": {
 		Chain:     "ETH",
@@ -436,6 +495,11 @@ func (b *StartpayWeb3Api) GetChainListInfo(c *gin.Context) {
 	}
 	response.OkWithDetailed(chainList, "获取链列表成功", c)
 }
+
+func (b *StartpayWeb3Api) GetWeb3Quote(c *gin.Context) {
+	response.OkWithDetailed(GASQUOTELIST, "get quote OK", c)
+}
+
 func (b *StartpayWeb3Api) GetTokenListInfo(c *gin.Context) {
 	var r systemReq.GetTokenInfoReq
 	err := c.ShouldBindJSON(&r)
