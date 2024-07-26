@@ -570,7 +570,7 @@ func (b *StartpayWeb3Api) Web3TransferList(c *gin.Context) {
 
 	global.GVA_LOG.Error("GetbankAccountList web3 db before", zap.Any("GetbankAccountList", r))
 	userId := utils.GetUserID(c)
-	list, _, err := StartpayWeb3Service.GetbankAccountList(userId, r.Page, r.PageSize)
+	list, err := StartpayWeb3Service.Web3TransferList(userId, r)
 
 	if err != nil {
 		global.GVA_LOG.Error("获取失败!", zap.Error(err))
@@ -578,35 +578,13 @@ func (b *StartpayWeb3Api) Web3TransferList(c *gin.Context) {
 		return
 	}
 
-	blist := make([]systemRes.UserBankRespons, 0)
-
-	for _, uwvalue := range list {
-		ubs := systemRes.UserBankRespons{}
-		ubs.ReceiverNumber = uwvalue.ReceiverNumber
-		ubs.Id = strconv.FormatInt(int64(uwvalue.ID), 10)
-		ubs.MerchantId = strconv.FormatInt(int64(uwvalue.MerchantId), 10)
-		ubs.BankTitle = uwvalue.BankTitle
-		ubs.BankCode = uwvalue.BankCode
-		ubs.Region = uwvalue.Region
-		ubs.FedWire = uwvalue.FedWire
-		ubs.EnterpriseTitle = uwvalue.EnterpriseTitle
-		ubs.ReceiverAddress = uwvalue.ReceiverAddress
-		ubs.ReceiverName = uwvalue.ReceiverName
-		ubs.CreateTime = uwvalue.CreatedAt
-		ubs.ReferenceField = uwvalue.ReferenceField
-		ubs.RemittanceType = uwvalue.RemittanceType
-		ubs.UpdateTime = uwvalue.UpdatedAt
-		blist = append(blist, ubs)
-	}
-
-	response.OkWithDetailed(blist, "获取成功", c)
+	response.OkWithDetailed(list, "获取成功", c)
 }
 
 func (b *StartpayWeb3Api) GetdepositOrder(c *gin.Context) {
-	var r systemReq.GetCommonPageInfo
+	var r systemReq.GetWeb3Requst
 	r.Page = 1
 	r.PageSize = 20
-
 	err := c.ShouldBindJSON(&r)
 	if err != nil {
 		global.GVA_LOG.Error("xxx ShouldBindJSON fail", zap.Any("err", err.Error()))
@@ -614,36 +592,14 @@ func (b *StartpayWeb3Api) GetdepositOrder(c *gin.Context) {
 
 	global.GVA_LOG.Error("GetbankAccountList web3 db before", zap.Any("GetbankAccountList", r))
 	userId := utils.GetUserID(c)
-	list, _, err := StartpayWeb3Service.GetbankAccountList(userId, r.Page, r.PageSize)
+	list, err := StartpayWeb3Service.Web3TransferList(userId, r)
 
 	if err != nil {
 		global.GVA_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", c)
 		return
 	}
-
-	blist := make([]systemRes.UserBankRespons, 0)
-
-	for _, uwvalue := range list {
-		ubs := systemRes.UserBankRespons{}
-		ubs.ReceiverNumber = uwvalue.ReceiverNumber
-		ubs.Id = strconv.FormatInt(int64(uwvalue.ID), 10)
-		ubs.MerchantId = strconv.FormatInt(int64(uwvalue.MerchantId), 10)
-		ubs.BankTitle = uwvalue.BankTitle
-		ubs.BankCode = uwvalue.BankCode
-		ubs.Region = uwvalue.Region
-		ubs.FedWire = uwvalue.FedWire
-		ubs.EnterpriseTitle = uwvalue.EnterpriseTitle
-		ubs.ReceiverAddress = uwvalue.ReceiverAddress
-		ubs.ReceiverName = uwvalue.ReceiverName
-		ubs.CreateTime = uwvalue.CreatedAt
-		ubs.ReferenceField = uwvalue.ReferenceField
-		ubs.RemittanceType = uwvalue.RemittanceType
-		ubs.UpdateTime = uwvalue.UpdatedAt
-		blist = append(blist, ubs)
-	}
-
-	response.OkWithDetailed(blist, "获取成功", c)
+	response.OkWithDetailed(list, "获取成功", c)
 }
 
 func (b *StartpayWeb3Api) GetbankAccountList(c *gin.Context) {
