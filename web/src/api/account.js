@@ -42,7 +42,7 @@ export const getDepositOrderList = (params) => {
 export const postBackendQuote = (chain) => {
   return service({
     url: '/web3/quote',
-    method: 'post',
+    method: 'get',
     data: JSON.stringify({ chain }),
     headers: {
       'Content-Type': 'application/json'
