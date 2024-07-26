@@ -75,6 +75,7 @@ type GetAccountInfoRespons struct {
 }
 
 type Web3AccountInfo struct {
+	ID                     string  `json:"id"`
 	WalletName             string  `json:"Walletname"`
 	Currency               string  `json:"currency"`
 	Chain                  string  `json:"chain"`
