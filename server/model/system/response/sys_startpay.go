@@ -182,3 +182,94 @@ type UserWithdrawOrder struct {
 	Memo               string          `json:"memo"`
 	AdminMemo          string          `json:"adminMemo"`
 }
+
+type DepositOrederRespons struct {
+	Content    []DepositOrederInfo `json:"content"`
+	TotalPages int                 `json:"total_pages"`
+	Last       bool                `json:"last"`
+	Page       int                 `json:"page"`
+	PageSize   int                 `json:"page_size"`
+	Total      interface{}         `json:"total"`
+}
+
+type DepositOrederInfo struct {
+	Id                     string  `json:"id"`
+	MerchantId             uint    `json:"merchantId"`
+	MerchantName           string  `json:"merchantName"`
+	ProjectId              string  `json:"projectId"`
+	ProjectName            string  `json:"projectName"`
+	MerchantSettleCurrency string  `json:"merchantSettleCurrency"`
+	BoundAddressId         string  `json:"boundAddressId"`
+	MerchantAddressId      string  `json:"merchantAddressId"`
+	AddressPoolId          string  `json:"addressPoolId"`
+	Chain                  string  `json:"chain"`
+	ChainIcon              string  `json:"chainIcon"`
+	Asset                  string  `json:"asset"`
+	AssetIcon              string  `json:"assetIcon"`
+	Address                string  `json:"address"`
+	FromAddress            string  `json:"fromAddress"`
+	DepositAmount          float64 `json:"depositAmount"`
+	Fee                    float64 `json:"fee"`
+	Amount                 float64 `json:"amount"`
+	AmountUsd              float64 `json:"amountUsd"`
+	DepositAmountUsd       float64 `json:"depositAmountUsd"`
+	TxHash                 string  `json:"txHash"`
+	Status                 string  `json:"status"`
+	ErrorMsg               string  `json:"errorMsg"`
+	Note                   string  `json:"note"`
+	AmAssembleOrderId      string  `json:"amAssembleOrderId"`
+	AmFeeAssembleOrderId   string  `json:"amFeeAssembleOrderId"`
+	AmSwitchOrderId        string  `json:"amSwitchOrderId"`
+	SwitchTransferHash     string  `json:"switchTransferHash"`
+	CreateTime             uint    `json:"createTime"`
+	FinishedTime           string  `json:"finishedTime"`
+	LastUpdate             uint    `json:"lastUpdate"`
+	CallbackStatus         string  `json:"callbackStatus"`
+	CallbackTimes          int     `json:"callbackTimes"`
+	NextCallbackTime       uint    `json:"nextCallbackTime"`
+	CallbackErrorMsg       string  `json:"callbackErrorMsg"`
+	Settled                bool    `json:"settled"`
+	AssembleAddress        string  `json:"assembleAddress"`
+	AssembleTxid           string  `json:"assembleTxid"`
+	MaliciousLabel         string  `json:"maliciousLabel"`
+	InfoLabel              string  `json:"infoLabel"`
+	ReferModelId           string  `json:"referModelId"`
+}
+
+type TransferListRespons struct {
+	Content    []TransferRecordInfo `json:"content"`
+	TotalPages int                  `json:"total_pages"`
+	Last       bool                 `json:"last"`
+	Page       int                  `json:"page"`
+	PageSize   int                  `json:"page_size"`
+	Total      int                  `json:"total"`
+}
+
+type TransferRecordInfo struct {
+	Id              string  `json:"id"`
+	MerchantId      uint    `json:"merchantId"`
+	FromAddress     string  `json:"fromAddress"`
+	ToAddress       string  `json:"toAddress"`
+	Chain           string  `json:"chain"`
+	ChainIcon       string  `json:"chainIcon"`
+	Currency        string  `json:"currency"`
+	CurrencyIcon    string  `json:"currencyIcon"`
+	ContractAddress string  `json:"contractAddress"`
+	Amount          int     `json:"amount"`
+	AmountUsd       float64 `json:"amountUsd"`
+	UsdPrice        float64 `json:"usdPrice"`
+	Fee             float64 `json:"fee"`
+	Gas             float64 `json:"gas"`
+	GasToken        string  `json:"gasToken"`
+	GasPrice        float64 `json:"gasPrice"`
+	Tag             string  `json:"tag"`
+	Status          string  `json:"status"`
+	Txid            string  `json:"txid"`
+	TxTime          uint    `json:"txTime"`
+	CreateTime      uint    `json:"createTime"`
+	Nonce           string  `json:"nonce"`
+	Note            string  `json:"note"`
+	ErrorMessage    string  `json:"errorMessage"`
+	UpdateTime      uint    `json:"updateTime"`
+	AuditRecordId   string  `json:"auditRecordId"`
+}

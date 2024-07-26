@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
+	MyCommon "github.com/flipped-aurora/gin-vue-admin/server/model/common"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
 	systemReq "github.com/flipped-aurora/gin-vue-admin/server/model/system/request"
@@ -20,23 +20,6 @@ import (
 const GLOBAL_Fee = 0.04
 const RemittanceFee = 50
 const MaxRemittanceFee = 100000
-
-var WEB3CHAINLIST map[string]string = map[string]string{
-	"ETH":     "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/eth.png",
-	"BSC":     "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/png",
-	"TRON":    "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/TRX.png",
-	"POLYGON": "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/MATIC.png",
-	"BTC":     "https://token-talk.oss-cn-shenzhen.aliyuncs.com/icon/wallet-btc.png?x-oss-process=image/resize,w_150",
-}
-
-var WEB3TOKENLISTAll = map[string]string{
-	"USDT":  "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/usdt.png",
-	"USDC":  "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/usdc.png",
-	"BNB":   "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/bnb.png",
-	"MATIC": "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/MATIC.png",
-	"BTC":   "https://token-talk.oss-cn-shenzhen.aliyuncs.com/icon/wallet-btc.png?x-oss-process=image/resize,w_150",
-	"ETH":   "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/eth.png",
-}
 
 var WEB3TOKENLIST = map[string][]Web3Chain{
 	"ETH": {
@@ -401,41 +384,6 @@ func (b *StartpayWeb3Api) GetWalletList(c *gin.Context) {
 	response.OkWithDetailed(WalletResp, "获取钱包成功", c)
 }
 
-// GetUserList
-// @Tags      SysUser
-// @Summary   分页获取用户列表
-// @Security  ApiKeyAuth
-// @accept    application/json
-// @Produce   application/json
-// @Param     data  body      request.PageInfo                                        true  "页码, 每页大小"
-// @Success   200   {object}  response.Response{data=response.PageResult,msg=string}  "分页获取用户列表,返回包括列表,总数,页码,每页数量"
-// @Router    /user/getUserList [post]
-func (b *StartpayWeb3Api) GetUserList(c *gin.Context) {
-	var pageInfo request.PageInfo
-	err := c.ShouldBindJSON(&pageInfo)
-	if err != nil {
-		response.FailWithMessage(err.Error(), c)
-		return
-	}
-	err = utils.Verify(pageInfo, utils.PageInfoVerify)
-	if err != nil {
-		response.FailWithMessage(err.Error(), c)
-		return
-	}
-	list, total, err := userService.GetUserInfoList(pageInfo)
-	if err != nil {
-		global.GVA_LOG.Error("获取失败!", zap.Error(err))
-		response.FailWithMessage("获取失败", c)
-		return
-	}
-	response.OkWithDetailed(response.PageResult{
-		List:     list,
-		Total:    total,
-		Page:     pageInfo.Page,
-		PageSize: pageInfo.PageSize,
-	}, "获取成功", c)
-}
-
 func (b *StartpayWeb3Api) GetAccountInfo(c *gin.Context) {
 	userId := utils.GetUserID(c)
 
@@ -482,7 +430,7 @@ func (b *StartpayWeb3Api) GetAccountInfo(c *gin.Context) {
 
 func (b *StartpayWeb3Api) GetChainListInfo(c *gin.Context) {
 	chainList := make([]systemRes.Web3ChainListRespons, 0)
-	for key, value := range WEB3CHAINLIST {
+	for key, value := range MyCommon.WEB3CHAINLIST {
 		chainInfo := systemRes.Web3ChainListRespons{Name: key, Icon: value}
 		chainList = append(chainList, chainInfo)
 	}
@@ -506,7 +454,7 @@ func (b *StartpayWeb3Api) GetTokenListInfo(c *gin.Context) {
 		}
 
 	} else {
-		for key, value := range WEB3TOKENLISTAll {
+		for key, value := range MyCommon.WEB3TOKENLISTAll {
 			tokenInfo := systemRes.Web3ChainListRespons{Name: key, Icon: value}
 			TokenList = append(TokenList, tokenInfo)
 		}
@@ -519,8 +467,119 @@ func (b *StartpayWeb3Api) GetDepositAddress(c *gin.Context) {
 
 	//userId := utils.GetUserID(c)
 }
-func (b *StartpayWeb3Api) GetAdepositOrder(c *gin.Context) {
-	//userId := utils.GetUserID(c)
+
+func (b *StartpayWeb3Api) Web3TransferCreate(c *gin.Context) {
+
+	var r systemReq.CreateTransferRequest
+	err := c.ShouldBindJSON(&r)
+	if err != nil {
+		global.GVA_LOG.Error("Web3TransferCreate ShouldBindJSON fail", zap.Any("err", err.Error()))
+	}
+
+	/*err = utils.Verify(pageInfo, utils.PageInfoVerify)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}*/
+
+	global.GVA_LOG.Error("Web3TransferCreate web3 db before", zap.Any("Web3TransferCreate", r))
+	userId := utils.GetUserID(c)
+
+	data, err := StartpayWeb3Service.Web3TransferCreate(userId, r)
+	if err != nil {
+		global.GVA_LOG.Error("转账失败!", zap.Error(err))
+		response.FailWithMessage("转账失败", c)
+		return
+	}
+	response.OkWithDetailed(data, "转账成功", c)
+}
+
+func (b *StartpayWeb3Api) Web3TransferList(c *gin.Context) {
+
+	var r systemReq.GetWeb3Requst
+	r.Page = 1
+	r.PageSize = 20
+	err := c.ShouldBindJSON(&r)
+	if err != nil {
+		global.GVA_LOG.Error("xxx ShouldBindJSON fail", zap.Any("err", err.Error()))
+	}
+
+	global.GVA_LOG.Error("GetbankAccountList web3 db before", zap.Any("GetbankAccountList", r))
+	userId := utils.GetUserID(c)
+	list, _, err := StartpayWeb3Service.GetbankAccountList(userId, r.Page, r.PageSize)
+
+	if err != nil {
+		global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		response.FailWithMessage("获取失败", c)
+		return
+	}
+
+	blist := make([]systemRes.UserBankRespons, 0)
+
+	for _, uwvalue := range list {
+		ubs := systemRes.UserBankRespons{}
+		ubs.ReceiverNumber = uwvalue.ReceiverNumber
+		ubs.Id = strconv.FormatInt(int64(uwvalue.ID), 10)
+		ubs.MerchantId = strconv.FormatInt(int64(uwvalue.MerchantId), 10)
+		ubs.BankTitle = uwvalue.BankTitle
+		ubs.BankCode = uwvalue.BankCode
+		ubs.Region = uwvalue.Region
+		ubs.FedWire = uwvalue.FedWire
+		ubs.EnterpriseTitle = uwvalue.EnterpriseTitle
+		ubs.ReceiverAddress = uwvalue.ReceiverAddress
+		ubs.ReceiverName = uwvalue.ReceiverName
+		ubs.CreateTime = uwvalue.CreatedAt
+		ubs.ReferenceField = uwvalue.ReferenceField
+		ubs.RemittanceType = uwvalue.RemittanceType
+		ubs.UpdateTime = uwvalue.UpdatedAt
+		blist = append(blist, ubs)
+	}
+
+	response.OkWithDetailed(blist, "获取成功", c)
+}
+
+func (b *StartpayWeb3Api) GetdepositOrder(c *gin.Context) {
+	var r systemReq.GetCommonPageInfo
+	r.Page = 1
+	r.PageSize = 20
+
+	err := c.ShouldBindJSON(&r)
+	if err != nil {
+		global.GVA_LOG.Error("xxx ShouldBindJSON fail", zap.Any("err", err.Error()))
+	}
+
+	global.GVA_LOG.Error("GetbankAccountList web3 db before", zap.Any("GetbankAccountList", r))
+	userId := utils.GetUserID(c)
+	list, _, err := StartpayWeb3Service.GetbankAccountList(userId, r.Page, r.PageSize)
+
+	if err != nil {
+		global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		response.FailWithMessage("获取失败", c)
+		return
+	}
+
+	blist := make([]systemRes.UserBankRespons, 0)
+
+	for _, uwvalue := range list {
+		ubs := systemRes.UserBankRespons{}
+		ubs.ReceiverNumber = uwvalue.ReceiverNumber
+		ubs.Id = strconv.FormatInt(int64(uwvalue.ID), 10)
+		ubs.MerchantId = strconv.FormatInt(int64(uwvalue.MerchantId), 10)
+		ubs.BankTitle = uwvalue.BankTitle
+		ubs.BankCode = uwvalue.BankCode
+		ubs.Region = uwvalue.Region
+		ubs.FedWire = uwvalue.FedWire
+		ubs.EnterpriseTitle = uwvalue.EnterpriseTitle
+		ubs.ReceiverAddress = uwvalue.ReceiverAddress
+		ubs.ReceiverName = uwvalue.ReceiverName
+		ubs.CreateTime = uwvalue.CreatedAt
+		ubs.ReferenceField = uwvalue.ReferenceField
+		ubs.RemittanceType = uwvalue.RemittanceType
+		ubs.UpdateTime = uwvalue.UpdatedAt
+		blist = append(blist, ubs)
+	}
+
+	response.OkWithDetailed(blist, "获取成功", c)
 }
 
 func (b *StartpayWeb3Api) GetbankAccountList(c *gin.Context) {
@@ -653,6 +712,7 @@ func (b *StartpayWeb3Api) UserContactList(c *gin.Context) {
 	for _, uwvalue := range list {
 		uds := systemRes.UserDEsposit{}
 		uds.Chain = uwvalue.Chain
+		uds.ChainIcon = MyCommon.WEB3CHAINLIST[uwvalue.Chain]
 		uds.Name = uwvalue.Name
 		uds.Id = strconv.FormatInt(int64(uwvalue.ID), 10)
 		uds.Address = uwvalue.Address
