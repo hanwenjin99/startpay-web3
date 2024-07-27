@@ -13,8 +13,8 @@ export const getAccountInfo = () => {
 // 获取账户可创建币种列表
 export const getAccountCurrencyCreatableList = (params) => {
   return service({
-    url: '/backend/options/account_currency_creatable/list',
-    method: 'post',
+    url: '/web3/token_list',
+    method: 'get',
     data: JSON.stringify({
       ...params,
       page: 0,
@@ -29,8 +29,8 @@ export const getAccountCurrencyCreatableList = (params) => {
 // 查询收款记录
 export const getDepositOrderList = (params) => {
   return service({
-    url: '/backend/deposit_order/list',
-    method: 'post',
+    url: '/web3/deposit_order',
+    method: 'get',
     data: JSON.stringify(params),
     headers: {
       'Content-Type': 'application/json'
@@ -41,8 +41,8 @@ export const getDepositOrderList = (params) => {
 // 单笔转账 - 转化接口
 export const postBackendQuote = (chain) => {
   return service({
-    url: '/backend/quote',
-    method: 'post',
+    url: '/web3/quote',
+    method: 'get',
     data: JSON.stringify({ chain }),
     headers: {
       'Content-Type': 'application/json'
@@ -65,8 +65,8 @@ export const createSingleTransfer = (params) => {
 // 查询单笔转账记录
 export const getTransferList = (params) => {
   return service({
-    url: '/backend/transfer/list ',
-    method: 'post',
+    url: '/web3/transfer_order',
+    method: 'get',
     data: JSON.stringify(params),
     headers: {
       'Content-Type': 'application/json'

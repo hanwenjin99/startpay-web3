@@ -3,8 +3,10 @@ package system
 import (
 	"errors"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	MyCommon "github.com/flipped-aurora/gin-vue-admin/server/model/common"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
 	systemReq "github.com/flipped-aurora/gin-vue-admin/server/model/system/request"
+	systemRes "github.com/flipped-aurora/gin-vue-admin/server/model/system/response"
 	web3api "github.com/flipped-aurora/gin-vue-admin/server/utils/startpay"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -99,7 +101,7 @@ func (s *StartpayWeb3Service) GetProjectList(userId uint, Page int, PageSize int
 	return web3.GetProjectList(Page, PageSize, "ACTIVE", stringProjectid)
 }
 
-func (s *StartpayWeb3Service) GetAccountInfo(userId uint) (map[string]web3api.GetAccountInfo, error) {
+func (s *StartpayWeb3Service) GetAccountInfo(userId uint) ([]web3api.GetAccountInfo, error) {
 
 	var projectlist []system.SysProject
 	_, err := global.GVA_DB.Where("user_id = ? ", userId).Find(&projectlist).Rows()
@@ -108,7 +110,7 @@ func (s *StartpayWeb3Service) GetAccountInfo(userId uint) (map[string]web3api.Ge
 		return nil, errors.New("查询用户项目失败")
 	}
 
-	web3AccountList := make(map[string]web3api.GetAccountInfo, 0)
+	web3AccountList := make([]web3api.GetAccountInfo, 0)
 	for _, pvalue := range projectlist {
 		web3 := web3api.StartpayWeb3Api{ApiKey: pvalue.AppKey, ApiSecret: pvalue.AppSecret}
 		webrResp, err := web3.GetAccountInfo()
@@ -116,12 +118,84 @@ func (s *StartpayWeb3Service) GetAccountInfo(userId uint) (map[string]web3api.Ge
 			continue
 		}
 		for _, data := range webrResp.Data {
-			key := data.Chain + "-" + data.Currency
-			web3AccountList[key] = data
+			data.Name = pvalue.ProName
+			web3AccountList = append(web3AccountList, data)
 		}
 
 	}
 	return web3AccountList, nil
+}
+func (s *StartpayWeb3Service) Web3TransferCreate(userId uint, request systemReq.CreateTransferRequest) (*string, error) {
+	var projectlist []system.SysProject
+
+	_, err := global.GVA_DB.Where("user_id = ? and id =? ", userId, request.ID).Find(&projectlist).Rows()
+
+	if err != nil {
+		return nil, errors.New("查询用户交易密钥失败")
+	}
+
+	for _, pvalue := range projectlist {
+		web3 := web3api.StartpayWeb3Api{ApiKey: pvalue.AppKey, ApiSecret: pvalue.AppSecret}
+		webrResp, err := web3.Web3TransferCreate(request)
+		if err != nil {
+			return nil, err
+		}
+		return &webrResp.Data.Id, nil
+	}
+
+	return nil, errors.New("交易失败")
+}
+
+func (s *StartpayWeb3Service) Web3TransferList(userId uint, request systemReq.GetWeb3Requst) (*systemRes.TransferListRespons, error) {
+	var projectlist []system.SysProject
+
+	_, err := global.GVA_DB.Where("user_id = ? ", userId).Find(&projectlist).Rows()
+
+	if err != nil {
+		return nil, errors.New("查询用户交易密钥失败")
+	}
+
+	transferRes := systemRes.TransferListRespons{}
+	for _, pvalue := range projectlist {
+		web3 := web3api.StartpayWeb3Api{ApiKey: pvalue.AppKey, ApiSecret: pvalue.AppSecret}
+		webrResp, err := web3.Web3TransferList(pvalue.ProUuid, request)
+		if err != nil {
+			continue
+		}
+		for _, data := range webrResp.Content {
+			tri := systemRes.TransferRecordInfo{}
+			tri.ToAddress = data.ToAddress
+			tri.Chain = data.Chain
+			tri.Currency = data.Currency
+			tri.Id = data.Id
+			tri.Amount, _ = strconv.Atoi(data.Amount)
+			tri.UsdPrice = 0
+			tri.CurrencyIcon = MyCommon.WEB3TOKENLISTAll[data.Currency]
+			tri.ChainIcon = MyCommon.WEB3CHAINLIST[data.Chain]
+			tri.AmountUsd = 0
+			tri.Status = data.Status
+			tri.MerchantId = userId
+			tri.CreateTime = data.CreateTime
+			tri.Note = ""
+			tri.UpdateTime = data.CreateTime
+			tri.AuditRecordId = ""
+			tri.ContractAddress = ""
+			tri.ErrorMessage = ""
+			tri.Fee = 0
+			tri.FromAddress = data.FromAddress
+			tri.Gas, _ = strconv.ParseFloat(data.Gas, 64)
+			tri.GasPrice, _ = strconv.ParseFloat(data.GasPrice, 64)
+			tri.GasToken = MyCommon.WEB3GASLIST[data.Chain]
+			tri.Nonce = ""
+			tri.Tag = ""
+			tri.Txid = data.Txid
+			tri.TxTime = data.TxTime
+			transferRes.Content = append(transferRes.Content, tri)
+		}
+
+	}
+
+	return &transferRes, nil
 }
 
 func (s *StartpayWeb3Service) GetChainListInfo() (*web3api.Web3ChainListRespons, error) {
@@ -162,37 +236,49 @@ func (s *StartpayWeb3Service) GetDepositAddress(userId uint, Page int, PageSize 
 	return web3.GetProjectList(Page, PageSize, "ACTIVE", stringProjectid)
 }
 
-func (s *StartpayWeb3Service) GetAdepositOrder(userId uint, Page int, PageSize int) (*web3api.ProjectList, error) {
-	web3 := web3api.StartpayWeb3Api{}
-
+func (s *StartpayWeb3Service) GetDepositOrder(userId uint, request systemReq.GetWeb3Requst) (*systemRes.DepositOrederRespons, error) {
 	var projectlist []system.SysProject
 
 	_, err := global.GVA_DB.Where("user_id = ? ", userId).Find(&projectlist).Rows()
 
 	if err != nil {
-		return nil, errors.New("查询用户项目失败")
+		return nil, errors.New("查询用户交易密钥失败")
 	}
 
-	global.GVA_LOG.Error("test", zap.Any("userId", userId),
-		zap.Any("Page", Page),
-		zap.Any("PageSize", PageSize),
-		zap.Any("projectlist", projectlist),
-	)
-
-	stringProjectid := ""
-	for index, pvalue := range projectlist {
-		if len(projectlist)-1 == index {
-			stringProjectid += pvalue.ProUuid
-		} else {
-			stringProjectid += pvalue.ProUuid + ","
+	depositRes := systemRes.DepositOrederRespons{}
+	for _, pvalue := range projectlist {
+		web3 := web3api.StartpayWeb3Api{ApiKey: pvalue.AppKey, ApiSecret: pvalue.AppSecret}
+		webrResp, err := web3.GetDepositOrder(pvalue.AssembleAddress, request)
+		if err != nil {
+			continue
 		}
+		for _, data := range webrResp.Data {
+			tri := systemRes.DepositOrederInfo{}
+			tri.Id = data.Id
+			tri.Amount, _ = strconv.ParseFloat(data.Amount, 64)
+			tri.AssembleAddress = data.Address
+			tri.FromAddress = data.FromAddress
+			tri.AmountUsd, _ = strconv.ParseFloat(data.AmountUsd, 64)
+			tri.CreateTime = data.CreateTime
+			tri.Status = data.Status
+			tri.Chain = data.Chain
+			tri.MerchantId = userId
+			tri.ChainIcon = MyCommon.WEB3CHAINLIST[data.Chain]
+			tri.Asset = data.Token
+			tri.Address = data.Address
+			tri.ProjectName = pvalue.ProName
+			tri.ProjectId = pvalue.ProUuid
+			tri.MerchantAddressId = data.MerchantAddressId
+			tri.AssetIcon = MyCommon.WEB3TOKENLISTAll[data.Token]
+			tri.TxHash = data.TxHash
+			tri.DepositAmountUsd = 0
+			tri.DepositAmount, _ = strconv.ParseFloat(data.DepositAmount, 64)
+			depositRes.Content = append(depositRes.Content, tri)
+		}
+
 	}
 
-	if stringProjectid == "" {
-		return nil, errors.New("没有查询到符合条件的项目")
-	}
-
-	return web3.GetProjectList(Page, PageSize, "ACTIVE", stringProjectid)
+	return &depositRes, nil
 }
 
 func (s *StartpayWeb3Service) GetbankAccountList(userId uint, Page int, PageSize int) (list []system.UserBank, total int64, err error) {

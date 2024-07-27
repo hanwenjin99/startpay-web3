@@ -183,11 +183,13 @@ type GetAccountInfoRespons struct {
 }
 
 type GetAccountInfo struct {
-	Address  string `json:"address"`
-	Balance  string `json:"balance"`
-	Chain    string `json:"chain"`
-	Currency string `json:"currency"`
-	Id       string `json:"id"`
+	Address   string `json:"address"`
+	Balance   string `json:"balance"`
+	Chain     string `json:"chain"`
+	Currency  string `json:"currency"`
+	UsdtPrice string `json:"usdtPrice"`
+	Id        string `json:"id"`
+	Name      string `json:"name"`
 }
 
 type Web3ChainListRespons struct {
@@ -231,4 +233,69 @@ type Web3ChainListRespons struct {
 	} `json:"data"`
 	Code    int    `json:"code"`
 	Message string `json:"message"`
+}
+
+type Web3CreatetransferReturn struct {
+	Code int `json:"code"`
+	Data struct {
+		Amount      string `json:"amount"`
+		Chain       string `json:"chain"`
+		CreateTime  int    `json:"createTime"`
+		Currency    string `json:"currency"`
+		FromAddress string `json:"fromAddress"`
+		Gas         string `json:"gas"`
+		GasPrice    string `json:"gasPrice"`
+		Id          string `json:"id"`
+		Status      string `json:"status"`
+		ToAddress   string `json:"toAddress"`
+		TxTime      int    `json:"txTime"`
+		Txid        string `json:"txid"`
+	} `json:"data"`
+	Message string `json:"message"`
+}
+
+type Web3ListtransferReturn struct {
+	Content []struct {
+		Amount      string `json:"amount"`
+		Chain       string `json:"chain"`
+		CreateTime  uint   `json:"createTime"`
+		Currency    string `json:"currency"`
+		FromAddress string `json:"fromAddress"`
+		Gas         string `json:"gas"`
+		GasPrice    string `json:"gasPrice"`
+		Id          string `json:"id"`
+		Status      string `json:"status"`
+		ToAddress   string `json:"toAddress"`
+		TxTime      uint   `json:"txTime"`
+		Txid        string `json:"txid"`
+	} `json:"content"`
+	Last       bool `json:"last"`
+	Page       int  `json:"page"`
+	PageSize   int  `json:"page_size"`
+	Total      int  `json:"total"`
+	TotalPages int  `json:"total_pages"`
+}
+
+type Web3DepositListReturn struct {
+	Data []struct {
+		Address           string   `json:"address"`
+		Amount            string   `json:"amount"`
+		AmountUsd         string   `json:"amountUsd"`
+		Chain             string   `json:"chain"`
+		CreateTime        uint     `json:"createTime"`
+		DepositAmount     string   `json:"depositAmount"`
+		FinishedTime      int      `json:"finishedTime"`
+		FromAddress       string   `json:"fromAddress"`
+		Id                string   `json:"id"`
+		MerchantAddressId string   `json:"merchantAddressId"`
+		OrderModeStatus   string   `json:"orderModeStatus"`
+		SettleTxid        string   `json:"settleTxid"`
+		Status            string   `json:"status"`
+		Token             string   `json:"token"`
+		TxHash            string   `json:"txHash"`
+		TxList            []string `json:"txList"`
+	} `json:"data"`
+	Page     int `json:"page"`
+	PageSize int `json:"pageSize"`
+	Total    int `json:"total"`
 }

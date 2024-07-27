@@ -99,8 +99,27 @@ type ProjectList struct {
 	Message string `json:"message"`
 }
 
+type Web3TransferReturn struct {
+	Code int `json:"code"`
+	Data struct {
+		Amount      string `json:"amount"`
+		Chain       string `json:"chain"`
+		CreateTime  int    `json:"createTime"`
+		Currency    string `json:"currency"`
+		FromAddress string `json:"fromAddress"`
+		Gas         string `json:"gas"`
+		GasPrice    string `json:"gasPrice"`
+		Id          string `json:"id"`
+		Status      string `json:"status"`
+		ToAddress   string `json:"toAddress"`
+		TxTime      int    `json:"txTime"`
+		Txid        string `json:"txid"`
+	} `json:"data"`
+	Message string `json:"message"`
+}
+
 func main() {
-	/*apiKey := "32e78838-a81e-4172-8008-d03f5102a2e7"
+	apiKey := "32e78838-a81e-4172-8008-d03f5102a2e7"
 	//apiSecret := "0B010C5D9A3BF3BC49D4CA76713ABD4C207E4E71"
 	currentTime := time.Now()
 	timestamp := currentTime.Unix()
@@ -112,23 +131,25 @@ func main() {
 
 	client := NewHttpClient()
 
-	srcStr1 := "GETapi.satogate.io/currency/list" + strtm
-	signStr1, err := SignMessage(srcStr1)
+	/*
 
-	if err != nil {
-		fmt.Println("SignMessage err")
-	}
+		srcStr1 := "GETapi.satogate.io/currency/list" + strtm
+		signStr1, err := SignMessage(srcStr1)
 
-	postHeaders := map[string]string{
-		"FP-API-KEY":   apiKey,
-		"FP-SIGN":      signStr1,
-		"FP-TIMESTAMP": strtm,
-	}
-	/*postBody = map[string]interface{}{
-		"page":     1,
-		"pageSize": 20,
-		"status":   "ACTIVE",
-	}*/
+		if err != nil {
+			fmt.Println("SignMessage err")
+		}
+
+		postHeaders := map[string]string{
+			"FP-API-KEY":   apiKey,
+			"FP-SIGN":      signStr1,
+			"FP-TIMESTAMP": strtm,
+		}
+		/*postBody = map[string]interface{}{
+			"page":     1,
+			"pageSize": 20,
+			"status":   "ACTIVE",
+		}*/
 
 	/*postURL1 := "https://api.satogate.io/currency/list"
 
@@ -144,15 +165,11 @@ func main() {
 		fmt.Println("GEt 请求响应:", string(postResponse))
 	}*/
 
-	apiKey := "32e78838-a81e-4172-8008-d03f5102a2e7"
-	//apiSecret := "0B010C5D9A3BF3BC49D4CA76713ABD4C207E4E71"
+	/*apiKey := "32e78838-a81e-4172-8008-d03f5102a2e7"
 	currentTime := time.Now()
 	timestamp := currentTime.Unix()
 	strtm := fmt.Sprintf("%d", timestamp)
 
-	// alohaschen@foxmail.com
-	// AppKey=32e78838-a81e-4172-8008-d03f5102a2e7
-	// AppSecret=0B010C5D9A3BF3BC49D4CA76713ABD4C207E4E71
 
 	client := NewHttpClient()
 
@@ -168,11 +185,7 @@ func main() {
 		"FP-SIGN":      signStr1,
 		"FP-TIMESTAMP": strtm,
 	}
-	/*postBody = map[string]interface{}{
-		"page":     1,
-		"pageSize": 20,
-		"status":   "ACTIVE",
-	}*/
+
 
 	postURL1 := "https://api.satogate.io/currency/chains"
 
@@ -187,6 +200,7 @@ func main() {
 	} else {
 		fmt.Println("GEt 请求响应:", string(postResponse))
 	}
+	*/
 
 	// GET 请求示例
 	/*
@@ -207,45 +221,48 @@ func main() {
 		}*/
 
 	// POST 请求示例
-	/*
-		postURL := "https://api.satogate.io/project/create"
 
-		//srcStr := "GETcvm.tencentcloudapi.com/?Action=DescribeInstances&InstanceIds.0=ins-09dx96dg&Limit=20&Nonce=11886&Offset=0&Region=ap-guangzhou&SecretId=32e78838-a81e-4172-8008-d03f5102a2e7&Timestamp=1465185768&Version=2017-03-121681973331"
-		assembleChain := "POLYGON"
-		projectName := "startpay-test"
-		settleCurrency := "USDT"
+	postURL := "https://api.satogate.io/transaction/transfer"
 
-		srcStr := "POSTapi.satogate.io/project/create?assembleChain=" + assembleChain + "&name=" + projectName + "&settleCurrency=" + settleCurrency + strtm
-		// 计算 HMAC-SHA1
-		mac := hmac.New(sha1.New, []byte(apiSecret))
-		mac.Write([]byte(srcStr))
-		macHex := mac.Sum(nil)
+	//srcStr := "GETcvm.tencentcloudapi.com/?Action=DescribeInstances&InstanceIds.0=ins-09dx96dg&Limit=20&Nonce=11886&Offset=0&Region=ap-guangzhou&SecretId=32e78838-a81e-4172-8008-d03f5102a2e7&Timestamp=1465185768&Version=2017-03-121681973331"
+	assembleChain := "POLYGON"
+	projectName := "startpay-test"
+	settleCurrency := "USDT"
 
-		// 转为 Base64 编码
-		signStr := base64.StdEncoding.EncodeToString(macHex)
+	srcStr := "POSTapi.satogate.io/transaction/transfer=" + assembleChain + "&name=" + projectName + "&settleCurrency=" + settleCurrency + strtm
+	// 计算 HMAC-SHA1
+	mac := hmac.New(sha1.New, []byte(apiSecret))
+	mac.Write([]byte(srcStr))
+	macHex := mac.Sum(nil)
 
-		postHeaders := map[string]string{
-			"FP-API-KEY":   apiKey,
-			"FP-SIGN":      signStr,
-			"FP-TIMESTAMP": strtm,
-		}
-		postBody := map[string]interface{}{
-			"assembleChain":  assembleChain,
-			"name":           projectName,
-			"settleCurrency": settleCurrency,
-		}
-		fmt.Println("postURL", postURL)
-		fmt.Println("srcStr", srcStr)
-		fmt.Println("signStr", signStr)
-		fmt.Println("POST head:", postHeaders)
-		fmt.Println("POST postBody:", postBody)
-		postResponse, err := client.Post(postURL, postHeaders, postBody)
-		if err != nil {
-			fmt.Println("POST 请求错误:", err)
-		} else {
-			fmt.Println("POST 请求响应:", string(postResponse))
-		}*/
+	// 转为 Base64 编码
+	signStr := base64.StdEncoding.EncodeToString(macHex)
 
+	postHeaders := map[string]string{
+		"FP-API-KEY":   apiKey,
+		"FP-SIGN":      signStr,
+		"FP-TIMESTAMP": strtm,
+	}
+	postBody := map[string]interface{}{
+		"assembleChain":  assembleChain,
+		"name":           projectName,
+		"settleCurrency": settleCurrency,
+	}
+	fmt.Println("postURL", postURL)
+	fmt.Println("srcStr", srcStr)
+	fmt.Println("signStr", signStr)
+	fmt.Println("POST head:", postHeaders)
+	fmt.Println("POST postBody:", postBody)
+	postResponse, err := client.Post(postURL, postHeaders, postBody)
+	if err != nil {
+		fmt.Println("POST 请求错误:", err)
+	} else {
+		fmt.Println("POST 请求响应:", string(postResponse))
+	}
+
+	pplist := Web3TransferReturn{}
+	json.Unmarshal(postResponse, &pplist)
+	fmt.Println("struct :", pplist)
 	/*
 		srcStr1 := "GETapi.satogate.io/project/list?page=1&pageSize=20&projectId=668fa8d267ad544bdc9dea86,dxxxxxx&status=ACTIVE" + strtm
 		signStr1, err := SignMessage(srcStr1)

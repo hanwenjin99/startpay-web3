@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
+	MyCommon "github.com/flipped-aurora/gin-vue-admin/server/model/common"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
 	systemReq "github.com/flipped-aurora/gin-vue-admin/server/model/system/request"
@@ -20,6 +20,187 @@ import (
 const GLOBAL_Fee = 0.04
 const RemittanceFee = 50
 const MaxRemittanceFee = 100000
+
+var WEB3TOKENLIST = map[string][]Web3Chain{
+	"ETH": {
+		{
+			Chain:     "ETH",
+			Chainicon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/eth.png",
+			Symbol:    "ETH",
+			Contract:  "",
+			Icon:      "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/eth.png",
+			Decimals:  18,
+			MinCharge: "1",
+		},
+		{
+			Chain:     "ETH",
+			Chainicon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/eth.png",
+			Symbol:    "USDT",
+			Contract:  "0xdac17f958d2ee523a2206206994597c13d831ec7",
+			Icon:      "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/usdt.png",
+			Decimals:  6,
+			MinCharge: "3000",
+		},
+		{
+			Chain:     "ETH",
+			Chainicon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/eth.png",
+			Symbol:    "USDC",
+			Contract:  "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+			Icon:      "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/usdc.png",
+			Decimals:  6,
+			MinCharge: "3000",
+		},
+	},
+
+	"BNB": {
+		{
+			Chain:     "BSC",
+			Chainicon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/png",
+			Symbol:    "BNB",
+			Contract:  "",
+			Icon:      "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/bnb.png",
+			Decimals:  18,
+			MinCharge: "1",
+		},
+		{
+			Chain:     "BSC",
+			Chainicon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/png",
+			Symbol:    "USDT",
+			Contract:  "0x55d398326f99059ff775485246999027b3197955",
+			Icon:      "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/usdt.png",
+			Decimals:  18,
+			MinCharge: "100",
+		},
+		{
+			Chain:     "BSC",
+			Chainicon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/png",
+			Symbol:    "USDC",
+			Contract:  "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d",
+			Icon:      "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/usdc.png",
+			Decimals:  18,
+			MinCharge: "100",
+		},
+	},
+	"TRON": {
+		{
+			Chain:     "TRON",
+			Chainicon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/TRX.png",
+			Symbol:    "USDT",
+			Contract:  "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",
+			Icon:      "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/usdt.png",
+			Decimals:  6,
+			MinCharge: "1000",
+		},
+		{
+			Chain:     "TRON",
+			Chainicon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/TRX.png",
+			Symbol:    "USDC",
+			Contract:  "TEkxiTehnzSmSe2XqrBj4w32RUN966rdz8",
+			Icon:      "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/usdc.png",
+			Decimals:  6,
+			MinCharge: "1000",
+		},
+	},
+	"POLYGON": {
+		{
+			Chain:     "POLYGON",
+			Chainicon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/MATIC.png",
+			Symbol:    "MATIC",
+			Contract:  "",
+			Icon:      "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/MATIC.png",
+			Decimals:  18,
+			MinCharge: "170",
+		},
+		{
+			Chain:     "POLYGON",
+			Chainicon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/MATIC.png",
+			Symbol:    "USDT",
+			Contract:  "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+			Icon:      "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/usdt.png",
+			Decimals:  6,
+			MinCharge: "100",
+		},
+		{
+			Chain:     "POLYGON",
+			Chainicon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/MATIC.png",
+			Symbol:    "USDC",
+			Contract:  "0x3c499c542cef5e3811e1192ce70d8cc03d5c3359",
+			Icon:      "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/usdc.png",
+			Decimals:  6,
+			MinCharge: "100",
+		},
+	},
+	"BTC": {
+		{
+			Chain:     "BTC",
+			Chainicon: "https://token-talk.oss-cn-shenzhen.aliyuncs.com/icon/wallet-btc.png?x-oss-process=image/resize,w_150",
+			Symbol:    "BTC",
+			Contract:  "",
+			Icon:      "https://token-talk.oss-cn-shenzhen.aliyuncs.com/icon/wallet-btc.png?x-oss-process=image/resize,w_150",
+			Decimals:  8,
+			MinCharge: "0.0005",
+		},
+	},
+}
+
+type GasQuoteList struct {
+	TransferCountGradeInfo []struct {
+		TransferCountGrade int     `json:"transferCountGrade"`
+		GasTotalAmount     float64 `json:"gasTotalAmount"`
+		GasTotalAmountUsd  float64 `json:"gasTotalAmountUsd"`
+		UsdtTotalAmount    float64 `json:"usdtTotalAmount"`
+		UsdtTotalAmountUsd float64 `json:"usdtTotalAmountUsd"`
+	} `json:"transferCountGradeInfo"`
+	GasToken                     string  `json:"gasToken"`
+	GasOnceAmount                float64 `json:"gasOnceAmount"`
+	GasUSDAmount                 float64 `json:"gasUSDAmount"`
+	GasTokenIcon                 string  `json:"gasTokenIcon"`
+	ChainIcon                    string  `json:"chainIcon"`
+	UsdtIcon                     string  `json:"usdtIcon"`
+	MerchantGasBalance           int     `json:"merchantGasBalance"`
+	MerchantGasLeftTransferCount int     `json:"merchantGasLeftTransferCount"`
+}
+
+var GASQUOTELIST = map[string]interface{}{
+	"transferCountGradeInfo": []map[string]interface{}{
+		{
+			"transferCountGrade": 5,
+			"gasTotalAmount":     0.001440,
+			"gasTotalAmountUsd":  4.685306400,
+			"usdtTotalAmount":    4.6872000,
+			"usdtTotalAmountUsd": 4.6872000,
+		},
+		{
+			"transferCountGrade": 20,
+			"gasTotalAmount":     0.005760,
+			"gasTotalAmountUsd":  18.741225600,
+			"usdtTotalAmount":    18.7488000,
+			"usdtTotalAmountUsd": 18.7488000,
+		},
+		{
+			"transferCountGrade": 50,
+			"gasTotalAmount":     0.014400,
+			"gasTotalAmountUsd":  46.853064000,
+			"usdtTotalAmount":    46.8720000,
+			"usdtTotalAmountUsd": 46.8720000,
+		},
+		{
+			"transferCountGrade": 100,
+			"gasTotalAmount":     0.028800,
+			"gasTotalAmountUsd":  93.706128000,
+			"usdtTotalAmount":    93.7440000,
+			"usdtTotalAmountUsd": 93.7440000,
+		},
+	},
+	"gasToken":                     "ETH",
+	"gasOnceAmount":                0.000288,
+	"gasUSDAmount":                 0.937061280,
+	"gasTokenIcon":                 "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/eth.png",
+	"chainIcon":                    "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/eth.png",
+	"usdtIcon":                     "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/usdt.png",
+	"merchantGasBalance":           0,
+	"merchantGasLeftTransferCount": 0,
+}
 
 var WEB3TOKENINFO map[string]Web3Chain = map[string]Web3Chain{
 	"ETH-ETH": {
@@ -262,41 +443,60 @@ func (b *StartpayWeb3Api) GetWalletList(c *gin.Context) {
 	response.OkWithDetailed(WalletResp, "获取钱包成功", c)
 }
 
-// GetUserList
-// @Tags      SysUser
-// @Summary   分页获取用户列表
-// @Security  ApiKeyAuth
-// @accept    application/json
-// @Produce   application/json
-// @Param     data  body      request.PageInfo                                        true  "页码, 每页大小"
-// @Success   200   {object}  response.Response{data=response.PageResult,msg=string}  "分页获取用户列表,返回包括列表,总数,页码,每页数量"
-// @Router    /user/getUserList [post]
-func (b *StartpayWeb3Api) GetUserList(c *gin.Context) {
-	var pageInfo request.PageInfo
-	err := c.ShouldBindJSON(&pageInfo)
+func (b *StartpayWeb3Api) GetWeb3Announcement(c *gin.Context) {
+	var r systemReq.GetCommonPageInfo
+	r.Page = 1
+	r.PageSize = 20
+
+	err := c.ShouldBindJSON(&r)
 	if err != nil {
-		response.FailWithMessage(err.Error(), c)
-		return
+		//response.FailWithMessage(err.Error(), c)
+		global.GVA_LOG.Error("test welcome", zap.Any("err", err.Error()))
+		//return
 	}
-	err = utils.Verify(pageInfo, utils.PageInfoVerify)
-	if err != nil {
-		response.FailWithMessage(err.Error(), c)
-		return
-	}
-	list, total, err := userService.GetUserInfoList(pageInfo)
-	if err != nil {
-		global.GVA_LOG.Error("获取失败!", zap.Error(err))
-		response.FailWithMessage("获取失败", c)
-		return
-	}
-	response.OkWithDetailed(response.PageResult{
-		List:     list,
-		Total:    total,
-		Page:     pageInfo.Page,
-		PageSize: pageInfo.PageSize,
-	}, "获取成功", c)
+
+	war := systemRes.Web3AnnouncementRespons{}
+
+	war.TotalCount = 3
+
+	aa1 := systemRes.Web3AnnouncementInfo{Id: "1", Title: "2023年8月StartPay 品牌正式启动", Content: "欢迎有识之士加入", Time: "2024-01-18 15:18:02"}
+	aa2 := systemRes.Web3AnnouncementInfo{Id: "1", Title: "2024年4月StartPay 启动web3 2B业务", Content: "给予跨海企业跨境业务支持", Time: "2024-03-18 15:18:02"}
+	war.AnnouncementList = append(war.AnnouncementList, aa1)
+	war.AnnouncementList = append(war.AnnouncementList, aa2)
+	aa3 := systemRes.Web3AnnouncementInfo{Id: "1", Title: "2024年8月StartPay 期待web3业务正式上线", Content: "欢迎欢迎!!!!!", Time: "2024-07-18 15:18:02"}
+	war.AnnouncementList = append(war.AnnouncementList, aa3)
+
+	response.OkWithDetailed(war, "获取account成功", c)
 }
 
+func (b *StartpayWeb3Api) GetWeb3Dashboard(c *gin.Context) {
+	userId := utils.GetUserID(c)
+
+	AccountReturn, err := StartpayWeb3Service.GetAccountInfo(userId)
+	if err != nil {
+		global.GVA_LOG.Error("获取account失败!", zap.Error(err))
+		response.FailWithDetailed("获取account失败", "获取account失败", c)
+		return
+	}
+	aacountResp := systemRes.Web3Dashboard{}
+	totalUsdPrice := float64(0)
+	for _, avalue := range AccountReturn {
+		Balance, _ := strconv.ParseFloat(avalue.Balance, 64)
+		UsdPrice, _ := strconv.ParseFloat(avalue.UsdtPrice, 64)
+		totalUsdPrice += UsdPrice * Balance
+	}
+	aacountResp.AssetValuationAmount = totalUsdPrice
+	aacountResp.AssetValuationCurrency = "USTD"
+	aacountResp.TotalDepositAmountToday = 0
+	aacountResp.TotalDepositAmountYesterday = 0
+	aacountResp.TotalDepositAmount7Days = 0
+	aacountResp.TotalDepositAmount30Days = 0
+	aacountResp.TotalWithdrawAmountToday = 0
+	aacountResp.TotalWithdrawAmountYesterday = 0
+	aacountResp.TotalWithdrawAmount7Days = 0
+	aacountResp.TotalWithdrawAmount30Days = 0
+	response.OkWithDetailed(aacountResp, "获取account成功", c)
+}
 func (b *StartpayWeb3Api) GetAccountInfo(c *gin.Context) {
 	userId := utils.GetUserID(c)
 
@@ -309,19 +509,23 @@ func (b *StartpayWeb3Api) GetAccountInfo(c *gin.Context) {
 
 	aacountResp := systemRes.GetAccountInfoRespons{}
 
-	for akey, avalue := range WEB3TOKENINFO {
+	for _, avalue := range AccountReturn {
 		accountres := systemRes.Web3AccountInfo{}
-		if data, OK := AccountReturn[akey]; OK {
-			accountres.Balance, _ = strconv.ParseFloat(data.Balance, 64)
-			accountres.UsdPrice = 0
-			accountres.AmountUsd = accountres.UsdPrice * accountres.Balance
-			accountres.Address = data.Address
-		}
+		accountres.Balance, _ = strconv.ParseFloat(avalue.Balance, 64)
+		accountres.UsdPrice, _ = strconv.ParseFloat(avalue.UsdtPrice, 64)
+		accountres.AmountUsd = accountres.UsdPrice * accountres.Balance
+		accountres.Address = avalue.Address
+		accountres.WalletName = avalue.Name
+
+		keys := avalue.Chain + "-" + avalue.Currency
+		SymbolInfo := WEB3TOKENINFO[keys]
+
 		accountres.Chain = avalue.Chain
-		accountres.Currency = avalue.Symbol
-		accountres.ChainIcon = avalue.Chainicon
-		accountres.CurrencyIcon = avalue.Icon
-		accountres.CurrencyName = avalue.Symbol
+		accountres.ID = avalue.Id
+		accountres.Currency = avalue.Currency
+		accountres.ChainIcon = SymbolInfo.Chainicon
+		accountres.CurrencyIcon = SymbolInfo.Icon
+		accountres.CurrencyName = SymbolInfo.Symbol
 		accountres.WithdrawEnable = true
 		accountres.RemittanceFeeAmount = RemittanceFee
 		accountres.WithdrawFeeBoundAmount = MaxRemittanceFee
@@ -339,21 +543,118 @@ func (b *StartpayWeb3Api) GetAccountInfo(c *gin.Context) {
 }
 
 func (b *StartpayWeb3Api) GetChainListInfo(c *gin.Context) {
-	ChainReturn, err := StartpayWeb3Service.GetChainListInfo()
-	if err != nil {
-		global.GVA_LOG.Error("获取链列表失败!", zap.Error(err))
-		response.FailWithDetailed("获取链列表失败!", "获取链列表失败!", c)
-		return
+	chainList := make([]systemRes.Web3ChainListRespons, 0)
+	for key, value := range MyCommon.WEB3CHAINLIST {
+		chainInfo := systemRes.Web3ChainListRespons{Name: key, Icon: value}
+		chainList = append(chainList, chainInfo)
 	}
-	response.OkWithDetailed(ChainReturn.Data, "获取链列表成功", c)
+	response.OkWithDetailed(chainList, "获取链列表成功", c)
+}
+
+func (b *StartpayWeb3Api) GetWeb3Quote(c *gin.Context) {
+	response.OkWithDetailed(GASQUOTELIST, "get quote OK", c)
+}
+
+func (b *StartpayWeb3Api) GetTokenListInfo(c *gin.Context) {
+	var r systemReq.GetTokenInfoReq
+	err := c.ShouldBindJSON(&r)
+	if err != nil {
+		//response.FailWithMessage(err.Error(), c)
+		global.GVA_LOG.Error("test welcome", zap.Any("err", err.Error()))
+		//return
+	}
+	TokenList := make([]systemRes.Web3ChainListRespons, 0)
+	if r.Chain != "" {
+		if data, ok := WEB3TOKENLIST[r.Chain]; ok {
+			for _, value := range data {
+				tokenInfo := systemRes.Web3ChainListRespons{Name: value.Symbol, Icon: value.Icon}
+				TokenList = append(TokenList, tokenInfo)
+			}
+		}
+
+	} else {
+		for key, value := range MyCommon.WEB3TOKENLISTAll {
+			tokenInfo := systemRes.Web3ChainListRespons{Name: key, Icon: value}
+			TokenList = append(TokenList, tokenInfo)
+		}
+	}
+
+	response.OkWithDetailed(TokenList, "获取token列表成功", c)
 }
 
 func (b *StartpayWeb3Api) GetDepositAddress(c *gin.Context) {
 
 	//userId := utils.GetUserID(c)
 }
-func (b *StartpayWeb3Api) GetAdepositOrder(c *gin.Context) {
-	//userId := utils.GetUserID(c)
+
+func (b *StartpayWeb3Api) Web3TransferCreate(c *gin.Context) {
+
+	var r systemReq.CreateTransferRequest
+	err := c.ShouldBindJSON(&r)
+	if err != nil {
+		global.GVA_LOG.Error("Web3TransferCreate ShouldBindJSON fail", zap.Any("err", err.Error()))
+	}
+
+	/*err = utils.Verify(pageInfo, utils.PageInfoVerify)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}*/
+
+	global.GVA_LOG.Error("Web3TransferCreate web3 db before", zap.Any("Web3TransferCreate", r))
+	userId := utils.GetUserID(c)
+
+	data, err := StartpayWeb3Service.Web3TransferCreate(userId, r)
+	if err != nil {
+		global.GVA_LOG.Error("转账失败!", zap.Error(err))
+		response.FailWithMessage("转账失败", c)
+		return
+	}
+	response.OkWithDetailed(data, "转账成功", c)
+}
+
+func (b *StartpayWeb3Api) Web3TransferList(c *gin.Context) {
+
+	var r systemReq.GetWeb3Requst
+	r.Page = 1
+	r.PageSize = 20
+	err := c.ShouldBindJSON(&r)
+	if err != nil {
+		global.GVA_LOG.Error("xxx ShouldBindJSON fail", zap.Any("err", err.Error()))
+	}
+
+	global.GVA_LOG.Error("GetbankAccountList web3 db before", zap.Any("GetbankAccountList", r))
+	userId := utils.GetUserID(c)
+	list, err := StartpayWeb3Service.Web3TransferList(userId, r)
+
+	if err != nil {
+		global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		response.FailWithMessage("获取失败", c)
+		return
+	}
+
+	response.OkWithDetailed(list, "获取成功", c)
+}
+
+func (b *StartpayWeb3Api) GetdepositOrder(c *gin.Context) {
+	var r systemReq.GetWeb3Requst
+	r.Page = 1
+	r.PageSize = 20
+	err := c.ShouldBindJSON(&r)
+	if err != nil {
+		global.GVA_LOG.Error("xxx ShouldBindJSON fail", zap.Any("err", err.Error()))
+	}
+
+	global.GVA_LOG.Error("GetbankAccountList web3 db before", zap.Any("GetbankAccountList", r))
+	userId := utils.GetUserID(c)
+	list, err := StartpayWeb3Service.Web3TransferList(userId, r)
+
+	if err != nil {
+		global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		response.FailWithMessage("获取失败", c)
+		return
+	}
+	response.OkWithDetailed(list, "获取成功", c)
 }
 
 func (b *StartpayWeb3Api) GetbankAccountList(c *gin.Context) {
@@ -486,6 +787,7 @@ func (b *StartpayWeb3Api) UserContactList(c *gin.Context) {
 	for _, uwvalue := range list {
 		uds := systemRes.UserDEsposit{}
 		uds.Chain = uwvalue.Chain
+		uds.ChainIcon = MyCommon.WEB3CHAINLIST[uwvalue.Chain]
 		uds.Name = uwvalue.Name
 		uds.Id = strconv.FormatInt(int64(uwvalue.ID), 10)
 		uds.Address = uwvalue.Address

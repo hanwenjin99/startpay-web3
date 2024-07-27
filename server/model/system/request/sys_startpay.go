@@ -13,6 +13,10 @@ type GetCommonPageInfo struct {
 	PageSize int `json:"pageSize" example:"pageSize"`
 }
 
+type GetTokenInfoReq struct {
+	Chain string `json:"chain" example:"chain"`
+}
+
 type CreateBank struct {
 	BankCode        string `json:"bankCode" example:"bankCode"`
 	BankTitle       string `json:"bankTitle" example:"bankTitle"`
@@ -76,4 +80,28 @@ type UpdateWithdrawOrderRequst struct {
 	Status      string `json:"status"`
 	Memo        string `json:"memo"`
 	PayPassword string `json:"payPassword"`
+}
+
+type CreateTransferRequest struct {
+	Amount      string  `json:"amount"`
+	Asset       string  `json:"asset"`
+	Chain       string  `json:"chain"`
+	EmailCode   string  `json:"emailCode"`
+	GasDefault  float64 `json:"gasDefault"`
+	GoogleCode  string  `json:"googleCode"`
+	PayPassword string  `json:"payPassword"`
+	ToAddress   string  `json:"toAddress"`
+	ID          string  `json:"id"`
+}
+
+type GetWeb3Requst struct {
+	PageSize  int    `json:"pageSize"`
+	Page      int    `json:"page"`
+	Search1   string `json:"Search1"`
+	Search2   string `json:"Search2"`
+	Currency  string `json:"currency"`
+	Chain     string `json:"chain"`
+	ID        string `json:"id"`
+	StartTime string `json:"startTime"`
+	EndTime   string `json:"startTime"`
 }

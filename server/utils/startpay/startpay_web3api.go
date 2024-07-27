@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	systemReq "github.com/flipped-aurora/gin-vue-admin/server/model/system/request"
 	"go.uber.org/zap"
 	"strconv"
 	"time"
@@ -150,6 +151,141 @@ func (s *StartpayWeb3Api) GetChainListInfo() (*Web3ChainListRespons, error) {
 	return &chainlist, nil
 }
 
+func (s *StartpayWeb3Api) Web3TransferCreate(requst systemReq.CreateTransferRequest) (*Web3CreatetransferReturn, error) {
+	currentTime := time.Now()
+	timestamp := currentTime.Unix()
+	strtm := fmt.Sprintf("%d", timestamp)
+
+	ApiKey := s.ApiKey
+	Host := global.GVA_CONFIG.StartpayWeb3.Host
+	client := NewHttpClient()
+
+	srcStr := "GET" + Host + "/transaction/transfer?amount=" + requst.Amount + "&asset=" + requst.Asset + "&chain=" + requst.Chain + "&toAddress=" + requst.ToAddress + strtm
+	signStr, err := s.SignMessage2(srcStr)
+
+	if err != nil {
+		fmt.Println("SignMessage err")
+	}
+	postURL := "https://" + Host + "/transaction/transfer"
+
+	postHeaders := map[string]string{
+		"FP-API-KEY":   ApiKey,
+		"FP-SIGN":      signStr,
+		"FP-TIMESTAMP": strtm,
+	}
+	postBody := map[string]interface{}{
+		"amount":    requst.Amount,
+		"asset":     requst.Asset,
+		"chain":     requst.Chain,
+		"toAddress": requst.ToAddress,
+	}
+
+	postResponse, err := client.Post(postURL, postHeaders, postBody)
+	if err != nil {
+		fmt.Println("POST 请求错误:", err)
+	} else {
+		fmt.Println("POST 请求响应:", string(postResponse))
+	}
+
+	transferRecord := Web3CreatetransferReturn{}
+	json.Unmarshal(postResponse, &transferRecord)
+	return &transferRecord, nil
+}
+
+func (s *StartpayWeb3Api) GetDepositOrder(projectid string, requst systemReq.GetWeb3Requst) (*Web3DepositListReturn, error) {
+	currentTime := time.Now()
+	timestamp := currentTime.Unix()
+	strtm := fmt.Sprintf("%d", timestamp)
+
+	ApiKey := s.ApiKey
+	Host := global.GVA_CONFIG.StartpayWeb3.Host
+	client := NewHttpClient()
+
+	pagenums := strconv.Itoa(requst.Page)
+	pagesizes := strconv.Itoa(requst.PageSize)
+
+	srcStr := "GET" + Host + "/wallet/deposit/history?page=" + pagenums + "&pageSize=" + pagesizes +
+		"&address=" + projectid + "&chain=" + requst.Chain + "&token=" + requst.Currency + strtm
+	signStr, err := s.SignMessage2(srcStr)
+
+	if err != nil {
+		fmt.Println("SignMessage err")
+	}
+
+	getHeaders := map[string]string{
+		"FP-API-KEY":   ApiKey,
+		"FP-SIGN":      signStr,
+		"FP-TIMESTAMP": strtm,
+	}
+	getURL := "https://" + Host + "/wallet/deposit/history?page=" + pagenums + "&pageSize=" + pagesizes +
+		"&address=" + projectid + "&chain=" + requst.Chain + "&token=" + requst.Currency
+
+	global.GVA_LOG.Error("test web3",
+		zap.Any("signStr", signStr),
+		zap.Any("srcStr", srcStr),
+		zap.Any("getURL", getURL),
+		zap.Any("ApiKey", ApiKey),
+	)
+
+	getResponse, err := client.Get(getURL, getHeaders)
+	if err != nil {
+		fmt.Println("GEt 请求错误:", err)
+	} else {
+		fmt.Println("GEt 请求响应:", string(getResponse))
+	}
+
+	depositlist := Web3DepositListReturn{}
+	json.Unmarshal(getResponse, &depositlist)
+	return &depositlist, nil
+}
+
+func (s *StartpayWeb3Api) Web3TransferList(projectid string, requst systemReq.GetWeb3Requst) (*Web3ListtransferReturn, error) {
+	currentTime := time.Now()
+	timestamp := currentTime.Unix()
+	strtm := fmt.Sprintf("%d", timestamp)
+
+	ApiKey := s.ApiKey
+	Host := global.GVA_CONFIG.StartpayWeb3.Host
+	client := NewHttpClient()
+
+	pagenums := strconv.Itoa(requst.Page)
+	pagesizes := strconv.Itoa(requst.PageSize)
+
+	srcStr := "GET" + Host + "/wallet/transfer/history?page=" + pagenums + "&pageSize=" + pagesizes +
+		"&projectId=" + projectid + "&chain=" + requst.Chain + "&token=" + requst.Currency + strtm
+	signStr, err := s.SignMessage2(srcStr)
+
+	if err != nil {
+		fmt.Println("SignMessage err")
+	}
+
+	getHeaders := map[string]string{
+		"FP-API-KEY":   ApiKey,
+		"FP-SIGN":      signStr,
+		"FP-TIMESTAMP": strtm,
+	}
+	getURL := "https://" + Host + "/wallet/transfer/history?page=" + pagenums + "&pageSize=" + pagesizes +
+		"&projectId=" + projectid + "&chain=" + requst.Chain + "&token=" + requst.Currency
+
+	global.GVA_LOG.Error("test web3",
+		zap.Any("signStr", signStr),
+		zap.Any("srcStr", srcStr),
+		zap.Any("getURL", getURL),
+		zap.Any("ApiKey", ApiKey),
+	)
+
+	getResponse, err := client.Get(getURL, getHeaders)
+	if err != nil {
+		fmt.Println("GEt 请求错误:", err)
+	} else {
+		fmt.Println("GEt 请求响应:", string(getResponse))
+	}
+
+	transferlist := Web3ListtransferReturn{}
+	json.Unmarshal(getResponse, &transferlist)
+	return &transferlist, nil
+}
+
 func (s *StartpayWeb3Api) GetAccountInfo() (*GetAccountInfoRespons, error) {
 	currentTime := time.Now()
 	timestamp := currentTime.Unix()
@@ -178,7 +314,6 @@ func (s *StartpayWeb3Api) GetAccountInfo() (*GetAccountInfoRespons, error) {
 		zap.Any("srcStr", srcStr),
 		zap.Any("getURL", getURL),
 		zap.Any("ApiKey", ApiKey),
-		zap.Any("ApiSecret", s.ApiSecret),
 	)
 
 	getResponse, err := client.Get(getURL, getHeaders)
