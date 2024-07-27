@@ -12,6 +12,11 @@ export const useCommonStore = defineStore('common', () => {
   // 页面初始化数据
   const pageInitPay = ref({}) //提现页面
   const singleTransfer = ref({}) // 单笔转账页面
+  const propertyToActionInitSelect = ref('') // 资产跳收款 | 转账 ｜ 支付页面
+
+  const SetPropertyToActionInitSelect = (newVal) => {
+    propertyToActionInitSelect.value = newVal
+  }
 
   const ChangePageInitPay = (newVal) => {
     pageInitPay.value = { ...newVal }
@@ -67,6 +72,8 @@ export const useCommonStore = defineStore('common', () => {
     ChangePageInitPay,
     pageInitPay,
     singleTransfer,
-    ChangeSingleTransfer
+    ChangeSingleTransfer,
+    propertyToActionInitSelect,
+    SetPropertyToActionInitSelect
   }
 })

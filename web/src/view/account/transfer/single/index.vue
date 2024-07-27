@@ -287,6 +287,11 @@ onMounted(() => {
       ...commonStore.singleTransfer,
       isSelectPayee: false
     })
+  } else if (commonStore.propertyToActionInitSelect) {
+    // 初始化默认选择币种
+    selectOneCurrency.value = commonStore.propertyToActionInitSelect
+    // 清空数据
+    commonStore.SetPropertyToActionInitSelect('')
   }
 })
 </script>

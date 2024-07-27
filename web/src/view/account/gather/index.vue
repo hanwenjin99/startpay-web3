@@ -4,13 +4,13 @@
 
     <!-- 选择币种组件 -->
     <span class="selectTitle">币种</span>
-    <SelectCurrency @handle-select-callback="showAddress" />
+    <SelectCurrency :init-data="selectOneCurrency" @handle-select-callback="showAddress" />
 
     <!-- 地址 -->
     <span class="smallTitle">地址</span>
     <section class="address">
       <div class="qrCode">
-        <canvas ref="qrCanvas" class="canvas" />
+        <canvas ref="qrCanvas" />
       </div>
       <span class="line" />
       <div class="addressBottom">
@@ -106,12 +106,14 @@ import QRCode from 'qrcode'
 import dayjs from 'dayjs'
 import { useRouter } from 'vue-router'
 
+import { useCommonStore } from '@/pinia/modules/common'
 import { getDepositOrderList } from '@/api/account'
 import SelectCurrency from '@/components/selectCurrency/index.vue'
 import { copyMessage } from '@/utils/common.js'
 
 const router = useRouter()
 const qrCanvas = ref(null)
+const commonStore = useCommonStore()
 
 const recordData = ref([])
 const total = ref(0)
@@ -121,7 +123,7 @@ const selectOneCurrency = ref({})
 // 根据选择的币种 - 展示地址信息
 const showAddress = (selectInfo) => {
   selectOneCurrency.value = selectInfo
-  QRCode.toCanvas(qrCanvas.value, selectInfo.address ?? '', error => {
+  QRCode.toCanvas(qrCanvas.value, selectInfo.address ?? '', { width: 248, height: 248, margin: 0 }, error => {
     if (error) console.error(error);
   });
 }
@@ -142,6 +144,15 @@ const handleChangePage = (page) => {
 onMounted(() => {
   // 初始化查询收款记录
   queryDepositList(1)
+
+  if (commonStore.propertyToActionInitSelect) {
+    // 初始化默认选择币种
+    selectOneCurrency.value = commonStore.propertyToActionInitSelect
+    // 清空数据
+    commonStore.SetPropertyToActionInitSelect('')
+    // 展示默认选择的币种地址
+    showAddress(selectOneCurrency.value)
+  }
 });
 </script>
 
@@ -193,11 +204,6 @@ onMounted(() => {
       width: 280px;
       height: 280px;
       padding: 16px;
-
-      .canvas {
-        width: 248px !important;
-        height: 248px !important;
-      }
     }
 
     .line {

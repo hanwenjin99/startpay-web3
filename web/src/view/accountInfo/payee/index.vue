@@ -100,8 +100,7 @@ const selectPayee = (item) => {
   commonStore.ChangeSingleTransfer({
     ...commonStore.singleTransfer,
     toAddress: item.address,
-    isSelectPayee: true,
-    chainQuery: '' // 重置自带的过滤条件
+    isSelectPayee: true
   })
   router.push('/layout/account/transfer/single')
 }
@@ -146,6 +145,11 @@ onMounted(() => {
     // 初始化带搜索条件
     chain.value = commonStore.singleTransfer?.chainQuery
     queryList({ chain: chain.value })
+    // 重置自带的过滤条件
+    commonStore.ChangeSingleTransfer({
+      ...commonStore.singleTransfer,
+      chainQuery: ''
+    })
   } else {
     queryList()
   }
