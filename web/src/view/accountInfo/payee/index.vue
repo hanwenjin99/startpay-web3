@@ -73,7 +73,7 @@
               <el-button icon="delete" type="danger" circle />
             </template>
           </el-popconfirm>
-          <el-button color="#000" plain round @click.stop="selectPayee">转账</el-button>
+          <el-button color="#000" plain round @click.stop="selectPayee(scope.row)">转账</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -96,7 +96,13 @@ const chain = ref('')
 
 const list = ref([])
 
-const selectPayee = () => {
+const selectPayee = (item) => {
+  commonStore.ChangeSingleTransfer({
+    ...commonStore.singleTransfer,
+    toAddress: item.address,
+    isSelectPayee: true,
+    chainQuery: '' // 重置自带的过滤条件
+  })
   router.push('/layout/account/transfer/single')
 }
 
@@ -136,7 +142,14 @@ onMounted(() => {
   if (commonStore.chainsList.length === 0) {
     commonStore.GetChainsList()
   }
-  queryList()
+  if (commonStore.singleTransfer?.chainQuery) {
+    // 初始化带搜索条件
+    chain.value = commonStore.singleTransfer?.chainQuery
+    queryList({ chain: chain.value })
+  } else {
+    queryList()
+  }
+  
 })
 </script>
 

@@ -121,6 +121,9 @@ const selectOneCurrency = ref({})
 // 根据选择的币种 - 展示地址信息
 const showAddress = (selectInfo) => {
   selectOneCurrency.value = selectInfo
+  QRCode.toCanvas(qrCanvas.value, selectInfo.address ?? '', error => {
+    if (error) console.error(error);
+  });
 }
 
 const queryDepositList = async (page) => {
@@ -137,9 +140,6 @@ const handleChangePage = (page) => {
 }
 
 onMounted(() => {
-  QRCode.toCanvas(qrCanvas.value, selectOneCurrency.value.address, error => {
-    if (error) console.error(error);
-  });
   // 初始化查询收款记录
   queryDepositList(1)
 });

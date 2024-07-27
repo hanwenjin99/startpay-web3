@@ -50,6 +50,18 @@ export const postBackendQuote = (chain) => {
   })
 }
 
+// 创建单笔转账
+export const createSingleTransfer = (params) => {
+  return service({
+    url: '/web3/create_transfer',
+    method: 'post',
+    data: JSON.stringify(params),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+}
+
 // 查询单笔转账记录
 export const getTransferList = (params) => {
   return service({

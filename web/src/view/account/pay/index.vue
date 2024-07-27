@@ -161,7 +161,6 @@ const canSubmit = computed(() => {
 })
 
 // 文本框输入过滤
-// 文本框输入
 const handleChange = (val) => {
   // 过滤非数字或者小数的值
   creatForm.value.amount = val.replace(/[^\d.]/g, "")
