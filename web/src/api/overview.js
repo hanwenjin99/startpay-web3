@@ -1,4 +1,5 @@
 // 获取总览数据
+import qs from 'qs'
 import service from '@/utils/request'
 
 // 获取估值统计数据
@@ -12,14 +13,10 @@ export const getDashboard = () => {
 // 获取公告列表
 export const getAnnouncementList = () => {
   return service({
-    url: '/web3/announcement',
-    method: 'get',
-    data: JSON.stringify({
+    url: `/web3/announcement?${qs.stringify({
       page: 1,
       pageSize: 5
-    }),
-    headers: {
-      'Content-Type': 'application/json'
-    }
+    })}`,
+    method: 'get'
   })
 }

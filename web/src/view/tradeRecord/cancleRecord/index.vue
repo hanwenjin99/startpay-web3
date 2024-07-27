@@ -143,15 +143,16 @@ const resetQuery = () => {
 }
 
 onMounted(() => {
-  if (commonStore.chainsList.length === 0) {
-    commonStore.GetChainsList()
-  }
+  // TODO - 取消记录初始化不获取
+  // if (commonStore.chainsList.length === 0) {
+  //   commonStore.GetChainsList()
+  // }
 
-  if (commonStore.currencyOptions.length === 0) {
-    commonStore.QueryCurrencyOptions()
-  }
+  // if (commonStore.currencyOptions.length === 0) {
+  //   commonStore.QueryCurrencyOptions()
+  // }
 
-  queryList({ page: 1 })
+  // queryList({ page: 1 })
 })
 </script>
 
