@@ -218,15 +218,28 @@ const handleSelect = (selectInfo) => {
   creatForm.value.asset = selectInfo.currency // 币种
   creatForm.value.chain = selectInfo.chain // 链类型
   creatForm.value.id = selectInfo.id // 币种id
+
+  // 单笔转账页面的记录查询需要带上选择的币种信息
+  queryTransferList({
+    page: 1,
+    currency: selectInfo.currency,
+    chain: selectInfo.chain,
+    id: selectInfo.id
+  })
 }
 
 // 翻页
 const handleChangePage = (page) => {
-  queryTransferList(page)
+  queryTransferList({
+    page,
+    currency: selectOneCurrency.value.currency,
+    chain: selectOneCurrency.value.chain,
+    id: selectOneCurrency.value.id
+  })
 }
 
-const queryTransferList = async (page) => {
-  const { code, data = {} } = await getTransferList({ page, pageSize: 10 })
+const queryTransferList = async (params) => {
+  const { code, data = {} } = await getTransferList({ ...params, pageSize: 10 })
   if (code === 0) {
     recordData.value = data.content ?? []
     recordTotal.value = data.total_pages ?? 0
@@ -269,14 +282,18 @@ const submitCreate = async () => {
     if (code === 0) {
       ElMessage.success('创建转账成功')
       // 刷新列表数据
-      queryTransferList(1)
+      queryTransferList({
+        page: 1,
+        currency: selectOneCurrency.value.currency,
+        chain: selectOneCurrency.value.chain,
+        id: selectOneCurrency.value.id
+      })
     }
   })
 
 }
 
 onMounted(() => {
-  queryTransferList(1)
   // 如果是选择收款人返回的 - 填充数据
   if (commonStore.singleTransfer?.isSelectPayee) {
     // 选择的币种信息

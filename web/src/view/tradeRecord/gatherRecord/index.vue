@@ -4,12 +4,20 @@
 
     <!-- 搜索 -->
     <section class="search">
+      <el-input
+        v-model="contactSearch"
+        placeholder="地址,Txid"
+        size="large"
+        style="width: 568px;"
+        prefix-icon="search"
+      />
+
       <!-- 网络 -->
       <el-select
         v-model="chain"
         clearable
         placeholder="网络"
-        style="width: 100px"
+        style="width: 100px; margin: 0 20px"
         size="large"
       >
         <el-option
@@ -108,7 +116,8 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="商户订单id"></el-table-column>
+      <!-- TODO - 不展示商户订单id -->
+      <!-- <el-table-column label="商户订单id" /> -->
     </el-table>
 
     <!-- 分页 -->
@@ -133,6 +142,7 @@ import { useCommonStore } from '@/pinia/modules/common'
 
 const commonStore = useCommonStore()
 
+const contactSearch = ref('')
 const chain = ref('')
 const currency = ref('')
 
@@ -154,6 +164,10 @@ const handleChangePage = (page) => {
   const params = { page }
   if (chain.value) params.chain = chain.value
   if (currency.value) params.currency = currency.value
+  if (contactSearch.value) {
+    params.contactSearch = contactSearch.value
+    params.txid = contactSearch.value
+  }
   queryList(params)
 }
 
@@ -163,6 +177,10 @@ const paramsQuery = () => {
   const params = { page: 1 }
   if (chain.value) params.chain = chain.value
   if (currency.value) params.currency = currency.value
+  if (contactSearch.value) {
+    params.contactSearch = contactSearch.value
+    params.txid = contactSearch.value
+  }
   queryList(params)
 }
 
@@ -171,6 +189,7 @@ const resetQuery = () => {
   currentPage.value = 1
   chain.value = ''
   currency.value = ''
+  contactSearch.value = ''
   queryList({ page: 1 })
 }
 

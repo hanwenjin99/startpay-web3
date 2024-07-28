@@ -71,7 +71,7 @@
     <!-- 提现记录 -->
     <section class="record">
       <div class="title">
-        <span>记录</span>
+        <span>提现记录</span>
         <el-button link @click="router.push('/layout/tradeRecord/payRecord')">查看全部</el-button>
       </div>
 
@@ -212,10 +212,19 @@ const handleSelect = (selectInfo) => {
   // 选择的币种信息 - 提交时入参
   creatForm.value.chain = selectInfo.chain
   creatForm.value.currency = selectInfo.currency
+
+  // 提现页面的记录查询需要带上选择的币种信息
+  queryList({
+    page: 1,
+    currency: selectInfo.currency,
+    chain: selectInfo.chain,
+    id: selectInfo.id
+  })
+
 }
 
-const queryList = async (page) => {
-  const { code, data = {} } = await getWithdrawOrderList({ page, pageSize: 10 })
+const queryList = async (params) => {
+  const { code, data = {} } = await getWithdrawOrderList({ ...params, pageSize: 10 })
   if (code === 0) {
     recordData.value = data.content ?? []
     total.value = data.total_pages ?? 0
@@ -224,7 +233,12 @@ const queryList = async (page) => {
 
 // 分页请求
 const handleChangePage = (page) => {
-  queryList(page)
+  queryList({
+    page,
+    currency: selectOneCurrency.value.currency,
+    chain: selectOneCurrency.value.chain,
+    id: selectOneCurrency.value.id
+  })
 }
 
 // 创建提现提交
@@ -252,7 +266,12 @@ const submitCreate = () => {
     if (code === 0) {
       ElMessage.success('创建提现成功')
       // 刷新列表数据
-      queryList(1)
+      queryList({
+        page: 1,
+        currency: selectOneCurrency.value.currency,
+        chain: selectOneCurrency.value.chain,
+        id: selectOneCurrency.value.id
+      })
     }
   })
 }
@@ -277,12 +296,16 @@ const revokeWithdraw = async (item) => {
   if (code === 0) {
     ElMessage.success('撤销提现成功！')
     // 刷新列表
-    queryList(1)
+    queryList({
+      page: 1,
+      currency: selectOneCurrency.value.currency,
+      chain: selectOneCurrency.value.chain,
+      id: selectOneCurrency.value.id
+    })
   }
 }
 
 onMounted(() => {
-  queryList(1)
   // 如果是选择银行账户返回 - 填充数据
   if (commonStore.pageInitPay?.isSelectedBankAccount) {
     // 选择的币种信息

@@ -126,10 +126,17 @@ const showAddress = (selectInfo) => {
   QRCode.toCanvas(qrCanvas.value, selectInfo.address ?? '', { width: 248, height: 248, margin: 0 }, error => {
     if (error) console.error(error);
   });
+  // 收款页面的记录查询需要带上选择的币种信息
+  queryDepositList({
+    page: 1,
+    currency: selectInfo.currency,
+    chain: selectInfo.chain,
+    id: selectInfo.id
+  })
 }
 
-const queryDepositList = async (page) => {
-  const { code, data } = await getDepositOrderList({ depositOrderType: 'ACCOUNT', pageSize: 10, page })
+const queryDepositList = async (params) => {
+  const { code, data } = await getDepositOrderList({ depositOrderType: 'ACCOUNT', pageSize: 10, ...params })
   if (code === 0) {
     recordData.value = data.content ?? []
     total.value = data.total_pages ?? 0
@@ -138,13 +145,16 @@ const queryDepositList = async (page) => {
 
 // 列表翻页
 const handleChangePage = (page) => {
-  queryDepositList(page)
+  // 收款页面的记录查询需要带上选择的币种信息
+  queryDepositList({
+    page,
+    currency: selectOneCurrency.value.currency,
+    chain: selectOneCurrency.value.chain,
+    id: selectOneCurrency.value.id
+  })
 }
 
 onMounted(() => {
-  // 初始化查询收款记录
-  queryDepositList(1)
-
   if (commonStore.propertyToActionInitSelect) {
     // 初始化默认选择币种
     selectOneCurrency.value = commonStore.propertyToActionInitSelect
