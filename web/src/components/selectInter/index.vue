@@ -43,7 +43,7 @@ const selectInfo = ref(commonStore.chainsList[0])
 const dialogVisible = ref(false)
 
 const handleChange = (key) => {
-  selectInfo.value = commonStore.chainsList.filter(item => item.chain === key)[0]
+  selectInfo.value = commonStore.chainsList.filter(item => item.name === key)[0]
   emits('handleSelectChain', selectInfo.value)
   dialogVisible.value = false
 }
