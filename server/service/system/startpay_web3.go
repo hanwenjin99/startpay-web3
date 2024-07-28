@@ -149,15 +149,23 @@ func (s *StartpayWeb3Service) Web3TransferCreate(userId uint, request systemReq.
 func (s *StartpayWeb3Service) Web3TransferList(userId uint, request systemReq.GetWeb3Requst) (*systemRes.TransferListRespons, error) {
 	var projectlist []system.SysProject
 
-	_, err := global.GVA_DB.Where("user_id = ? ", userId).Find(&projectlist).Rows()
-
-	if err != nil {
-		return nil, errors.New("查询用户交易密钥失败")
+	if request.ID != "" {
+		_, err := global.GVA_DB.Where("pro_uuid = ? ", request.ID).Find(&projectlist).Rows()
+		if err != nil {
+			return nil, errors.New("查询用户交易密钥失败")
+		}
+	} else {
+		_, err := global.GVA_DB.Where("user_id = ? ", userId).Find(&projectlist).Rows()
+		if err != nil {
+			return nil, errors.New("查询用户交易密钥失败")
+		}
 	}
 
 	transferRes := systemRes.TransferListRespons{}
 	for _, pvalue := range projectlist {
 		web3 := web3api.StartpayWeb3Api{ApiKey: pvalue.AppKey, ApiSecret: pvalue.AppSecret}
+		request.Currency = pvalue.SettleCurrency
+		request.Chain = pvalue.AssembleChain
 		webrResp, err := web3.Web3TransferList(pvalue.ProUuid, request)
 		if err != nil {
 			continue
@@ -239,15 +247,24 @@ func (s *StartpayWeb3Service) GetDepositAddress(userId uint, Page int, PageSize 
 func (s *StartpayWeb3Service) GetDepositOrder(userId uint, request systemReq.GetWeb3Requst) (*systemRes.DepositOrederRespons, error) {
 	var projectlist []system.SysProject
 
-	_, err := global.GVA_DB.Where("user_id = ? ", userId).Find(&projectlist).Rows()
-
-	if err != nil {
-		return nil, errors.New("查询用户交易密钥失败")
+	if request.ID != "" {
+		_, err := global.GVA_DB.Where("pro_uuid = ? ", request.ID).Find(&projectlist).Rows()
+		if err != nil {
+			return nil, errors.New("查询用户交易密钥失败")
+		}
+	} else {
+		_, err := global.GVA_DB.Where("user_id = ? ", userId).Find(&projectlist).Rows()
+		if err != nil {
+			return nil, errors.New("查询用户交易密钥失败")
+		}
 	}
 
 	depositRes := systemRes.DepositOrederRespons{}
 	for _, pvalue := range projectlist {
 		web3 := web3api.StartpayWeb3Api{ApiKey: pvalue.AppKey, ApiSecret: pvalue.AppSecret}
+		request.Currency = pvalue.SettleCurrency
+		request.Chain = pvalue.AssembleChain
+
 		webrResp, err := web3.GetDepositOrder(pvalue.AssembleAddress, request)
 		if err != nil {
 			continue
@@ -348,7 +365,7 @@ func (s *StartpayWeb3Service) UserContactDelete(uw *system.Userwallet) error {
 	return nil
 }
 
-func (s *StartpayWeb3Service) WithdrawOrderList(userId string, reInfo *systemReq.GetWithdrawOrderRequst) (list []system.UserWithDrawOrder, total int64, err error) {
+func (s *StartpayWeb3Service) WithdrawOrderList(userId string, reInfo *systemReq.GetWeb3Requst) (list []system.UserWithDrawOrder, total int64, err error) {
 	limit := reInfo.PageSize
 	offset := reInfo.PageSize * (reInfo.Page - 1)
 	db := global.GVA_DB.Model(&system.UserWithDrawOrder{})
