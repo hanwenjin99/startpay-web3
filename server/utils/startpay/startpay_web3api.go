@@ -204,7 +204,7 @@ func (s *StartpayWeb3Api) GetDepositOrder(projectid string, requst systemReq.Get
 	pagenums := strconv.Itoa(requst.Page)
 	pagesizes := strconv.Itoa(requst.PageSize)
 
-	srcStr := "GET" + Host + "/wallet/deposit/history?address=" + projectid + "&chain=" + requst.Chain + "page=" + pagenums + "&pageSize=" + pagesizes +
+	srcStr := "GET" + Host + "/wallet/deposit/history?address=" + projectid + "&chain=" + requst.Chain + "&page=" + pagenums + "&pageSize=" + pagesizes +
 		"&token=" + requst.Currency + strtm
 	signStr, err := s.SignMessage2(srcStr)
 
@@ -217,7 +217,7 @@ func (s *StartpayWeb3Api) GetDepositOrder(projectid string, requst systemReq.Get
 		"FP-SIGN":      signStr,
 		"FP-TIMESTAMP": strtm,
 	}
-	getURL := "https://" + Host + "/wallet/deposit/history?address=" + projectid + "&chain=" + requst.Chain + "page=" + pagenums + "&pageSize=" + pagesizes +
+	getURL := "https://" + Host + "/wallet/deposit/history?address=" + projectid + "&chain=" + requst.Chain + "&page=" + pagenums + "&pageSize=" + pagesizes +
 		"&token=" + requst.Currency
 
 	global.GVA_LOG.Error("test web3",
