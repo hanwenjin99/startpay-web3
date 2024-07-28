@@ -164,6 +164,8 @@ func (s *StartpayWeb3Service) Web3TransferList(userId uint, request systemReq.Ge
 	transferRes := systemRes.TransferListRespons{}
 	for _, pvalue := range projectlist {
 		web3 := web3api.StartpayWeb3Api{ApiKey: pvalue.AppKey, ApiSecret: pvalue.AppSecret}
+		request.Currency = pvalue.SettleCurrency
+		request.Chain = pvalue.AssembleChain
 		webrResp, err := web3.Web3TransferList(pvalue.ProUuid, request)
 		if err != nil {
 			continue
@@ -260,6 +262,9 @@ func (s *StartpayWeb3Service) GetDepositOrder(userId uint, request systemReq.Get
 	depositRes := systemRes.DepositOrederRespons{}
 	for _, pvalue := range projectlist {
 		web3 := web3api.StartpayWeb3Api{ApiKey: pvalue.AppKey, ApiSecret: pvalue.AppSecret}
+		request.Currency = pvalue.SettleCurrency
+		request.Chain = pvalue.AssembleChain
+
 		webrResp, err := web3.GetDepositOrder(pvalue.AssembleAddress, request)
 		if err != nil {
 			continue
