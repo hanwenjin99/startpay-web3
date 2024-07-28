@@ -365,7 +365,7 @@ func (s *StartpayWeb3Service) UserContactDelete(uw *system.Userwallet) error {
 	return nil
 }
 
-func (s *StartpayWeb3Service) WithdrawOrderList(userId string, reInfo *systemReq.GetWithdrawOrderRequst) (list []system.UserWithDrawOrder, total int64, err error) {
+func (s *StartpayWeb3Service) WithdrawOrderList(userId string, reInfo *systemReq.GetWeb3Requst) (list []system.UserWithDrawOrder, total int64, err error) {
 	limit := reInfo.PageSize
 	offset := reInfo.PageSize * (reInfo.Page - 1)
 	db := global.GVA_DB.Model(&system.UserWithDrawOrder{})

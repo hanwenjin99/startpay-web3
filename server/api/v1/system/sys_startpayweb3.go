@@ -863,7 +863,7 @@ func (b *StartpayWeb3Api) UserContactDelete(c *gin.Context) {
 
 func (b *StartpayWeb3Api) WithdrawOrderList(c *gin.Context) {
 
-	var r systemReq.GetWithdrawOrderRequst
+	var r systemReq.GetWeb3Requst
 	r.Page = 1
 	r.PageSize = 20
 

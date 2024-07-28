@@ -95,13 +95,14 @@ type CreateTransferRequest struct {
 }
 
 type GetWeb3Requst struct {
-	PageSize  int    `json:"pageSize"`
-	Page      int    `json:"page"`
-	Search1   string `json:"Search1"`
-	Search2   string `json:"Search2"`
-	Currency  string `json:"currency"`
-	Chain     string `json:"chain"`
-	ID        string `json:"id"`
-	StartTime string `json:"startTime"`
-	EndTime   string `json:"startTime"`
+	PageSize         int    `json:"pageSize"`
+	Page             int    `json:"page"`
+	Search1          string `json:"Search1"`
+	Search2          string `json:"Search2"`
+	Currency         string `json:"currency"`
+	Chain            string `json:"chain"`
+	ID               string `json:"id"`
+	StartTime        string `json:"startTime"`
+	DepositOrderType string `json:"depositOrderType"`
+	EndTime          string `json:"startTime"`
 }
