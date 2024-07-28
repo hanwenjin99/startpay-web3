@@ -645,9 +645,9 @@ func (b *StartpayWeb3Api) GetdepositOrder(c *gin.Context) {
 		global.GVA_LOG.Error("xxx ShouldBindJSON fail", zap.Any("err", err.Error()))
 	}
 
-	global.GVA_LOG.Error("GetbankAccountList web3 db before", zap.Any("GetbankAccountList", r))
+	global.GVA_LOG.Error("GetdepositOrder web3 db before", zap.Any("GetdepositOrder", r))
 	userId := utils.GetUserID(c)
-	list, err := StartpayWeb3Service.Web3TransferList(userId, r)
+	list, err := StartpayWeb3Service.GetDepositOrder(userId, r)
 
 	if err != nil {
 		global.GVA_LOG.Error("获取失败!", zap.Error(err))
