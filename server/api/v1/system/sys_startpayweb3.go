@@ -362,7 +362,7 @@ func (b *StartpayWeb3Api) GetProjectList(c *gin.Context) {
 	var r systemReq.GetCommonPageInfo
 	r.Page = 1
 	r.PageSize = 20
-	err := c.ShouldBindJSON(&r)
+	err := c.ShouldBindQuery(&r)
 	if err != nil {
 		global.GVA_LOG.Error("test", zap.Any("GetProjectList", r),
 			zap.Any("err", err.Error()),
@@ -397,7 +397,7 @@ func (b *StartpayWeb3Api) GetWalletList(c *gin.Context) {
 	r.Page = 1
 	r.PageSize = 20
 
-	err := c.ShouldBindJSON(&r)
+	err := c.ShouldBindQuery(&r)
 	if err != nil {
 		//response.FailWithMessage(err.Error(), c)
 		global.GVA_LOG.Error("test welcome", zap.Any("err", err.Error()))
@@ -448,7 +448,7 @@ func (b *StartpayWeb3Api) GetWeb3Announcement(c *gin.Context) {
 	r.Page = 1
 	r.PageSize = 20
 
-	err := c.ShouldBindJSON(&r)
+	err := c.ShouldBindQuery(&r)
 	if err != nil {
 		//response.FailWithMessage(err.Error(), c)
 		global.GVA_LOG.Error("test welcome", zap.Any("err", err.Error()))
@@ -557,7 +557,7 @@ func (b *StartpayWeb3Api) GetWeb3Quote(c *gin.Context) {
 
 func (b *StartpayWeb3Api) GetTokenListInfo(c *gin.Context) {
 	var r systemReq.GetTokenInfoReq
-	err := c.ShouldBindJSON(&r)
+	err := c.ShouldBindQuery(&r)
 	if err != nil {
 		//response.FailWithMessage(err.Error(), c)
 		global.GVA_LOG.Error("test welcome", zap.Any("err", err.Error()))
@@ -618,7 +618,7 @@ func (b *StartpayWeb3Api) Web3TransferList(c *gin.Context) {
 	var r systemReq.GetWeb3Requst
 	r.Page = 1
 	r.PageSize = 20
-	err := c.ShouldBindJSON(&r)
+	err := c.ShouldBindQuery(&r)
 	if err != nil {
 		global.GVA_LOG.Error("xxx ShouldBindJSON fail", zap.Any("err", err.Error()))
 	}
@@ -640,7 +640,7 @@ func (b *StartpayWeb3Api) GetdepositOrder(c *gin.Context) {
 	var r systemReq.GetWeb3Requst
 	r.Page = 1
 	r.PageSize = 20
-	err := c.ShouldBindJSON(&r)
+	err := c.ShouldBindQuery(&r)
 	if err != nil {
 		global.GVA_LOG.Error("xxx ShouldBindJSON fail", zap.Any("err", err.Error()))
 	}
@@ -662,7 +662,7 @@ func (b *StartpayWeb3Api) GetbankAccountList(c *gin.Context) {
 	r.Page = 1
 	r.PageSize = 20
 
-	err := c.ShouldBindJSON(&r)
+	err := c.ShouldBindQuery(&r)
 	if err != nil {
 		global.GVA_LOG.Error("xxx ShouldBindJSON fail", zap.Any("err", err.Error()))
 	}
@@ -767,7 +767,7 @@ func (b *StartpayWeb3Api) UserContactList(c *gin.Context) {
 	r.Page = 1
 	r.PageSize = 20
 
-	err := c.ShouldBindJSON(&r)
+	err := c.ShouldBindQuery(&r)
 	if err != nil {
 		global.GVA_LOG.Error("xxx ShouldBindJSON fail", zap.Any("err", err.Error()))
 	}
@@ -867,7 +867,7 @@ func (b *StartpayWeb3Api) WithdrawOrderList(c *gin.Context) {
 	r.Page = 1
 	r.PageSize = 20
 
-	err := c.ShouldBindJSON(&r)
+	err := c.ShouldBindQuery(&r)
 	if err != nil {
 		global.GVA_LOG.Error("xxx ShouldBindJSON fail", zap.Any("err", err.Error()))
 	}
