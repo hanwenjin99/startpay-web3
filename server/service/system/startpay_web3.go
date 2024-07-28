@@ -371,6 +371,12 @@ func (s *StartpayWeb3Service) WithdrawOrderList(userId string, reInfo *systemReq
 	db := global.GVA_DB.Model(&system.UserWithDrawOrder{})
 	var uwoList []system.UserWithDrawOrder
 	err = db.Count(&total).Error
+	global.GVA_LOG.Error("WithdrawOrderList", zap.Any("userId", userId),
+		zap.Any("limit", limit),
+		zap.Any("offset", offset),
+		zap.Any("total", total),
+	)
+
 	if err != nil {
 		global.GVA_LOG.Error("WithdrawOrderList", zap.Any("userId", userId),
 			zap.Any("limit", limit),
