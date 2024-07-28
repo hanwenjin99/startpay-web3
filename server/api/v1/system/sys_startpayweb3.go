@@ -904,7 +904,7 @@ func (b *StartpayWeb3Api) WithdrawOrderList(c *gin.Context) {
 		uds.RemittanceFee = uwvalue.RemittanceFee
 		uds.Amount = uwvalue.Amount
 		uds.TotalAmount = uwvalue.TotalAmount
-		uws.Data.Content = append(uws.Data.Content, uds)
+		uws.Content = append(uws.Content, uds)
 	}
 	response.OkWithDetailed(uws, "获取成功", c)
 
