@@ -14,7 +14,7 @@
       </el-table-column>
       <el-table-column label="状态" prop="statusName" />
       <el-table-column label="到">
-        <template #default="scope">{{ scope.row.bankAccount.bankTitle }}</template>
+        <template #default="scope">{{ scope.row.bankAccount?.bankTitle }}</template>
       </el-table-column>
       <el-table-column label="币种" prop="currency" />
       <el-table-column label="服务费">
@@ -43,6 +43,9 @@
           </div>
         </template>
       </el-table-column>
+      <!-- 新增交易/审核附言 -->
+      <el-table-column label="交易附言" prop="inputNote" />
+      <el-table-column label="审核附言" prop="adminMemo" />
       <!-- 管理后台 - 审核 -->
       <el-table-column label="操作">
         <template #default="scope">
@@ -60,7 +63,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import dayjs from 'dayjs'
 
 import { getAdminWithdrawOrderList, reviewAdminWithdrawOrder } from '@/api/account'
@@ -77,18 +80,25 @@ const queryList = async (page) => {
 }
 
 // 管理后台审核提现记录
-const reviewWithdraw = async (item) => {
-  const { code } = await reviewAdminWithdrawOrder({
-    id: item.id,
-    chain: item.chain,
-    currency: item.currency,
-    status: item.status
+const reviewWithdraw = (item) => {
+  // 填写审核备注信息
+  ElMessageBox.prompt('请填写审核备注信息', '提示', {
+    confirmButtonText: '确认',
+    cancelButtonText: '取消'
+  }).then(async ({ value }) => {
+    const { code } = await reviewAdminWithdrawOrder({
+      id: item.id,
+      chain: item.chain,
+      currency: item.currency,
+      status: item.status,
+      memo: value // 审核备注信息
+    })
+    if (code === 0) {
+      ElMessage.success('审核成功！')
+      // 刷新列表
+      queryList(1)
+    }
   })
-  if (code === 0) {
-    ElMessage.success('审核成功！')
-    // 刷新列表
-    queryList(1)
-  }
 }
 
 // 分页请求
