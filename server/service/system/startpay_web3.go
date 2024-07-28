@@ -438,7 +438,7 @@ func (s *StartpayWeb3Service) AdminWithdrawOrderUpdate(req *systemReq.UpdateWith
 	}
 	uwo.UpdatedAt = time.Now()
 	rqId, _ := strconv.Atoi(req.Id)
-	if err := global.GVA_DB.Where("id = ? ", req.Id).Updates(uwo).Error; err != nil {
+	if err := global.GVA_DB.Where("id = ? ", rqId).Updates(uwo).Error; err != nil {
 		return errors.New("更新取现订单失败")
 	}
 
