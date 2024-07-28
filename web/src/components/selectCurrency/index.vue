@@ -6,6 +6,7 @@
         :secondary-icon="selectInfo?.chainIcon"
         :main-name="selectInfo?.currency"
         :secondary-name="selectInfo?.chain"
+        :wallet-name="selectInfo?.Walletname"
       />
       <el-icon><ArrowRightBold /></el-icon>
     </section>
@@ -25,6 +26,7 @@
             :secondary-icon="item.chainIcon"
             :main-name="item.currency"
             :secondary-name="item.chain"
+            :wallet-name="selectInfo?.Walletname"
           />
         </el-radio>
       </el-radio-group>
