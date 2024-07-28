@@ -414,6 +414,7 @@ func (s *StartpayWeb3Service) WithdrawOrderList(userId uint, reInfo *systemReq.G
 
 func (s *StartpayWeb3Service) WithdrawOrderCreate(uwo *system.UserWithDrawOrder) error {
 	uwo.StatusName = WithdrawStatus[1]
+	uwo.Status = 1
 	err := global.GVA_DB.Create(&uwo).Error
 	if err != nil {
 		return err
@@ -429,7 +430,7 @@ func (s *StartpayWeb3Service) AdminWithdrawOrderUpdate(req *systemReq.UpdateWith
 	} else if st == 2 {
 		st = 3
 	} else {
-		return errors.New("撤销订单不需要审核")
+		return errors.New("订单不处于审核状态")
 	}
 	uwo := &system.UserWithDrawOrder{
 		Status:     st,
