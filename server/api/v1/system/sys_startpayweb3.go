@@ -875,7 +875,7 @@ func (b *StartpayWeb3Api) WithdrawOrderList(c *gin.Context) {
 	global.GVA_LOG.Error("GetbankAccountList web3 db before", zap.Any("GetbankAccountList", r))
 	userId := utils.GetUserID(c)
 
-	struserId := fmt.Sprintf("%u", userId)
+	//struserId := fmt.Sprintf("%u", userId)
 
 	list, _, err := StartpayWeb3Service.WithdrawOrderList(userId, &r)
 
