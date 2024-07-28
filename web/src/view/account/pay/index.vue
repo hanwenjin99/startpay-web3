@@ -243,10 +243,10 @@ const handleChangePage = (page) => {
 
 // 创建提现提交
 const submitCreate = () => {
-  if (Number(creatForm.value.amount) === 0) {
-    ElMessage.warning('提现金额需大于0！')
-    return
-  }
+  // if (Number(creatForm.value.amount) === 0) {
+  //   ElMessage.warning('提现金额需大于0！')
+  //   return
+  // }
   
   if (Number(withdrawAmount.value) > Number(selectOneCurrency.value.balance)) {
     ElMessage.warning('提现金额不能大于最大可用金额！')
