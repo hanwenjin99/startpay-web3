@@ -204,8 +204,8 @@ func (s *StartpayWeb3Api) GetDepositOrder(projectid string, requst systemReq.Get
 	pagenums := strconv.Itoa(requst.Page)
 	pagesizes := strconv.Itoa(requst.PageSize)
 
-	srcStr := "GET" + Host + "/wallet/deposit/history?page=" + pagenums + "&pageSize=" + pagesizes +
-		"&address=" + projectid + "&chain=" + requst.Chain + "&token=" + requst.Currency + strtm
+	srcStr := "GET" + Host + "/wallet/deposit/history?address=" + projectid + "&chain=" + requst.Chain + "page=" + pagenums + "&pageSize=" + pagesizes +
+		"&token=" + requst.Currency + strtm
 	signStr, err := s.SignMessage2(srcStr)
 
 	if err != nil {
@@ -217,8 +217,8 @@ func (s *StartpayWeb3Api) GetDepositOrder(projectid string, requst systemReq.Get
 		"FP-SIGN":      signStr,
 		"FP-TIMESTAMP": strtm,
 	}
-	getURL := "https://" + Host + "/wallet/deposit/history?page=" + pagenums + "&pageSize=" + pagesizes +
-		"&address=" + projectid + "&chain=" + requst.Chain + "&token=" + requst.Currency
+	getURL := "https://" + Host + "/wallet/deposit/history?address=" + projectid + "&chain=" + requst.Chain + "page=" + pagenums + "&pageSize=" + pagesizes +
+		"&token=" + requst.Currency
 
 	global.GVA_LOG.Error("test web3",
 		zap.Any("signStr", signStr),
@@ -251,8 +251,8 @@ func (s *StartpayWeb3Api) Web3TransferList(projectid string, requst systemReq.Ge
 	pagenums := strconv.Itoa(requst.Page)
 	pagesizes := strconv.Itoa(requst.PageSize)
 
-	srcStr := "GET" + Host + "/wallet/transfer/history?page=" + pagenums + "&pageSize=" + pagesizes +
-		"&projectId=" + projectid + "&chain=" + requst.Chain + "&token=" + requst.Currency + strtm
+	srcStr := "GET" + Host + "/wallet/transfer/history?chain=" + requst.Chain + "&page=" + pagenums + "&pageSize=" + pagesizes +
+		"&projectId=" + projectid + "&token=" + requst.Currency + strtm
 	signStr, err := s.SignMessage2(srcStr)
 
 	if err != nil {
@@ -264,8 +264,8 @@ func (s *StartpayWeb3Api) Web3TransferList(projectid string, requst systemReq.Ge
 		"FP-SIGN":      signStr,
 		"FP-TIMESTAMP": strtm,
 	}
-	getURL := "https://" + Host + "/wallet/transfer/history?page=" + pagenums + "&pageSize=" + pagesizes +
-		"&projectId=" + projectid + "&chain=" + requst.Chain + "&token=" + requst.Currency
+	getURL := "https://" + Host + "/wallet/transfer/history?chain=" + requst.Chain + "&page=" + pagenums + "&pageSize=" + pagesizes +
+		"&projectId=" + projectid + "&token=" + requst.Currency
 
 	global.GVA_LOG.Error("test web3",
 		zap.Any("signStr", signStr),

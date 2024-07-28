@@ -149,10 +149,16 @@ func (s *StartpayWeb3Service) Web3TransferCreate(userId uint, request systemReq.
 func (s *StartpayWeb3Service) Web3TransferList(userId uint, request systemReq.GetWeb3Requst) (*systemRes.TransferListRespons, error) {
 	var projectlist []system.SysProject
 
-	_, err := global.GVA_DB.Where("user_id = ? ", userId).Find(&projectlist).Rows()
-
-	if err != nil {
-		return nil, errors.New("查询用户交易密钥失败")
+	if request.ID != "" {
+		_, err := global.GVA_DB.Where("pro_uuid = ? ", request.ID).Find(&projectlist).Rows()
+		if err != nil {
+			return nil, errors.New("查询用户交易密钥失败")
+		}
+	} else {
+		_, err := global.GVA_DB.Where("user_id = ? ", userId).Find(&projectlist).Rows()
+		if err != nil {
+			return nil, errors.New("查询用户交易密钥失败")
+		}
 	}
 
 	transferRes := systemRes.TransferListRespons{}
@@ -239,10 +245,16 @@ func (s *StartpayWeb3Service) GetDepositAddress(userId uint, Page int, PageSize 
 func (s *StartpayWeb3Service) GetDepositOrder(userId uint, request systemReq.GetWeb3Requst) (*systemRes.DepositOrederRespons, error) {
 	var projectlist []system.SysProject
 
-	_, err := global.GVA_DB.Where("user_id = ? ", userId).Find(&projectlist).Rows()
-
-	if err != nil {
-		return nil, errors.New("查询用户交易密钥失败")
+	if request.ID != "" {
+		_, err := global.GVA_DB.Where("pro_uuid = ? ", request.ID).Find(&projectlist).Rows()
+		if err != nil {
+			return nil, errors.New("查询用户交易密钥失败")
+		}
+	} else {
+		_, err := global.GVA_DB.Where("user_id = ? ", userId).Find(&projectlist).Rows()
+		if err != nil {
+			return nil, errors.New("查询用户交易密钥失败")
+		}
 	}
 
 	depositRes := systemRes.DepositOrederRespons{}
