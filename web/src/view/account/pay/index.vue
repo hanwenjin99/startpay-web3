@@ -248,10 +248,10 @@ const submitCreate = () => {
   //   return
   // }
   
-  if (Number(withdrawAmount.value) > Number(selectOneCurrency.value.balance)) {
-    ElMessage.warning('提现金额不能大于最大可用金额！')
-    return
-  }
+  // if (Number(withdrawAmount.value) > Number(selectOneCurrency.value.balance)) {
+  //   ElMessage.warning('提现金额不能大于最大可用金额！')
+  //   return
+  // }
   // 二次确认
   ElMessageBox.confirm(
     '确认创建提现记录吗？',
