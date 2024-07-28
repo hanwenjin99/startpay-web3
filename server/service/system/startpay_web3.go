@@ -386,7 +386,7 @@ func (s *StartpayWeb3Service) WithdrawOrderList(userId string, reInfo *systemReq
 		return
 	}
 
-	err = db.Limit(limit).Offset(offset).Where("merchantId = ?", userId).Find(&uwoList).Error
+	_, err = db.Limit(limit).Offset(offset).Where("merchantId = ?", userId).Find(&uwoList).Rows()
 
 	global.GVA_LOG.Error("WithdrawOrderList",
 		zap.Any("uwoList", uwoList),
