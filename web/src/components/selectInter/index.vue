@@ -2,8 +2,8 @@
   <main class="selectInter">
     <section class="showSelect" @click.stop="dialogVisible = true">
       <div class="showInfo">
-        <img :src="selectInfo.icon" alt="">
-        {{ selectInfo.name }}
+        <img :src="selectInfo?.icon" alt="">
+        {{ selectInfo?.name }}
       </div>
       <el-icon><ArrowRightBold /></el-icon>
     </section>
@@ -37,7 +37,7 @@ const commonStore = useCommonStore()
 
 const emits = defineEmits('handleSelectChain')
 
-const radioInter = ref(commonStore.chainsList[0].chain)
+const radioInter = ref(commonStore.chainsList[0]?.name)
 const selectInfo = ref(commonStore.chainsList[0])
 
 const dialogVisible = ref(false)
