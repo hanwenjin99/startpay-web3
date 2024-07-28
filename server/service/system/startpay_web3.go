@@ -14,6 +14,13 @@ import (
 	"time"
 )
 
+var WithdrawStatus = map[int]string{
+	1: "待审核",
+	2: "审核中",
+	3: "完成",
+	4: "撤销",
+}
+
 type StartpayWeb3Service struct {
 }
 
@@ -338,6 +345,16 @@ func (s *StartpayWeb3Service) BankAccountCreate(ub *system.UserBank) error {
 	return nil
 }
 
+func (s *StartpayWeb3Service) BankAccountInfo(bankid string) (*system.UserBank, error) {
+	var userBank system.UserBank
+	bid, _ := strconv.Atoi(bankid)
+	_, err := global.GVA_DB.Where(" id = ? ", bid).First(&userBank).Rows()
+	if err != nil {
+		return nil, err
+	}
+	return &userBank, nil
+}
+
 func (s *StartpayWeb3Service) BankAccountDelete(ub *system.UserBank) error {
 	if err := global.GVA_DB.Where("id = ? ", ub.ID).Delete(&system.UserBank{}).Error; err != nil {
 		return errors.New("删除bank信息失败")
@@ -396,6 +413,7 @@ func (s *StartpayWeb3Service) WithdrawOrderList(userId uint, reInfo *systemReq.G
 }
 
 func (s *StartpayWeb3Service) WithdrawOrderCreate(uwo *system.UserWithDrawOrder) error {
+	uwo.StatusName = WithdrawStatus[1]
 	err := global.GVA_DB.Create(&uwo).Error
 	if err != nil {
 		return err
@@ -406,8 +424,9 @@ func (s *StartpayWeb3Service) WithdrawOrderCreate(uwo *system.UserWithDrawOrder)
 func (s *StartpayWeb3Service) AdminWithdrawOrderUpdate(req *systemReq.UpdateWithdrawOrderRequst) error {
 	st, _ := strconv.Atoi(req.Status)
 	uwo := &system.UserWithDrawOrder{
-		Status:    st,
-		AdminMemo: req.Memo,
+		Status:     st,
+		AdminMemo:  req.Memo,
+		StatusName: WithdrawStatus[st],
 	}
 	uwo.UpdatedAt = time.Now()
 	if err := global.GVA_DB.Where("id = ? ", req.Id).Updates(uwo).Error; err != nil {
@@ -420,8 +439,9 @@ func (s *StartpayWeb3Service) AdminWithdrawOrderUpdate(req *systemReq.UpdateWith
 func (s *StartpayWeb3Service) WithdrawOrderUpdate(req *systemReq.UpdateWithdrawOrderRequst) error {
 	st, _ := strconv.Atoi(req.Status)
 	uwo := &system.UserWithDrawOrder{
-		Status: st,
-		Memo:   req.Memo,
+		Status:     st,
+		InputNote:  req.Memo,
+		StatusName: WithdrawStatus[st],
 	}
 	uwo.UpdatedAt = time.Now()
 	if err := global.GVA_DB.Where("id = ? ", req.Id).Updates(uwo).Error; err != nil {

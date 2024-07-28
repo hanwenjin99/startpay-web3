@@ -74,7 +74,7 @@ type CreateWithdrawOrderRequst struct {
 }
 
 type UpdateWithdrawOrderRequst struct {
-	Id          string `json:"id"`
+	Id          uint   `json:"id"`
 	EmailCode   string `json:"emailCode"`
 	GoogleCode  string `json:"googleCode"`
 	Status      string `json:"status"`

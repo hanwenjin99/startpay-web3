@@ -888,8 +888,22 @@ func (b *StartpayWeb3Api) WithdrawOrderList(c *gin.Context) {
 	uws := systemRes.UserWithdrawOrderRespons{}
 
 	for _, uwvalue := range list {
+
 		uds := systemRes.UserWithdrawOrder{}
 		uds.Id = fmt.Sprintf("%u", uwvalue.ID)
+
+		bkId, err := StartpayWeb3Service.BankAccountInfo(uwvalue.BankId)
+
+		if err != nil {
+			uds.BankInfo = bkId.BankTitle
+			uds.BankAccount.BankTitle = bkId.BankTitle
+			uds.BankAccount.EnterpriseTitle = bkId.EnterpriseTitle
+			uds.BankAccount.BankCode = bkId.BankCode
+			uds.BankAccount.ReceiverName = bkId.ReceiverName
+			uds.BankAccount.ReceiverNumber = bkId.ReceiverNumber
+			uds.BankAccount.Region = bkId.Region
+		}
+
 		uds.BankInfo = uwvalue.BankTitle
 		uds.Currency = uwvalue.Currency
 		uds.Chain = uwvalue.Chain
