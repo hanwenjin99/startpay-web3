@@ -60,7 +60,7 @@ onMounted(async () => {
     initList = [...commonStore.chainsList]
   }
   // 更新默认选择的网络信息
-  radioInter.value = initList[0].name
+  radioInter.value = initList[0]?.name
   selectInfo.value = initList[0]
   // 返回给父组件
   emits('handleSelectChain', initList[0])
