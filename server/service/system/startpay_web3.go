@@ -390,6 +390,7 @@ func (s *StartpayWeb3Service) WithdrawOrderList(userId string, reInfo *systemReq
 
 	global.GVA_LOG.Error("WithdrawOrderList",
 		zap.Any("uwoList", uwoList),
+		zap.Any("err", err),
 	)
 	return uwoList, total, err
 }
