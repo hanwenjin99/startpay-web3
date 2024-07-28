@@ -105,8 +105,9 @@
         src="@/assets/login_right_banner.jpg"
         alt="banner"
       ></div>
+       -->
     </div>
-    -->
+
 
     <BottomInfo class="left-0 right-0 absolute bottom-3 mx-auto  w-full z-20">
       <div class="links items-center justify-center gap-2 hidden md:flex">
