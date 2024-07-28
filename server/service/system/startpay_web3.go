@@ -365,16 +365,33 @@ func (s *StartpayWeb3Service) UserContactDelete(uw *system.Userwallet) error {
 	return nil
 }
 
-func (s *StartpayWeb3Service) WithdrawOrderList(userId string, reInfo *systemReq.GetWeb3Requst) (list []system.UserWithDrawOrder, total int64, err error) {
+func (s *StartpayWeb3Service) WithdrawOrderList(userId uint, reInfo *systemReq.GetWeb3Requst) (list []system.UserWithDrawOrder, total int64, err error) {
 	limit := reInfo.PageSize
 	offset := reInfo.PageSize * (reInfo.Page - 1)
 	db := global.GVA_DB.Model(&system.UserWithDrawOrder{})
 	var uwoList []system.UserWithDrawOrder
 	err = db.Count(&total).Error
+	global.GVA_LOG.Error("WithdrawOrderList", zap.Any("userId", userId),
+		zap.Any("limit", limit),
+		zap.Any("offset", offset),
+		zap.Any("total", total),
+	)
+
 	if err != nil {
+		global.GVA_LOG.Error("WithdrawOrderList", zap.Any("userId", userId),
+			zap.Any("limit", limit),
+			zap.Any("offset", offset),
+			zap.Any("total", total),
+		)
 		return
 	}
-	err = db.Limit(limit).Offset(offset).Where("merchantId = ?", userId).Find(&uwoList).Error
+
+	_, err = db.Limit(limit).Offset(offset).Where("merchantId = ?", userId).Find(&uwoList).Rows()
+
+	global.GVA_LOG.Error("WithdrawOrderList",
+		zap.Any("uwoList", uwoList),
+		zap.Any("err", err),
+	)
 	return uwoList, total, err
 }
 

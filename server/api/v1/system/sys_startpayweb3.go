@@ -875,9 +875,9 @@ func (b *StartpayWeb3Api) WithdrawOrderList(c *gin.Context) {
 	global.GVA_LOG.Error("GetbankAccountList web3 db before", zap.Any("GetbankAccountList", r))
 	userId := utils.GetUserID(c)
 
-	struserId := fmt.Sprintf("%u", userId)
+	//struserId := fmt.Sprintf("%u", userId)
 
-	list, _, err := StartpayWeb3Service.WithdrawOrderList(struserId, &r)
+	list, _, err := StartpayWeb3Service.WithdrawOrderList(userId, &r)
 
 	if err != nil {
 		global.GVA_LOG.Error("获取失败!", zap.Error(err))
@@ -904,7 +904,7 @@ func (b *StartpayWeb3Api) WithdrawOrderList(c *gin.Context) {
 		uds.RemittanceFee = uwvalue.RemittanceFee
 		uds.Amount = uwvalue.Amount
 		uds.TotalAmount = uwvalue.TotalAmount
-		uws.Data.Content = append(uws.Data.Content, uds)
+		uws.Content = append(uws.Content, uds)
 	}
 	response.OkWithDetailed(uws, "获取成功", c)
 

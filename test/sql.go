@@ -102,7 +102,7 @@ KEY `idx_merchantId` (`merchantId`),
 KEY `idx_bankId` (`bankId`),
 KEY `idx_currency` (`currency`),
 KEY `idx_chain` (`chain`),
-UNIQUE KEY unique_index_name (`merchantId`, `bankId`,`currency`,`chain`)
+UNIQUE KEY unique_index_name (`merchantId`, `bankId`,`currency`,`chain`,`created_at` )
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
