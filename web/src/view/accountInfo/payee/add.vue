@@ -72,7 +72,7 @@ const addForm = reactive({
 const isCanSubmit = computed(() => addForm.name && addForm.chain && addForm.address && addForm.emailCode && addForm.googleCode)
 
 const handleSelectChain = (selected) => {
-  addForm.chain = selected.name
+  addForm.chain = selected.name ?? ''
 }
 
 // 新增收款人

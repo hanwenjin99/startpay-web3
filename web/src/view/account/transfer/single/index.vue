@@ -201,8 +201,8 @@ const handleChange = (val) => {
   postBackendQuote(selectOneCurrency.value.chain)
 }
 
-const recordData = []
-const recordTotal = 0
+const recordData = ref([])
+const recordTotal = ref(0)
 
 // 点击最大按钮
 const handleMaxBtn = () => {
