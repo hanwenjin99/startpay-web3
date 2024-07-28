@@ -87,7 +87,7 @@
         </el-table-column>
         <el-table-column label="状态" prop="statusName" />
         <el-table-column label="到">
-          <template #default="scope">{{ scope.row.bankAccount.bankTitle }}</template>
+          <template #default="scope">{{ scope.row.bankAccount?.bankTitle }}</template>
         </el-table-column>
         <el-table-column label="币种" prop="currency" />
         <el-table-column label="服务费">
@@ -116,10 +116,24 @@
             </div>
           </template>
         </el-table-column>
+        <!-- 新增交易/审核附言 -->
+        <el-table-column label="交易附言" prop="inputNote" />
+        <el-table-column label="审核附言" prop="adminMemo" />
         <!-- 商户端 - 撤销 -->
         <el-table-column label="操作">
           <template #default="scope">
-            <el-button link @click="revokeWithdraw(scope.row)">撤销</el-button>
+            <el-popconfirm
+              confirm-button-text="确定"
+              cancel-button-text="取消"
+              icon="infoFilled"
+              icon-color="#626AEF"
+              title="确认撤销此条记录？"
+              @confirm="revokeWithdraw(scope.row)"
+            >
+              <template #reference>
+                <el-button link>撤销</el-button>
+              </template>
+            </el-popconfirm>
           </template>
         </el-table-column>
       </el-table>
@@ -286,23 +300,30 @@ const selectBankAccount = () => {
 }
 
 // 商户端 - 撤销提现
-const revokeWithdraw = async (item) => {
-  const { code } = await revokeMerchantWithdraw({
-    id: item.id,
-    chain: item.chain,
-    currency: item.currency,
-    status: item.status
-  })
-  if (code === 0) {
-    ElMessage.success('撤销提现成功！')
-    // 刷新列表
-    queryList({
-      page: 1,
-      currency: selectOneCurrency.value.currency,
-      chain: selectOneCurrency.value.chain,
-      id: selectOneCurrency.value.id
+const revokeWithdraw = (item) => {
+  // 填写备注信息
+  ElMessageBox.prompt('请填写撤销备注信息', '提示', {
+    confirmButtonText: '确认',
+    cancelButtonText: '取消'
+  }).then(async ({ value }) => {
+    const { code } = await revokeMerchantWithdraw({
+      id: item.id,
+      chain: item.chain,
+      currency: item.currency,
+      status: item.status,
+      memo: value // 撤销备注信息
     })
-  }
+    if (code === 0) {
+      ElMessage.success('撤销提现成功！')
+      // 刷新列表
+      queryList({
+        page: 1,
+        currency: selectOneCurrency.value.currency,
+        chain: selectOneCurrency.value.chain,
+        id: selectOneCurrency.value.id
+      })
+    }
+  })
 }
 
 onMounted(() => {
