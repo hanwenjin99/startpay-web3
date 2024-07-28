@@ -877,7 +877,7 @@ func (b *StartpayWeb3Api) WithdrawOrderList(c *gin.Context) {
 
 	struserId := fmt.Sprintf("%u", userId)
 
-	list, _, err := StartpayWeb3Service.WithdrawOrderList(struserId, &r)
+	list, _, err := StartpayWeb3Service.WithdrawOrderList(userId, &r)
 
 	if err != nil {
 		global.GVA_LOG.Error("获取失败!", zap.Error(err))
