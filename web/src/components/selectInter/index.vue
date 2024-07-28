@@ -2,8 +2,8 @@
   <main class="selectInter">
     <section class="showSelect" @click.stop="dialogVisible = true">
       <div class="showInfo">
-        <img :src="selectInfo.chainIcon" alt="">
-        {{ selectInfo.chain }}
+        <img :src="selectInfo?.icon" alt="">
+        {{ selectInfo?.name }}
       </div>
       <el-icon><ArrowRightBold /></el-icon>
     </section>
@@ -13,14 +13,14 @@
       <el-radio-group v-model="radioInter" class="groupStyle" @change="handleChange">
         <el-radio
           v-for="item in commonStore.chainsList"
-          :key="item.chain"
-          :value="item.chain"
+          :key="item.name"
+          :value="item.name"
           size="large"
         >
           <!-- 选项展示 -->
           <div class="showSelectItem">
-            <img :src="item.chainIcon" alt="">
-            {{ item.chain }}
+            <img :src="item.icon" alt="">
+            {{ item.name }}
           </div>
         </el-radio>
       </el-radio-group>
@@ -37,13 +37,13 @@ const commonStore = useCommonStore()
 
 const emits = defineEmits('handleSelectChain')
 
-const radioInter = ref(commonStore.chainsList[0].chain)
+const radioInter = ref(commonStore.chainsList[0]?.name)
 const selectInfo = ref(commonStore.chainsList[0])
 
 const dialogVisible = ref(false)
 
 const handleChange = (key) => {
-  selectInfo.value = commonStore.chainsList.filter(item => item.chain === key)[0]
+  selectInfo.value = commonStore.chainsList.filter(item => item.name === key)[0]
   emits('handleSelectChain', selectInfo.value)
   dialogVisible.value = false
 }
@@ -60,7 +60,7 @@ onMounted(async () => {
     initList = [...commonStore.chainsList]
   }
   // 更新默认选择的网络信息
-  radioInter.value = initList[0].name
+  radioInter.value = initList[0]?.name
   selectInfo.value = initList[0]
   // 返回给父组件
   emits('handleSelectChain', initList[0])

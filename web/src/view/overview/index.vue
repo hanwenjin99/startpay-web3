@@ -6,7 +6,7 @@
     </h1>
     <section class="assets">
       <h2>资产估值</h2>
-      <h1>≈ ${{ Number(dashboardData.assetValuationAmount ?? 0).toFixed(2) }} <img src="@/assets/icons/arrow-right.svg" alt=""> </h1>
+      <h1 @click="router.push('/layout/account/property')">≈ ${{ Number(dashboardData.assetValuationAmount ?? 0).toFixed(2) }} <img src="@/assets/icons/arrow-right.svg" alt=""> </h1>
     </section>
     <!-- 统计 -->
     <section class="statistics">
@@ -62,7 +62,11 @@
 <script setup>
 import  { ref, reactive, onMounted } from 'vue'
 import dayjs from 'dayjs'
+import { useRouter } from 'vue-router'
+
 import { getDashboard, getAnnouncementList } from '@/api/overview'
+
+const router = useRouter()
 
 const statisticsActions = [{ key: 'Deposit', name: '充值' }, { key: 'Withdraw', name: '提现' }]
 

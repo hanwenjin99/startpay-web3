@@ -22,6 +22,7 @@
             :secondary-icon="scope.row.chainIcon"
             :main-name="scope.row.currency"
             :secondary-name="scope.row.chain"
+            :wallet-name="scope.row.Walletname"
           />
         </template>
       </el-table-column>

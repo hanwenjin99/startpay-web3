@@ -4,7 +4,7 @@
       <img class="mainIcon" :src="mainIcon" alt="">
       <img class="secondaryIcon" :src="secondaryIcon" alt="">
     </div>
-    <span class="name">{{ mainName }}-{{ secondaryName }}</span>
+    <span class="name">{{ mainName }}-{{ secondaryName }}-{{ walletName }}</span>
   </section>
 </template>
 
@@ -24,6 +24,10 @@ const props = defineProps({
     default: ''
   },
   secondaryName: {
+    type: String,
+    default: ''
+  },
+  walletName: {
     type: String,
     default: ''
   }
