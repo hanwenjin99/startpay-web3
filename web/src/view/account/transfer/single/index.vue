@@ -4,13 +4,13 @@
       单笔转账
     </h1>
     <!-- 选择币种组件 -->
-    <SelectCurrency @handle-select-callback="handleSelect" />
+    <SelectCurrency :init-data="selectOneCurrency" @handle-select-callback="handleSelect" />
 
     <section class="amountOuter">
       <div class="formOuter">
         <span class="amountBtn" @click="handleMaxBtn">最大</span>
         <input
-          v-model="amountInputVal"
+          v-model="creatForm.amount"
           class="input"
           :placeholder="`0${selectOneCurrency.currency ?? ''}`"
           @input="e => handleChange(e.target.value)"
@@ -24,8 +24,8 @@
     <!-- 收款人 -->
     <span class="inputTitle">收款人</span>
 
-    <div class="payeeSelector" @click="router.push('/layout/accountInfo/payee')">
-      <span>ETH地址</span>
+    <div class="payeeSelector" @click="selectToAddress">
+      <span :style="creatForm.toAddress ? 'color: #000' : ''">{{ creatForm.toAddress ? creatForm.toAddress : 'ETH地址' }}</span>
       <el-icon><Notebook /></el-icon>
     </div>
 
@@ -41,7 +41,16 @@
     </div>
 
     <!-- 按钮 -->
-    <el-button class="continueBtn" round color="#000" plain>继续</el-button>
+    <el-button
+      :disabled="!isCanSubmit"
+      class="continueBtn"
+      round
+      color="#000"
+      plain
+      @click="submitCreate"
+    >
+      继续
+    </el-button>
 
     <!-- 记录 -->
     <section class="record">
@@ -140,31 +149,54 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router'
 import dayjs from 'dayjs'
 
-import { postBackendQuote, getTransferList } from '@/api/account'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { useCommonStore } from '@/pinia/modules/common'
+import { postBackendQuote, getTransferList, createSingleTransfer } from '@/api/account'
 import SelectCurrency from '@/components/selectCurrency/index.vue'
 import { copyMessage } from '@/utils/common.js'
 
 const router = useRouter()
 const selectOneCurrency = ref({})
-// 填入的值
-const amountInputVal = ref(0)
+const commonStore = useCommonStore()
+
+const creatForm = ref({
+  amount: '',
+  asset: '',
+  chain: '',
+  toAddress: '', // 收款人地址
+  id: ''
+})
+
+// 继续按钮是否可点击
+const isCanSubmit = computed(() =>
+  creatForm.value.amount &&
+  creatForm.value.asset &&
+  creatForm.value.chain &&
+  creatForm.value.toAddress
+)
+
 // 手续费
 const feeAmount = ref(0)
 
 // 等价的值
-const amountEqualVal = computed(() => (
-  ((selectOneCurrency.value.usdPrice ?? 0) * (amountInputVal.value ?? 0)).toFixed(2)
-))
+const amountEqualVal = computed(() => {
+  // 如果是最大值填入，则直接取接口返回的字段，否则js计算
+  if (Number(creatForm.value.amount ?? 0) === selectOneCurrency.value.balance) {
+    return selectOneCurrency.value.amountUsd
+  } else {
+    return ((selectOneCurrency.value.usdPrice ?? 0) * (creatForm.value.amount ?? 0)).toFixed(2)
+  }
+})
 
 // 总金额
 const sumAmount = computed(() => (
-  Number(amountInputVal.value ?? 0) + Number(feeAmount.value ?? 0)
+  Number(creatForm.value.amount ?? 0) + Number(feeAmount.value ?? 0)
 ))
 
 // 文本框输入
 const handleChange = (val) => {
   // 过滤非数字或者小数的值
-  amountInputVal.value = val.replace(/[^\d.]/g, "")
+  creatForm.value.amount = val.replace(/[^\d.]/g, "")
   // 调接口
   postBackendQuote(selectOneCurrency.value.chain)
 }
@@ -175,7 +207,7 @@ const recordTotal = 0
 // 点击最大按钮
 const handleMaxBtn = () => {
   // 文本框填入最大值
-  amountInputVal.value = selectOneCurrency.value.balance
+  creatForm.value.amount = selectOneCurrency.value.balance
   // 调接口
   postBackendQuote(selectOneCurrency.value.chain)
 }
@@ -183,6 +215,9 @@ const handleMaxBtn = () => {
 // 选择币种回调
 const handleSelect = (selectInfo) => {
   selectOneCurrency.value = selectInfo
+  creatForm.value.asset = selectInfo.currency // 币种
+  creatForm.value.chain = selectInfo.chain // 链类型
+  creatForm.value.id = selectInfo.id // 币种id
 }
 
 // 翻页
@@ -198,8 +233,66 @@ const queryTransferList = async (page) => {
   }
 }
 
+// 选择收款人地址
+const selectToAddress = () => {
+  commonStore.ChangeSingleTransfer({
+    creatForm: creatForm.value,
+    selectOneCurrency: selectOneCurrency.value,
+    chainQuery: selectOneCurrency.value.chain
+  })
+  router.push('/layout/accountInfo/payee')
+}
+
+// 提交单笔转账
+const submitCreate = async () => {
+  if (Number(creatForm.value.amount) === 0) {
+    ElMessage.warning('转账金额需大于0！')
+    return
+  }
+
+  if (Number(creatForm.value.amount) > Number(selectOneCurrency.value.balance)) {
+    ElMessage.warning('转账金额不能大于最大可用金额！')
+    return
+  }
+
+  // 二次确认
+  ElMessageBox.confirm(
+    '确认创建转账记录吗？',
+    '二次确认',
+    {
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
+      type: 'warning',
+    }
+  ).then(async () => {
+    const { code } = await createSingleTransfer(creatForm.value)
+    if (code === 0) {
+      ElMessage.success('创建转账成功')
+      // 刷新列表数据
+      queryTransferList(1)
+    }
+  })
+
+}
+
 onMounted(() => {
   queryTransferList(1)
+  // 如果是选择收款人返回的 - 填充数据
+  if (commonStore.singleTransfer?.isSelectPayee) {
+    // 选择的币种信息
+    selectOneCurrency.value = commonStore.singleTransfer.selectOneCurrency
+    // 提交信息
+    creatForm.value = { ...commonStore.singleTransfer.creatForm, toAddress: commonStore.singleTransfer.toAddress }
+    commonStore.ChangePageInitPay({
+      ...commonStore.singleTransfer,
+      isSelectPayee: false
+    })
+  } else if (commonStore.propertyToActionInitSelect) {
+    // 初始化默认选择币种
+    selectOneCurrency.value = commonStore.propertyToActionInitSelect
+    // 清空数据
+    commonStore.SetPropertyToActionInitSelect('')
+  }
 })
 </script>
 

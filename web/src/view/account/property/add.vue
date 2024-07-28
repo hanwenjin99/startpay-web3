@@ -78,12 +78,13 @@ const initCurrencyList = async (params) => {
 }
 
 onMounted(() => {
-  if (commonStore.chainsList.length === 0) {
-    // 更新网络列表
-    commonStore.GetChainsList()
-  }
-  // 初始化获取账户可创建币种列表
-  initCurrencyList()
+  // TODO - 初始化不获取
+  // if (commonStore.chainsList.length === 0) {
+  //   // 更新网络列表
+  //   commonStore.GetChainsList()
+  // }
+  // // 初始化获取账户可创建币种列表
+  // initCurrencyList()
 })
 </script>
 

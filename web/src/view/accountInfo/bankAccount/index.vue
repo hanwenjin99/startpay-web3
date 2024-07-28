@@ -67,7 +67,7 @@ const comfirmSelect = (item) => {
     },
     isSelectedBankAccount: true,
   })
-  router.go(-1)
+  router.push('/layout/account/pay')
 }
 
 const queryList = async () => {

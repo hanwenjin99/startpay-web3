@@ -13,37 +13,37 @@ export const getAccountInfo = () => {
 // 获取账户可创建币种列表
 export const getAccountCurrencyCreatableList = (params) => {
   return service({
-    url: '/web3/token_list',
-    method: 'get',
-    data: JSON.stringify({
+    url: `/web3/token_list?${qs.stringify({
       ...params,
       page: 0,
       pageSize: 200
-    }),
-    headers: {
-      'Content-Type': 'application/json'
-    }
+    })}`,
+    method: 'get'
   })
 }
 
 // 查询收款记录
 export const getDepositOrderList = (params) => {
   return service({
-    url: '/web3/deposit_order',
-    method: 'get',
-    data: JSON.stringify(params),
-    headers: {
-      'Content-Type': 'application/json'
-    }
+    url: `/web3/deposit_order?${qs.stringify(params)}`,
+    method: 'get'
   })
 }
 
 // 单笔转账 - 转化接口
 export const postBackendQuote = (chain) => {
   return service({
-    url: '/web3/quote',
-    method: 'get',
-    data: JSON.stringify({ chain }),
+    url: `/web3/quote?chain=${chain}`,
+    method: 'get'
+  })
+}
+
+// 创建单笔转账
+export const createSingleTransfer = (params) => {
+  return service({
+    url: '/web3/create_transfer',
+    method: 'post',
+    data: JSON.stringify(params),
     headers: {
       'Content-Type': 'application/json'
     }
@@ -53,12 +53,8 @@ export const postBackendQuote = (chain) => {
 // 查询单笔转账记录
 export const getTransferList = (params) => {
   return service({
-    url: '/web3/transfer_order',
-    method: 'get',
-    data: JSON.stringify(params),
-    headers: {
-      'Content-Type': 'application/json'
-    }
+    url: `/web3/transfer_order?${qs.stringify(params)}`,
+    method: 'get'
   })
 }
 

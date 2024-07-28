@@ -51,7 +51,7 @@
         :rules="formRules"
         :model="formLabelAlign"
       >
-        <el-form-item label="项目名称" prop="name">
+        <el-form-item label="钱包名称" prop="name">
           <el-input v-model="formLabelAlign.name" />
         </el-form-item>
         <el-form-item label="链类型" prop="assembleChain">
@@ -59,6 +59,7 @@
             v-model="formLabelAlign.assembleChain"
             clearable
             placeholder="请选择"
+            @change="handleChangeChain"
           >
             <el-option
               v-for="item in commonStore.chainsList"
@@ -105,7 +106,7 @@ const dialogVisible = ref(false)
 
 const ruleFormRef = ref('')
 const formLabelAlign = reactive({
-  name: '', // 项目名称
+  name: '', // 钱包名称
   assembleChain: '', // 链类型
   settleCurrency: '' // 结算币种
 })
@@ -140,7 +141,7 @@ const resetForm = (formEl) => {
   dialogVisible.value = false // 关闭弹窗
 }
 
-// 提交创建项目
+// 提交创建钱包
 const submitForm = async (formEl) => {
   if (!formEl) return
   await formEl.validate(async (valid, fields) => {
@@ -161,6 +162,13 @@ const submitForm = async (formEl) => {
 const refresh = () => {
   currentPage.value = 1
   queryList(1)
+}
+
+// 选择链类型后，动态查询结算币种列表
+const handleChangeChain = (chain) => {
+  // 清空结算币种的选择
+  formLabelAlign.settleCurrency = ''
+  commonStore.QueryCurrencyOptions({ chain })
 }
 
 onMounted(() => {

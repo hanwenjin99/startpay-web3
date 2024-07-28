@@ -11,9 +11,19 @@ export const useCommonStore = defineStore('common', () => {
 
   // 页面初始化数据
   const pageInitPay = ref({}) //提现页面
+  const singleTransfer = ref({}) // 单笔转账页面
+  const propertyToActionInitSelect = ref('') // 资产跳收款 | 转账 ｜ 支付页面
+
+  const SetPropertyToActionInitSelect = (newVal) => {
+    propertyToActionInitSelect.value = newVal
+  }
 
   const ChangePageInitPay = (newVal) => {
     pageInitPay.value = { ...newVal }
+  }
+
+  const ChangeSingleTransfer = (newVal) => {
+    singleTransfer.value = { ...newVal }
   }
 
   const setChainsList = (val) => {
@@ -37,8 +47,8 @@ export const useCommonStore = defineStore('common', () => {
   }
   
   // 获取币种列表
-  const QueryCurrencyOptions = async () => {
-    const { code, data } = await getCurrencyOptions()
+  const QueryCurrencyOptions = async (params) => {
+    const { code, data } = await getCurrencyOptions(params)
     if (code === 0) {
       setCurrencyOptions(data || [])
     }
@@ -60,6 +70,10 @@ export const useCommonStore = defineStore('common', () => {
     currencyOptions,
     depositOrderStatus,
     ChangePageInitPay,
-    pageInitPay
+    pageInitPay,
+    singleTransfer,
+    ChangeSingleTransfer,
+    propertyToActionInitSelect,
+    SetPropertyToActionInitSelect
   }
 })

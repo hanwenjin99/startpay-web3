@@ -110,7 +110,8 @@ const handleChangePage = (page) => {
 }
 
 onMounted(() => {
-  queryBatchPayoutList({ page: 1 })
+  // TODO - 批量转账记录 初始化不获取
+  // queryBatchPayoutList({ page: 1 })
 })
 </script>
 

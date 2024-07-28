@@ -35,9 +35,9 @@
       </el-table-column>
       <el-table-column align="right">
         <template #default="scope">
-          <el-button color="#000" plain type="info" icon="bottom" round>收款</el-button>
-          <el-button color="#000" plain type="info" icon="top" round>转账</el-button>
-          <el-button color="#000" plain type="info" icon="topRight" round>提现</el-button>
+          <el-button color="#000" plain type="info" icon="bottom" round @click="goAction('gather', scope.row)">收款</el-button>
+          <el-button color="#000" plain type="info" icon="top" round @click="goAction('/layout/account/transfer/single', scope.row)">转账</el-button>
+          <el-button color="#000" plain type="info" icon="topRight" round @click="goAction('pay', scope.row)">提现</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -49,9 +49,11 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getAccountInfo } from '@/api/account'
 
+import { useCommonStore } from '@/pinia/modules/common'
 import ShowCurrency from '@/components/showCurrency/index.vue'
 
 const router = useRouter()
+const commonStore = useCommonStore()
 
 const accountInfo = ref({})
 
@@ -60,6 +62,12 @@ const initAccountInfo = async () => {
   if (code === 0) {
     accountInfo.value = data
   }
+}
+
+// 列表跳转
+const goAction = (routePathName, item) => {
+  commonStore.SetPropertyToActionInitSelect(item)
+  router.push(routePathName)
 }
 
 onMounted(() => {
