@@ -146,16 +146,12 @@ type UserBankRespons struct {
 }
 
 type UserWithdrawOrderRespons struct {
-	Data struct {
-		Content    []UserWithdrawOrder `json:"content"`
-		TotalPages int                 `json:"total_pages"`
-		Last       bool                `json:"last"`
-		Page       int                 `json:"page"`
-		PageSize   int                 `json:"page_size"`
-		Total      float64             `json:"total"`
-	} `json:"data"`
-	Code    int    `json:"code"`
-	Message string `json:"message"`
+	Content    []UserWithdrawOrder `json:"content"`
+	TotalPages int                 `json:"total_pages"`
+	Last       bool                `json:"last"`
+	Page       int                 `json:"page"`
+	PageSize   int                 `json:"page_size"`
+	Total      float64             `json:"total"`
 }
 
 type UserWithdrawOrder struct {
