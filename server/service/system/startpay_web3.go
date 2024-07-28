@@ -423,6 +423,14 @@ func (s *StartpayWeb3Service) WithdrawOrderCreate(uwo *system.UserWithDrawOrder)
 
 func (s *StartpayWeb3Service) AdminWithdrawOrderUpdate(req *systemReq.UpdateWithdrawOrderRequst) error {
 	st, _ := strconv.Atoi(req.Status)
+
+	if st == 1 {
+		st = 2
+	} else if st == 2 {
+		st = 3
+	} else {
+		return errors.New("撤销订单不需要审核")
+	}
 	uwo := &system.UserWithDrawOrder{
 		Status:     st,
 		AdminMemo:  req.Memo,
@@ -438,10 +446,14 @@ func (s *StartpayWeb3Service) AdminWithdrawOrderUpdate(req *systemReq.UpdateWith
 
 func (s *StartpayWeb3Service) WithdrawOrderUpdate(req *systemReq.UpdateWithdrawOrderRequst) error {
 	st, _ := strconv.Atoi(req.Status)
+
+	if st != 1 {
+		return errors.New("此状态不能撤销")
+	}
 	uwo := &system.UserWithDrawOrder{
-		Status:     st,
+		Status:     4,
 		InputNote:  req.Memo,
-		StatusName: WithdrawStatus[st],
+		StatusName: WithdrawStatus[4],
 	}
 	uwo.UpdatedAt = time.Now()
 	if err := global.GVA_DB.Where("id = ? ", req.Id).Updates(uwo).Error; err != nil {
