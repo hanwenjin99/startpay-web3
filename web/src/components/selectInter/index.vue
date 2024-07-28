@@ -12,7 +12,7 @@
     <el-dialog v-model="dialogVisible" title="选择网络" width="800">
       <el-radio-group v-model="radioInter" class="groupStyle" @change="handleChange">
         <el-radio
-          v-for="item in commonStore.chainsInfoList"
+          v-for="item in commonStore.chainsList"
           :key="item.chain"
           :value="item.chain"
           size="large"
@@ -37,13 +37,13 @@ const commonStore = useCommonStore()
 
 const emits = defineEmits('handleSelectChain')
 
-const radioInter = ref(commonStore.chainsInfoList[0].chain)
-const selectInfo = ref(commonStore.chainsInfoList[0])
+const radioInter = ref(commonStore.chainsList[0].chain)
+const selectInfo = ref(commonStore.chainsList[0])
 
 const dialogVisible = ref(false)
 
 const handleChange = (key) => {
-  selectInfo.value = commonStore.chainsInfoList.filter(item => item.chain === key)[0]
+  selectInfo.value = commonStore.chainsList.filter(item => item.chain === key)[0]
   emits('handleSelectChain', selectInfo.value)
   dialogVisible.value = false
 }
