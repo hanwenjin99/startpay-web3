@@ -165,7 +165,7 @@ func (s *StartpayWeb3Api) Web3TransferCreate(requst systemReq.CreateTransferRequ
 		zap.Any("requst", requst),
 	)
 
-	srcStr := "GET" + Host + "/transaction/transfer?amount=" + requst.Amount + "&asset=" + requst.Asset + "&chain=" + requst.Chain + "&toAddress=" + requst.ToAddress + strtm
+	srcStr := "POST" + Host + "/transaction/transfer?amount=" + requst.Amount + "&asset=" + requst.Asset + "&chain=" + requst.Chain + "&toAddress=" + requst.ToAddress + strtm
 	signStr, err := s.SignMessage2(srcStr)
 
 	if err != nil {
