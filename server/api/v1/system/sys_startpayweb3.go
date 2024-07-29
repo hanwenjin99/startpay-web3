@@ -521,7 +521,7 @@ func (b *StartpayWeb3Api) GetAccountInfo(c *gin.Context) {
 		SymbolInfo := WEB3TOKENINFO[keys]
 
 		accountres.Chain = avalue.Chain
-		accountres.ID = avalue.Id
+		accountres.ID = avalue.ProjectId
 		accountres.Currency = avalue.Currency
 		accountres.ChainIcon = SymbolInfo.Chainicon
 		accountres.CurrencyIcon = SymbolInfo.Icon

@@ -190,6 +190,7 @@ type GetAccountInfo struct {
 	UsdtPrice string `json:"usdtPrice"`
 	Id        string `json:"id"`
 	Name      string `json:"name"`
+	ProjectId string `json:"projectId"`
 }
 
 type Web3ChainListRespons struct {
