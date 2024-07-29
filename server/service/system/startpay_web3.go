@@ -455,13 +455,20 @@ func (s *StartpayWeb3Service) AdminWithdrawOrderUpdate(req *systemReq.UpdateWith
 		uwo.UpdatedAt = time.Now()
 	*/
 	rqId, _ := strconv.Atoi(req.Id)
+
+	global.GVA_LOG.Error("WithdrawOrderList",
+		zap.Any("st", st),
+		zap.Any("req.Memo", req.Memo),
+		zap.Any(" WithdrawStatus[st]", WithdrawStatus[st]),
+	)
+
 	if err := global.GVA_DB.Where("id = ? ", rqId).Updates(map[string]interface{}{
 		"updated_at": time.Now(),
 		"status":     st,
 		"adminMemo":  req.Memo,
 		"statusName": WithdrawStatus[st],
 	}).Error; err != nil {
-		return errors.New("更新取现订单失败")
+		return err
 	}
 
 	return nil
@@ -487,7 +494,7 @@ func (s *StartpayWeb3Service) WithdrawOrderUpdate(req *systemReq.UpdateWithdrawO
 		"InputNote":  req.Memo,
 		"statusName": WithdrawStatus[st],
 	}).Error; err != nil {
-		return errors.New("更新取现订单失败")
+		return err
 	}
 
 	return nil
