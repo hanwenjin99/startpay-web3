@@ -1010,3 +1010,15 @@ func (b *StartpayWeb3Api) WithdrawOrderUpdate(c *gin.Context) {
 	}
 	response.OkWithDetailed("true", "更新取现订单成功", c)
 }
+
+func (b *StartpayWeb3Api) UserBillSummary(c *gin.Context) {
+	response.OkWithDetailed("true", "get成功", c)
+}
+
+func (b *StartpayWeb3Api) UserBillList(c *gin.Context) {
+	response.OkWithDetailed("true", "get成功", c)
+}
+
+func (b *StartpayWeb3Api) UserBillExport(c *gin.Context) {
+	response.OkWithDetailed("true", "get成功", c)
+}

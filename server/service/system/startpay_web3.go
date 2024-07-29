@@ -432,14 +432,22 @@ func (s *StartpayWeb3Service) AdminWithdrawOrderUpdate(req *systemReq.UpdateWith
 	} else {
 		return errors.New("订单不处于审核状态")
 	}
-	uwo := &system.UserWithDrawOrder{
-		Status:     st,
-		AdminMemo:  req.Memo,
-		StatusName: WithdrawStatus[st],
-	}
-	uwo.UpdatedAt = time.Now()
+
+	/*
+		uwo := &system.UserWithDrawOrder{
+			Status:     st,
+			AdminMemo:  req.Memo,
+			StatusName: WithdrawStatus[st],
+		}
+		uwo.UpdatedAt = time.Now()
+	*/
 	rqId, _ := strconv.Atoi(req.Id)
-	if err := global.GVA_DB.Where("id = ? ", rqId).Updates(uwo).Error; err != nil {
+	if err := global.GVA_DB.Where("id = ? ", rqId).Updates(map[string]interface{}{
+		"updated_at": time.Now(),
+		"status":     st,
+		"adminMemo":  req.Memo,
+		"statusName": WithdrawStatus[st],
+	}).Error; err != nil {
 		return errors.New("更新取现订单失败")
 	}
 
@@ -452,14 +460,20 @@ func (s *StartpayWeb3Service) WithdrawOrderUpdate(req *systemReq.UpdateWithdrawO
 	if st != 1 {
 		return errors.New("此状态不能撤销")
 	}
-	uwo := &system.UserWithDrawOrder{
+	/*uwo := &system.UserWithDrawOrder{
 		Status:     4,
 		InputNote:  req.Memo,
 		StatusName: WithdrawStatus[4],
 	}
 	uwo.UpdatedAt = time.Now()
+	*/
 	rqId, _ := strconv.Atoi(req.Id)
-	if err := global.GVA_DB.Where("id = ? ", rqId).Updates(uwo).Error; err != nil {
+	if err := global.GVA_DB.Where("id = ? ", rqId).Updates(map[string]interface{}{
+		"updated_at": time.Now(),
+		"status":     st,
+		"InputNote":  req.Memo,
+		"statusName": WithdrawStatus[st],
+	}).Error; err != nil {
 		return errors.New("更新取现订单失败")
 	}
 
