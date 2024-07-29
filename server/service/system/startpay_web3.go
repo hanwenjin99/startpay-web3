@@ -478,7 +478,7 @@ func (s *StartpayWeb3Service) WithdrawOrderUpdate(req *systemReq.UpdateWithdrawO
 	st, _ := strconv.Atoi(req.Status)
 
 	if st != 1 {
-		return errors.New("此状态不能撤销")
+		return errors.New("此状态已审核不能撤销")
 	}
 	/*uwo := &system.UserWithDrawOrder{
 		Status:     4,

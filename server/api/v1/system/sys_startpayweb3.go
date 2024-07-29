@@ -986,7 +986,7 @@ func (b *StartpayWeb3Api) AdminWithdrawOrderUpdate(c *gin.Context) {
 	err = StartpayWeb3Service.AdminWithdrawOrderUpdate(&r)
 	if err != nil {
 		global.GVA_LOG.Error("更新取现订单失败!", zap.Error(err))
-		response.FailWithDetailed("false", "更新取现订单失败", c)
+		response.FailWithDetailed("false", err.Error(), c)
 		return
 	}
 	response.OkWithDetailed("true", "更新取现订单成功", c)
@@ -1011,7 +1011,7 @@ func (b *StartpayWeb3Api) WithdrawOrderUpdate(c *gin.Context) {
 	err = StartpayWeb3Service.WithdrawOrderUpdate(&r)
 	if err != nil {
 		global.GVA_LOG.Error("更新取现订单失败!", zap.Error(err))
-		response.FailWithDetailed("false", "更新取现订单失败", c)
+		response.FailWithDetailed("false", err.Error(), c)
 		return
 	}
 	response.OkWithDetailed("true", "更新取现订单成功", c)
