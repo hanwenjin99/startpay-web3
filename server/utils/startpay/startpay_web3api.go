@@ -5,6 +5,7 @@ import (
 	"crypto/sha1"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	systemReq "github.com/flipped-aurora/gin-vue-admin/server/model/system/request"
@@ -196,6 +197,7 @@ func (s *StartpayWeb3Api) Web3TransferCreate(requst systemReq.CreateTransferRequ
 		global.GVA_LOG.Error("Web3TransferCreate web3",
 			zap.Any("POST 请求错误", err.Error()),
 		)
+		return nil, err
 	} else {
 		global.GVA_LOG.Info("Web3TransferCreate web3",
 			zap.Any("POST 请求响应:", postResponse),
@@ -203,7 +205,22 @@ func (s *StartpayWeb3Api) Web3TransferCreate(requst systemReq.CreateTransferRequ
 	}
 
 	transferRecord := Web3CreatetransferReturn{}
-	json.Unmarshal(postResponse, &transferRecord)
+	err = json.Unmarshal(postResponse, &transferRecord)
+
+	if err != nil {
+		global.GVA_LOG.Error("Web3TransferCreate web3",
+			zap.Any("Unmarshal", err.Error()),
+		)
+		return nil, err
+	}
+
+	if transferRecord.Code != 0 {
+		global.GVA_LOG.Error("Web3TransferCreate web3",
+			zap.Any("transferRecord error", transferRecord.Message),
+		)
+		return nil, errors.New(transferRecord.Message)
+	}
+
 	global.GVA_LOG.Info("Web3TransferCreate web3",
 		zap.Any("transferRecord:", transferRecord),
 	)
