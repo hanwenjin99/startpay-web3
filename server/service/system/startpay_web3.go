@@ -466,7 +466,7 @@ func (s *StartpayWeb3Service) AdminWithdrawOrderUpdate(req *systemReq.UpdateWith
 		"status":     st,
 		"adminMemo":  req.Memo,
 		"statusName": WithdrawStatus[st],
-	}).Commit().Error; err != nil {
+	}).Error; err != nil {
 		return err
 	}
 
@@ -492,7 +492,7 @@ func (s *StartpayWeb3Service) WithdrawOrderUpdate(req *systemReq.UpdateWithdrawO
 		"status":     st,
 		"InputNote":  req.Memo,
 		"statusName": WithdrawStatus[st],
-	}).Commit().Error; err != nil {
+	}).Error; err != nil {
 		return err
 	}
 
