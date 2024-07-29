@@ -861,6 +861,70 @@ func (b *StartpayWeb3Api) UserContactDelete(c *gin.Context) {
 	response.OkWithDetailed("true", "删除收款地址成功", c)
 }
 
+func (b *StartpayWeb3Api) AdminWithdrawOrderList(c *gin.Context) {
+
+	var r systemReq.GetWeb3Requst
+	r.Page = 1
+	r.PageSize = 20
+
+	err := c.ShouldBindQuery(&r)
+	if err != nil {
+		global.GVA_LOG.Error("xxx ShouldBindJSON fail", zap.Any("err", err.Error()))
+	}
+
+	global.GVA_LOG.Error("GetbankAccountList web3 db before", zap.Any("GetbankAccountList", r))
+
+	//struserId := fmt.Sprintf("%u", userId)
+
+	list, _, err := StartpayWeb3Service.AdminWithdrawOrderList(&r)
+
+	if err != nil {
+		global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		response.FailWithMessage("获取失败", c)
+		return
+	}
+
+	uws := systemRes.UserWithdrawOrderRespons{}
+
+	for _, uwvalue := range list {
+
+		uds := systemRes.UserWithdrawOrder{}
+
+		iid := int(uwvalue.ID)
+		uds.Id = strconv.Itoa(iid)
+
+		bkId, err := StartpayWeb3Service.BankAccountInfo(uwvalue.BankId)
+
+		if err != nil {
+			uds.BankInfo = bkId.BankTitle
+			uds.BankAccount.BankTitle = bkId.BankTitle
+			uds.BankAccount.EnterpriseTitle = bkId.EnterpriseTitle
+			uds.BankAccount.BankCode = bkId.BankCode
+			uds.BankAccount.ReceiverName = bkId.ReceiverName
+			uds.BankAccount.ReceiverNumber = bkId.ReceiverNumber
+			uds.BankAccount.Region = bkId.Region
+		}
+
+		uds.BankInfo = uwvalue.BankTitle
+		uds.Currency = uwvalue.Currency
+		uds.Chain = uwvalue.Chain
+		uds.Memo = uwvalue.Memo
+		uds.AdminMemo = uwvalue.AdminMemo
+		uds.InputNote = uwvalue.InputNote
+		uds.TxInfo = uwvalue.TxInfo
+		uds.StatusName = uwvalue.StatusName
+		uds.CreateTime = uwvalue.UpdatedAt
+		uds.Status = fmt.Sprintf("%v", uwvalue.Status)
+		uds.MerchantId = fmt.Sprintf("%v", uwvalue.MerchantId)
+		uds.RemittanceFee = uwvalue.RemittanceFee
+		uds.Amount = uwvalue.Amount
+		uds.TotalAmount = uwvalue.TotalAmount
+		uws.Content = append(uws.Content, uds)
+	}
+	response.OkWithDetailed(uws, "获取成功", c)
+
+}
+
 func (b *StartpayWeb3Api) WithdrawOrderList(c *gin.Context) {
 
 	var r systemReq.GetWeb3Requst
