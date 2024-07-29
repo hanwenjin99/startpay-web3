@@ -890,7 +890,9 @@ func (b *StartpayWeb3Api) WithdrawOrderList(c *gin.Context) {
 	for _, uwvalue := range list {
 
 		uds := systemRes.UserWithdrawOrder{}
-		uds.Id = fmt.Sprintf("%u", uwvalue.ID)
+
+		iid := int(uwvalue.ID)
+		uds.Id = strconv.Itoa(iid)
 
 		bkId, err := StartpayWeb3Service.BankAccountInfo(uwvalue.BankId)
 
