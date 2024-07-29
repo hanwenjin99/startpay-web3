@@ -255,7 +255,7 @@ type Web3CreatetransferReturn struct {
 	Message string `json:"message"`
 }
 
-type Web3ListtransferReturn struct {
+/*type Web3ListtransferReturn struct {
 	Content []struct {
 		Amount      string `json:"amount"`
 		Chain       string `json:"chain"`
@@ -275,6 +275,32 @@ type Web3ListtransferReturn struct {
 	PageSize   int  `json:"page_size"`
 	Total      int  `json:"total"`
 	TotalPages int  `json:"total_pages"`
+}*/
+
+type Web3ListtransferReturn struct {
+	Data struct {
+		Content []struct {
+			Id          string      `json:"id"`
+			FromAddress string      `json:"fromAddress"`
+			ToAddress   string      `json:"toAddress"`
+			Chain       string      `json:"chain"`
+			Currency    string      `json:"currency"`
+			Amount      string      `json:"amount"`
+			Gas         string      `json:"gas"`
+			GasPrice    interface{} `json:"gasPrice"`
+			Status      string      `json:"status"`
+			Txid        interface{} `json:"txid"`
+			TxTime      int         `json:"txTime"`
+			CreateTime  int         `json:"createTime"`
+		} `json:"content"`
+		TotalPages int  `json:"total_pages"`
+		Last       bool `json:"last"`
+		Page       int  `json:"page"`
+		PageSize   int  `json:"page_size"`
+		Total      int  `json:"total"`
+	} `json:"data"`
+	Code    int    `json:"code"`
+	Message string `json:"message"`
 }
 
 type Web3DepositListReturn struct {
