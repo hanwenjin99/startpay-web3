@@ -203,7 +203,7 @@ func (s *StartpayWeb3Service) Web3TransferList(userId uint, request systemReq.Ge
 		if err != nil {
 			continue
 		}
-		for _, data := range webrResp.Content {
+		for _, data := range webrResp.Data.Content {
 			tri := systemRes.TransferRecordInfo{}
 			tri.ToAddress = data.ToAddress
 			tri.Chain = data.Chain

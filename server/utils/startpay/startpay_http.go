@@ -280,18 +280,18 @@ type Web3CreatetransferReturn struct {
 type Web3ListtransferReturn struct {
 	Data struct {
 		Content []struct {
-			Id          string      `json:"id"`
-			FromAddress string      `json:"fromAddress"`
-			ToAddress   string      `json:"toAddress"`
-			Chain       string      `json:"chain"`
-			Currency    string      `json:"currency"`
-			Amount      string      `json:"amount"`
-			Gas         string      `json:"gas"`
-			GasPrice    interface{} `json:"gasPrice"`
-			Status      string      `json:"status"`
-			Txid        interface{} `json:"txid"`
-			TxTime      int         `json:"txTime"`
-			CreateTime  int         `json:"createTime"`
+			Id          string `json:"id"`
+			FromAddress string `json:"fromAddress"`
+			ToAddress   string `json:"toAddress"`
+			Chain       string `json:"chain"`
+			Currency    string `json:"currency"`
+			Amount      string `json:"amount"`
+			Gas         string `json:"gas"`
+			GasPrice    string `json:"gasPrice"`
+			Status      string `json:"status"`
+			Txid        string `json:"txid"`
+			TxTime      uint   `json:"txTime"`
+			CreateTime  uint   `json:"createTime"`
 		} `json:"content"`
 		TotalPages int  `json:"total_pages"`
 		Last       bool `json:"last"`
