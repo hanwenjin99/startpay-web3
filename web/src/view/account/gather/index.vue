@@ -31,17 +31,14 @@
         <el-table-column label="时间">
           <template #default="scope">
             <div class="date">
-              <span>{{ dayjs(scope.row.lastUpdate).format('YYYY-MM-DD') }}</span>
-              <span class="time">{{ dayjs(scope.row.lastUpdate).format('HH:mm') }}</span>
+              <span>{{ dayjs(scope.row.createTime ? scope.row.createTime * 1000 : '').format('YYYY-MM-DD') }}</span>
+              <span class="time">{{ dayjs(scope.row.createTime ? scope.row.createTime * 1000 : '').format('HH:mm') }}</span>
             </div>
           </template>
         </el-table-column>
         <el-table-column label="状态">
           <template #default="scope">
-            <div class="status">
-              <span :class="['icon', scope.row.status === 'FINISHED' ? 'finished' : '']" />
-              {{ scope.row.status === 'FINISHED' ? '已完成' : '' }}
-            </div>
+            {{ GATHER_LIST_STATUS[scope.row.status] }}
           </template>
         </el-table-column>
         <el-table-column label="从">
@@ -86,8 +83,8 @@
         <el-table-column label="金额">
           <template #default="scope">
             <div class="amount">
-              {{ `+${scope.row.amountUsd}` }}
-              <span class="smallAmount">{{ `$${scope.row.amountUsd}` }}</span>
+              {{ `+${scope.row.depositAmount}` }}
+              <span class="smallAmount">{{ `$${scope.row.depositAmount}` }}</span>
             </div>
           </template>
         </el-table-column>
@@ -106,6 +103,7 @@ import QRCode from 'qrcode'
 import dayjs from 'dayjs'
 import { useRouter } from 'vue-router'
 
+import { GATHER_LIST_STATUS } from '@/constants/constants'
 import { useCommonStore } from '@/pinia/modules/common'
 import { getDepositOrderList } from '@/api/account'
 import SelectCurrency from '@/components/selectCurrency/index.vue'
@@ -260,23 +258,6 @@ onMounted(() => {
         margin-top: 4px;
         color: grey;
         font-size: 14px;
-      }
-    }
-
-    .status {
-      display: flex;
-      align-items: center;
-      color: #000;
-
-      .icon {
-        width: 8px;
-        height: 8px;
-        margin-right: 8px;
-        border-radius: 8px;
-      }
-
-      .finished {
-        background-color: rgb(48, 190, 55);
       }
     }
 
