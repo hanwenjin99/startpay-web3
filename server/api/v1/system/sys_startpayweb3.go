@@ -970,7 +970,7 @@ func (b *StartpayWeb3Api) AdminWithdrawOrderUpdate(c *gin.Context) {
 	var r systemReq.UpdateWithdrawOrderRequst
 	err := c.ShouldBindJSON(&r)
 	if err != nil {
-		global.GVA_LOG.Error("xxx ShouldBindJSON fail", zap.Any("err", err.Error()))
+		global.GVA_LOG.Error("AdminWithdrawOrderUpdate ShouldBindJSON fail", zap.Any("err", err.Error()))
 	}
 
 	/*err = utils.Verify(r, utils.PageInfoVerify)
@@ -978,6 +978,8 @@ func (b *StartpayWeb3Api) AdminWithdrawOrderUpdate(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}*/
+
+	global.GVA_LOG.Info("AdminWithdrawOrderUpdate ShouldBindJSON ", zap.Any("request", r))
 
 	err = StartpayWeb3Service.AdminWithdrawOrderUpdate(&r)
 	if err != nil {
@@ -1001,6 +1003,8 @@ func (b *StartpayWeb3Api) WithdrawOrderUpdate(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}*/
+
+	global.GVA_LOG.Info("AdminWithdrawOrderUpdate ShouldBindJSON ", zap.Any("request", r))
 
 	err = StartpayWeb3Service.WithdrawOrderUpdate(&r)
 	if err != nil {
