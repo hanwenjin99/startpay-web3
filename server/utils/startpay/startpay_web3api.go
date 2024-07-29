@@ -160,6 +160,10 @@ func (s *StartpayWeb3Api) Web3TransferCreate(requst systemReq.CreateTransferRequ
 	Host := global.GVA_CONFIG.StartpayWeb3.Host
 	client := NewHttpClient()
 
+	global.GVA_LOG.Info("Web3TransferCreate web3",
+		zap.Any("requst", requst),
+	)
+
 	srcStr := "GET" + Host + "/transaction/transfer?amount=" + requst.Amount + "&asset=" + requst.Asset + "&chain=" + requst.Chain + "&toAddress=" + requst.ToAddress + strtm
 	signStr, err := s.SignMessage2(srcStr)
 
@@ -180,15 +184,29 @@ func (s *StartpayWeb3Api) Web3TransferCreate(requst systemReq.CreateTransferRequ
 		"toAddress": requst.ToAddress,
 	}
 
+	global.GVA_LOG.Info("Web3TransferCreate web3",
+		zap.Any("signStr", signStr),
+		zap.Any("srcStr", srcStr),
+		zap.Any("POStURL", postURL),
+		zap.Any("ApiKey", ApiKey),
+	)
+
 	postResponse, err := client.Post(postURL, postHeaders, postBody)
 	if err != nil {
-		fmt.Println("POST 请求错误:", err)
+		global.GVA_LOG.Error("Web3TransferCreate web3",
+			zap.Any("POST 请求错误", err.Error()),
+		)
 	} else {
-		fmt.Println("POST 请求响应:", string(postResponse))
+		global.GVA_LOG.Info("Web3TransferCreate web3",
+			zap.Any("POST 请求响应:", postResponse),
+		)
 	}
 
 	transferRecord := Web3CreatetransferReturn{}
 	json.Unmarshal(postResponse, &transferRecord)
+	global.GVA_LOG.Info("Web3TransferCreate web3",
+		zap.Any("transferRecord:", transferRecord),
+	)
 	return &transferRecord, nil
 }
 

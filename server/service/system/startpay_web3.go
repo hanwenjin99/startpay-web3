@@ -135,18 +135,37 @@ func (s *StartpayWeb3Service) GetAccountInfo(userId uint) ([]web3api.GetAccountI
 func (s *StartpayWeb3Service) Web3TransferCreate(userId uint, request systemReq.CreateTransferRequest) (*string, error) {
 	var projectlist []system.SysProject
 
+	global.GVA_LOG.Info("Web3TransferCreate", zap.Any("userId", userId),
+		zap.Any("userId", userId),
+		zap.Any("request", request),
+	)
+
 	_, err := global.GVA_DB.Where("user_id = ? and id =? ", userId, request.ID).Find(&projectlist).Rows()
 
 	if err != nil {
+		global.GVA_LOG.Error("Web3TransferCreate", zap.Any("userId", userId),
+			zap.Any("err", err),
+			zap.Any("request", request),
+		)
 		return nil, errors.New("查询用户交易密钥失败")
 	}
 
 	for _, pvalue := range projectlist {
 		web3 := web3api.StartpayWeb3Api{ApiKey: pvalue.AppKey, ApiSecret: pvalue.AppSecret}
+
+		global.GVA_LOG.Info("Web3TransferCreate", zap.Any("userId", userId),
+			zap.Any("pvalue.AppKey", pvalue.AppKey),
+			zap.Any("request", request),
+		)
+
 		webrResp, err := web3.Web3TransferCreate(request)
 		if err != nil {
 			return nil, err
 		}
+		global.GVA_LOG.Info("Web3TransferCreate", zap.Any("userId", userId),
+			zap.Any("webrResp", webrResp),
+			zap.Any("request", request),
+		)
 		return &webrResp.Data.Id, nil
 	}
 
