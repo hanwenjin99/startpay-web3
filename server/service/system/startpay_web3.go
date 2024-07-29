@@ -460,6 +460,7 @@ func (s *StartpayWeb3Service) AdminWithdrawOrderUpdate(req *systemReq.UpdateWith
 		zap.Any("st", st),
 		zap.Any("req.Memo", req.Memo),
 		zap.Any(" WithdrawStatus[st]", WithdrawStatus[st]),
+		zap.Any(" rqId", rqId),
 	)
 	if err := global.GVA_DB.Model(&system.UserWithDrawOrder{}).Where("id = ? ", rqId).Updates(map[string]interface{}{
 		"updated_at": time.Now(),
