@@ -156,16 +156,22 @@ func (s *StartpayWeb3Service) Web3TransferCreate(userId uint, request systemReq.
 func (s *StartpayWeb3Service) Web3TransferList(userId uint, request systemReq.GetWeb3Requst) (*systemRes.TransferListRespons, error) {
 	var projectlist []system.SysProject
 
-	if request.ID != "" {
-		_, err := global.GVA_DB.Where("pro_uuid = ? ", request.ID).Find(&projectlist).Rows()
-		if err != nil {
-			return nil, errors.New("查询用户交易密钥失败")
-		}
-	} else {
-		_, err := global.GVA_DB.Where("user_id = ? ", userId).Find(&projectlist).Rows()
-		if err != nil {
-			return nil, errors.New("查询用户交易密钥失败")
-		}
+	/*
+		if request.ID != "" {
+			_, err := global.GVA_DB.Where("pro_uuid = ? ", request.ID).Find(&projectlist).Rows()
+			if err != nil {
+				return nil, errors.New("查询用户交易密钥失败")
+			}
+		} else {
+			_, err := global.GVA_DB.Where("user_id = ? ", userId).Find(&projectlist).Rows()
+			if err != nil {
+				return nil, errors.New("查询用户交易密钥失败")
+			}
+		}*/
+
+	_, err := global.GVA_DB.Where("user_id = ? ", userId).Find(&projectlist).Rows()
+	if err != nil {
+		return nil, errors.New("查询用户交易密钥失败")
 	}
 
 	transferRes := systemRes.TransferListRespons{}
@@ -173,6 +179,7 @@ func (s *StartpayWeb3Service) Web3TransferList(userId uint, request systemReq.Ge
 		web3 := web3api.StartpayWeb3Api{ApiKey: pvalue.AppKey, ApiSecret: pvalue.AppSecret}
 		request.Currency = pvalue.SettleCurrency
 		request.Chain = pvalue.AssembleChain
+		request.ID = pvalue.ProUuid
 		webrResp, err := web3.Web3TransferList(pvalue.ProUuid, request)
 		if err != nil {
 			continue
@@ -254,7 +261,7 @@ func (s *StartpayWeb3Service) GetDepositAddress(userId uint, Page int, PageSize 
 func (s *StartpayWeb3Service) GetDepositOrder(userId uint, request systemReq.GetWeb3Requst) (*systemRes.DepositOrederRespons, error) {
 	var projectlist []system.SysProject
 
-	if request.ID != "" {
+	/*if request.ID != "" {
 		_, err := global.GVA_DB.Where("pro_uuid = ? ", request.ID).Find(&projectlist).Rows()
 		if err != nil {
 			return nil, errors.New("查询用户交易密钥失败")
@@ -264,6 +271,11 @@ func (s *StartpayWeb3Service) GetDepositOrder(userId uint, request systemReq.Get
 		if err != nil {
 			return nil, errors.New("查询用户交易密钥失败")
 		}
+	}*/
+
+	_, err := global.GVA_DB.Where("user_id = ? ", userId).Find(&projectlist).Rows()
+	if err != nil {
+		return nil, errors.New("查询用户交易密钥失败")
 	}
 
 	depositRes := systemRes.DepositOrederRespons{}
@@ -271,6 +283,7 @@ func (s *StartpayWeb3Service) GetDepositOrder(userId uint, request systemReq.Get
 		web3 := web3api.StartpayWeb3Api{ApiKey: pvalue.AppKey, ApiSecret: pvalue.AppSecret}
 		request.Currency = pvalue.SettleCurrency
 		request.Chain = pvalue.AssembleChain
+		request.ID = pvalue.ProUuid
 
 		webrResp, err := web3.GetDepositOrder(pvalue.AssembleAddress, request)
 		if err != nil {
