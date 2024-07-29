@@ -14,6 +14,13 @@ import (
 	"time"
 )
 
+var WithdrawStatus = map[int]string{
+	1: "待审核",
+	2: "审核中",
+	3: "完成",
+	4: "撤销",
+}
+
 type StartpayWeb3Service struct {
 }
 
@@ -128,18 +135,37 @@ func (s *StartpayWeb3Service) GetAccountInfo(userId uint) ([]web3api.GetAccountI
 func (s *StartpayWeb3Service) Web3TransferCreate(userId uint, request systemReq.CreateTransferRequest) (*string, error) {
 	var projectlist []system.SysProject
 
-	_, err := global.GVA_DB.Where("user_id = ? and id =? ", userId, request.ID).Find(&projectlist).Rows()
+	global.GVA_LOG.Info("Web3TransferCreate", zap.Any("userId", userId),
+		zap.Any("userId", userId),
+		zap.Any("request", request),
+	)
+
+	_, err := global.GVA_DB.Where("user_id = ? and pro_uuid =? ", userId, request.ID).Find(&projectlist).Rows()
 
 	if err != nil {
+		global.GVA_LOG.Error("Web3TransferCreate", zap.Any("userId", userId),
+			zap.Any("err", err),
+			zap.Any("request", request),
+		)
 		return nil, errors.New("查询用户交易密钥失败")
 	}
 
 	for _, pvalue := range projectlist {
 		web3 := web3api.StartpayWeb3Api{ApiKey: pvalue.AppKey, ApiSecret: pvalue.AppSecret}
+
+		global.GVA_LOG.Info("Web3TransferCreate", zap.Any("userId", userId),
+			zap.Any("pvalue.AppKey", pvalue.AppKey),
+			zap.Any("request", request),
+		)
+
 		webrResp, err := web3.Web3TransferCreate(request)
 		if err != nil {
 			return nil, err
 		}
+		global.GVA_LOG.Info("Web3TransferCreate", zap.Any("userId", userId),
+			zap.Any("webrResp", webrResp),
+			zap.Any("request", request),
+		)
 		return &webrResp.Data.Id, nil
 	}
 
@@ -149,16 +175,22 @@ func (s *StartpayWeb3Service) Web3TransferCreate(userId uint, request systemReq.
 func (s *StartpayWeb3Service) Web3TransferList(userId uint, request systemReq.GetWeb3Requst) (*systemRes.TransferListRespons, error) {
 	var projectlist []system.SysProject
 
-	if request.ID != "" {
-		_, err := global.GVA_DB.Where("pro_uuid = ? ", request.ID).Find(&projectlist).Rows()
-		if err != nil {
-			return nil, errors.New("查询用户交易密钥失败")
-		}
-	} else {
-		_, err := global.GVA_DB.Where("user_id = ? ", userId).Find(&projectlist).Rows()
-		if err != nil {
-			return nil, errors.New("查询用户交易密钥失败")
-		}
+	/*
+		if request.ID != "" {
+			_, err := global.GVA_DB.Where("pro_uuid = ? ", request.ID).Find(&projectlist).Rows()
+			if err != nil {
+				return nil, errors.New("查询用户交易密钥失败")
+			}
+		} else {
+			_, err := global.GVA_DB.Where("user_id = ? ", userId).Find(&projectlist).Rows()
+			if err != nil {
+				return nil, errors.New("查询用户交易密钥失败")
+			}
+		}*/
+
+	_, err := global.GVA_DB.Where("user_id = ? ", userId).Find(&projectlist).Rows()
+	if err != nil {
+		return nil, errors.New("查询用户交易密钥失败")
 	}
 
 	transferRes := systemRes.TransferListRespons{}
@@ -166,11 +198,12 @@ func (s *StartpayWeb3Service) Web3TransferList(userId uint, request systemReq.Ge
 		web3 := web3api.StartpayWeb3Api{ApiKey: pvalue.AppKey, ApiSecret: pvalue.AppSecret}
 		request.Currency = pvalue.SettleCurrency
 		request.Chain = pvalue.AssembleChain
+		request.ID = pvalue.ProUuid
 		webrResp, err := web3.Web3TransferList(pvalue.ProUuid, request)
 		if err != nil {
 			continue
 		}
-		for _, data := range webrResp.Content {
+		for _, data := range webrResp.Data.Content {
 			tri := systemRes.TransferRecordInfo{}
 			tri.ToAddress = data.ToAddress
 			tri.Chain = data.Chain
@@ -247,7 +280,7 @@ func (s *StartpayWeb3Service) GetDepositAddress(userId uint, Page int, PageSize 
 func (s *StartpayWeb3Service) GetDepositOrder(userId uint, request systemReq.GetWeb3Requst) (*systemRes.DepositOrederRespons, error) {
 	var projectlist []system.SysProject
 
-	if request.ID != "" {
+	/*if request.ID != "" {
 		_, err := global.GVA_DB.Where("pro_uuid = ? ", request.ID).Find(&projectlist).Rows()
 		if err != nil {
 			return nil, errors.New("查询用户交易密钥失败")
@@ -257,6 +290,11 @@ func (s *StartpayWeb3Service) GetDepositOrder(userId uint, request systemReq.Get
 		if err != nil {
 			return nil, errors.New("查询用户交易密钥失败")
 		}
+	}*/
+
+	_, err := global.GVA_DB.Where("user_id = ? ", userId).Find(&projectlist).Rows()
+	if err != nil {
+		return nil, errors.New("查询用户交易密钥失败")
 	}
 
 	depositRes := systemRes.DepositOrederRespons{}
@@ -264,12 +302,13 @@ func (s *StartpayWeb3Service) GetDepositOrder(userId uint, request systemReq.Get
 		web3 := web3api.StartpayWeb3Api{ApiKey: pvalue.AppKey, ApiSecret: pvalue.AppSecret}
 		request.Currency = pvalue.SettleCurrency
 		request.Chain = pvalue.AssembleChain
+		request.ID = pvalue.ProUuid
 
 		webrResp, err := web3.GetDepositOrder(pvalue.AssembleAddress, request)
 		if err != nil {
 			continue
 		}
-		for _, data := range webrResp.Data {
+		for _, data := range webrResp.Data.Data {
 			tri := systemRes.DepositOrederInfo{}
 			tri.Id = data.Id
 			tri.Amount, _ = strconv.ParseFloat(data.Amount, 64)
@@ -290,10 +329,18 @@ func (s *StartpayWeb3Service) GetDepositOrder(userId uint, request systemReq.Get
 			tri.TxHash = data.TxHash
 			tri.DepositAmountUsd = 0
 			tri.DepositAmount, _ = strconv.ParseFloat(data.DepositAmount, 64)
+			global.GVA_LOG.Info("depositRes.Content", zap.Any("depositRes.Content", depositRes.Content),
+				zap.Any("data.Address", data.Address),
+				zap.Any("data.Token", data.Token),
+				zap.Any("data.Chain", data.Chain),
+			)
 			depositRes.Content = append(depositRes.Content, tri)
 		}
+		global.GVA_LOG.Info("depositRes proname:", zap.Any("depositRes", depositRes), zap.Any("pvalue.ProName", pvalue.ProName))
 
 	}
+
+	global.GVA_LOG.Info("depositRes end ", zap.Any("depositRes", depositRes))
 
 	return &depositRes, nil
 }
@@ -338,6 +385,16 @@ func (s *StartpayWeb3Service) BankAccountCreate(ub *system.UserBank) error {
 	return nil
 }
 
+func (s *StartpayWeb3Service) BankAccountInfo(bankid string) (*system.UserBank, error) {
+	var userBank system.UserBank
+	bid, _ := strconv.Atoi(bankid)
+	_, err := global.GVA_DB.Where(" id = ? ", bid).First(&userBank).Rows()
+	if err != nil {
+		return nil, err
+	}
+	return &userBank, nil
+}
+
 func (s *StartpayWeb3Service) BankAccountDelete(ub *system.UserBank) error {
 	if err := global.GVA_DB.Where("id = ? ", ub.ID).Delete(&system.UserBank{}).Error; err != nil {
 		return errors.New("删除bank信息失败")
@@ -363,6 +420,36 @@ func (s *StartpayWeb3Service) UserContactDelete(uw *system.Userwallet) error {
 	}
 
 	return nil
+}
+
+func (s *StartpayWeb3Service) AdminWithdrawOrderList(reInfo *systemReq.GetWeb3Requst) (list []system.UserWithDrawOrder, total int64, err error) {
+	limit := reInfo.PageSize
+	offset := reInfo.PageSize * (reInfo.Page - 1)
+	db := global.GVA_DB.Model(&system.UserWithDrawOrder{})
+	var uwoList []system.UserWithDrawOrder
+	err = db.Count(&total).Error
+	global.GVA_LOG.Error("WithdrawOrderList",
+		zap.Any("limit", limit),
+		zap.Any("offset", offset),
+		zap.Any("total", total),
+	)
+
+	if err != nil {
+		global.GVA_LOG.Error("WithdrawOrderList",
+			zap.Any("limit", limit),
+			zap.Any("offset", offset),
+			zap.Any("total", total),
+		)
+		return
+	}
+
+	_, err = db.Limit(limit).Offset(offset).Find(&uwoList).Rows()
+
+	global.GVA_LOG.Error("WithdrawOrderList",
+		zap.Any("uwoList", uwoList),
+		zap.Any("err", err),
+	)
+	return uwoList, total, err
 }
 
 func (s *StartpayWeb3Service) WithdrawOrderList(userId uint, reInfo *systemReq.GetWeb3Requst) (list []system.UserWithDrawOrder, total int64, err error) {
@@ -396,6 +483,8 @@ func (s *StartpayWeb3Service) WithdrawOrderList(userId uint, reInfo *systemReq.G
 }
 
 func (s *StartpayWeb3Service) WithdrawOrderCreate(uwo *system.UserWithDrawOrder) error {
+	uwo.StatusName = WithdrawStatus[1]
+	uwo.Status = 1
 	err := global.GVA_DB.Create(&uwo).Error
 	if err != nil {
 		return err
@@ -405,13 +494,38 @@ func (s *StartpayWeb3Service) WithdrawOrderCreate(uwo *system.UserWithDrawOrder)
 
 func (s *StartpayWeb3Service) AdminWithdrawOrderUpdate(req *systemReq.UpdateWithdrawOrderRequst) error {
 	st, _ := strconv.Atoi(req.Status)
-	uwo := &system.UserWithDrawOrder{
-		Status:    st,
-		AdminMemo: req.Memo,
+
+	if st == 1 {
+		st = 2
+	} else if st == 2 {
+		st = 3
+	} else {
+		return errors.New("订单不处于审核状态")
 	}
-	uwo.UpdatedAt = time.Now()
-	if err := global.GVA_DB.Where("id = ? ", req.Id).Updates(uwo).Error; err != nil {
-		return errors.New("更新取现订单失败")
+
+	/*
+		uwo := &system.UserWithDrawOrder{
+			Status:     st,
+			AdminMemo:  req.Memo,
+			StatusName: WithdrawStatus[st],
+		}
+		uwo.UpdatedAt = time.Now()
+	*/
+	rqId, _ := strconv.Atoi(req.Id)
+
+	global.GVA_LOG.Error("WithdrawOrderList",
+		zap.Any("st", st),
+		zap.Any("req.Memo", req.Memo),
+		zap.Any(" WithdrawStatus[st]", WithdrawStatus[st]),
+		zap.Any(" rqId", rqId),
+	)
+	if err := global.GVA_DB.Model(&system.UserWithDrawOrder{}).Where("id = ? ", rqId).Updates(map[string]interface{}{
+		"updated_at": time.Now(),
+		"status":     st,
+		"adminMemo":  req.Memo,
+		"statusName": WithdrawStatus[st],
+	}).Error; err != nil {
+		return err
 	}
 
 	return nil
@@ -419,13 +533,25 @@ func (s *StartpayWeb3Service) AdminWithdrawOrderUpdate(req *systemReq.UpdateWith
 
 func (s *StartpayWeb3Service) WithdrawOrderUpdate(req *systemReq.UpdateWithdrawOrderRequst) error {
 	st, _ := strconv.Atoi(req.Status)
-	uwo := &system.UserWithDrawOrder{
-		Status: st,
-		Memo:   req.Memo,
+
+	if st != 1 {
+		return errors.New("此状态已审核不能撤销")
+	}
+	/*uwo := &system.UserWithDrawOrder{
+		Status:     4,
+		InputNote:  req.Memo,
+		StatusName: WithdrawStatus[4],
 	}
 	uwo.UpdatedAt = time.Now()
-	if err := global.GVA_DB.Where("id = ? ", req.Id).Updates(uwo).Error; err != nil {
-		return errors.New("更新取现订单失败")
+	*/
+	rqId, _ := strconv.Atoi(req.Id)
+	if err := global.GVA_DB.Model(&system.UserWithDrawOrder{}).Where("id = ? ", rqId).Updates(map[string]interface{}{
+		"updated_at": time.Now(),
+		"status":     st,
+		"InputNote":  req.Memo,
+		"statusName": WithdrawStatus[st],
+	}).Error; err != nil {
+		return err
 	}
 
 	return nil

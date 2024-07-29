@@ -36,11 +36,15 @@ func (s *StartpayRouter) InitStartpayRouter(Router *gin.RouterGroup) {
 		web3RouterWithoutRecord.POST("merchant/contact/delete", startpayWeb3Api.UserContactDelete)
 
 		web3RouterWithoutRecord.GET("merchant/withdraw/list", startpayWeb3Api.WithdrawOrderList)
-		web3RouterWithoutRecord.GET("admin/withdraw/list", startpayWeb3Api.WithdrawOrderList)
+		web3RouterWithoutRecord.GET("admin/withdraw/list", startpayWeb3Api.AdminWithdrawOrderList)
 		web3RouterWithoutRecord.POST("merchant/withdraw/create", startpayWeb3Api.WithdrawOrderCreate)
 		web3RouterWithoutRecord.POST("merchant/withdraw/update", startpayWeb3Api.WithdrawOrderUpdate)
-		web3RouterWithoutRecord.POST("admin/withdraw/update", startpayWeb3Api.WithdrawOrderUpdate)
+		web3RouterWithoutRecord.POST("admin/withdraw/update", startpayWeb3Api.AdminWithdrawOrderUpdate)
 
+		web3RouterWithoutRecord.GET("bill/summary", startpayWeb3Api.UserBillSummary)
+		web3RouterWithoutRecord.GET("bill/list", startpayWeb3Api.UserBillList)
+		web3RouterWithoutRecord.GET("list/export", startpayWeb3Api.UserBillExport)
+		web3RouterWithoutRecord.GET("deposit_order_status", startpayWeb3Api.DepositOrderStatus)
 	}
 	{
 		web3Router.POST("get_projectlist", startpayWeb3Api.GetProjectList)

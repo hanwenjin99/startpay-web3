@@ -5,6 +5,7 @@ import (
 	"crypto/sha1"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	systemReq "github.com/flipped-aurora/gin-vue-admin/server/model/system/request"
@@ -160,7 +161,11 @@ func (s *StartpayWeb3Api) Web3TransferCreate(requst systemReq.CreateTransferRequ
 	Host := global.GVA_CONFIG.StartpayWeb3.Host
 	client := NewHttpClient()
 
-	srcStr := "GET" + Host + "/transaction/transfer?amount=" + requst.Amount + "&asset=" + requst.Asset + "&chain=" + requst.Chain + "&toAddress=" + requst.ToAddress + strtm
+	global.GVA_LOG.Info("Web3TransferCreate web3",
+		zap.Any("requst", requst),
+	)
+
+	srcStr := "POST" + Host + "/transaction/transfer?amount=" + requst.Amount + "&asset=" + requst.Asset + "&chain=" + requst.Chain + "&toAddress=" + requst.ToAddress + strtm
 	signStr, err := s.SignMessage2(srcStr)
 
 	if err != nil {
@@ -180,15 +185,45 @@ func (s *StartpayWeb3Api) Web3TransferCreate(requst systemReq.CreateTransferRequ
 		"toAddress": requst.ToAddress,
 	}
 
+	global.GVA_LOG.Info("Web3TransferCreate web3",
+		zap.Any("signStr", signStr),
+		zap.Any("srcStr", srcStr),
+		zap.Any("POStURL", postURL),
+		zap.Any("ApiKey", ApiKey),
+	)
+
 	postResponse, err := client.Post(postURL, postHeaders, postBody)
 	if err != nil {
-		fmt.Println("POST 请求错误:", err)
+		global.GVA_LOG.Error("Web3TransferCreate web3",
+			zap.Any("POST 请求错误", err.Error()),
+		)
+		return nil, err
 	} else {
-		fmt.Println("POST 请求响应:", string(postResponse))
+		global.GVA_LOG.Info("Web3TransferCreate web3",
+			zap.Any("POST 请求响应:", postResponse),
+		)
 	}
 
 	transferRecord := Web3CreatetransferReturn{}
-	json.Unmarshal(postResponse, &transferRecord)
+	err = json.Unmarshal(postResponse, &transferRecord)
+
+	if err != nil {
+		global.GVA_LOG.Error("Web3TransferCreate web3",
+			zap.Any("Unmarshal", err.Error()),
+		)
+		return nil, err
+	}
+
+	if transferRecord.Code != 0 {
+		global.GVA_LOG.Error("Web3TransferCreate web3",
+			zap.Any("transferRecord error", transferRecord.Message),
+		)
+		return nil, errors.New(transferRecord.Message)
+	}
+
+	global.GVA_LOG.Info("Web3TransferCreate web3",
+		zap.Any("transferRecord:", transferRecord),
+	)
 	return &transferRecord, nil
 }
 

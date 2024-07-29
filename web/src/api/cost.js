@@ -5,7 +5,7 @@ import service from '@/utils/request'
 // 获取账单和趋势数据
 export const getBillSummary = (month) => {
   return service({
-    url: `/backend/bill/summary?month=${month}`,
+    url: `/web3/bill/summary?month=${month}`,
     method: 'get'
   })
 }
@@ -13,7 +13,7 @@ export const getBillSummary = (month) => {
 // 查询费用明细
 export const getBillList = (params) => {
   return service({
-    url: `/backend/bill/list?${qs.stringify({
+    url: `/web3/bill/list?${qs.stringify({
       ...params,
       pageSize: 20
     })}`,
@@ -24,7 +24,7 @@ export const getBillList = (params) => {
 // 导出明细文件
 export const exportBillList = (month) => {
   return service({
-    url: `/backend/bill/list/export?month=${month}`,
+    url: `/web3/list/export?month=${month}`,
     method: 'get'
   })
 }
