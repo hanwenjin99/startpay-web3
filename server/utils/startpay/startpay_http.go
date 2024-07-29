@@ -277,25 +277,29 @@ type Web3ListtransferReturn struct {
 }
 
 type Web3DepositListReturn struct {
-	Data []struct {
-		Address           string   `json:"address"`
-		Amount            string   `json:"amount"`
-		AmountUsd         string   `json:"amountUsd"`
-		Chain             string   `json:"chain"`
-		CreateTime        uint     `json:"createTime"`
-		DepositAmount     string   `json:"depositAmount"`
-		FinishedTime      int      `json:"finishedTime"`
-		FromAddress       string   `json:"fromAddress"`
-		Id                string   `json:"id"`
-		MerchantAddressId string   `json:"merchantAddressId"`
-		OrderModeStatus   string   `json:"orderModeStatus"`
-		SettleTxid        string   `json:"settleTxid"`
-		Status            string   `json:"status"`
-		Token             string   `json:"token"`
-		TxHash            string   `json:"txHash"`
-		TxList            []string `json:"txList"`
+	Data struct {
+		Total    int `json:"total"`
+		Page     int `json:"page"`
+		PageSize int `json:"pageSize"`
+		Data     []struct {
+			Id                string `json:"id"`
+			MerchantAddressId string `json:"merchantAddressId"`
+			Chain             string `json:"chain"`
+			Token             string `json:"token"`
+			Address           string `json:"address"`
+			DepositAmount     string `json:"depositAmount"`
+			Amount            string `json:"amount"`
+			AmountUsd         string `json:"amountUsd"`
+			Status            string `json:"status"`
+			CreateTime        uint   `json:"createTime"`
+			FinishedTime      int    `json:"finishedTime"`
+			TxHash            string `json:"txHash"`
+			FromAddress       string `json:"fromAddress"`
+			SettleTxid        string `json:"settleTxid"`
+			TxList            string `json:"txList"`
+			OrderModeStatus   string `json:"orderModeStatus"`
+		} `json:"data"`
 	} `json:"data"`
-	Page     int `json:"page"`
-	PageSize int `json:"pageSize"`
-	Total    int `json:"total"`
+	Code    int    `json:"code"`
+	Message string `json:"message"`
 }

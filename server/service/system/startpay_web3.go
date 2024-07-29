@@ -289,7 +289,7 @@ func (s *StartpayWeb3Service) GetDepositOrder(userId uint, request systemReq.Get
 		if err != nil {
 			continue
 		}
-		for _, data := range webrResp.Data {
+		for _, data := range webrResp.Data.Data {
 			tri := systemRes.DepositOrederInfo{}
 			tri.Id = data.Id
 			tri.Amount, _ = strconv.ParseFloat(data.Amount, 64)
