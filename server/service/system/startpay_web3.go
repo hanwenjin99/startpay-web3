@@ -310,10 +310,19 @@ func (s *StartpayWeb3Service) GetDepositOrder(userId uint, request systemReq.Get
 			tri.TxHash = data.TxHash
 			tri.DepositAmountUsd = 0
 			tri.DepositAmount, _ = strconv.ParseFloat(data.DepositAmount, 64)
+			global.GVA_LOG.Info("depositRes.Content", zap.Any("depositRes.Content", depositRes.Content),
+				zap.Any("data.Address", data.Address),
+				zap.Any("data.Token", data.Token),
+				zap.Any("data.Chain", data.Chain),
+			)
 			depositRes.Content = append(depositRes.Content, tri)
 		}
+		global.GVA_LOG.Info("depositRes proname:", zap.Any("depositRes", depositRes),zap.Any("pvalue.ProName", pvalue.ProName),
+		)
 
 	}
+
+	global.GVA_LOG.Info("depositRes end ", zap.Any("depositRes", depositRes),
 
 	return &depositRes, nil
 }
