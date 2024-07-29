@@ -21,7 +21,7 @@ export const getCurrencyOptions = (params) => {
 // 获取 收款记录 状态列表
 export const getDepositOrderStatus = () => {
   return service({
-    url: '/backend/options/deposit_order_status',
-    method: 'post'
+    url: '/web3/deposit_order_status',
+    method: 'get'
   })
 }

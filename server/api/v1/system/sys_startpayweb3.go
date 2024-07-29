@@ -1028,3 +1028,7 @@ func (b *StartpayWeb3Api) UserBillList(c *gin.Context) {
 func (b *StartpayWeb3Api) UserBillExport(c *gin.Context) {
 	response.OkWithDetailed("true", "get成功", c)
 }
+
+func (b *StartpayWeb3Api) DepositOrderStatus(c *gin.Context) {
+	response.OkWithDetailed("true", "get成功", c)
+}
