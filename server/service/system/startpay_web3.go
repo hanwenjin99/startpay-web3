@@ -388,10 +388,23 @@ func (s *StartpayWeb3Service) BankAccountCreate(ub *system.UserBank) error {
 func (s *StartpayWeb3Service) BankAccountInfo(bankid string) (*system.UserBank, error) {
 	var userBank system.UserBank
 	bid, _ := strconv.Atoi(bankid)
+
+	global.GVA_LOG.Error("BankAccountInfo",
+		zap.Any("bankid", bankid),
+		zap.Any("bid", bid),
+	)
 	_, err := global.GVA_DB.Where(" id = ? ", bid).First(&userBank).Rows()
 	if err != nil {
+		global.GVA_LOG.Error("BankAccountInfo",
+			zap.Any("err", err.Error()),
+			zap.Any("bid", bid),
+		)
 		return nil, err
 	}
+	global.GVA_LOG.Info("BankAccountInfo",
+		zap.Any("userBank", userBank),
+		zap.Any("bid", bid),
+	)
 	return &userBank, nil
 }
 

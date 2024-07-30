@@ -509,11 +509,14 @@ func (b *StartpayWeb3Api) GetAccountInfo(c *gin.Context) {
 
 	aacountResp := systemRes.GetAccountInfoRespons{}
 
+	totalamount := 0.0
+
 	for _, avalue := range AccountReturn {
 		accountres := systemRes.Web3AccountInfo{}
 		accountres.Balance, _ = strconv.ParseFloat(avalue.Balance, 64)
 		accountres.UsdPrice, _ = strconv.ParseFloat(avalue.UsdtPrice, 64)
 		accountres.AmountUsd = accountres.UsdPrice * accountres.Balance
+		totalamount += accountres.AmountUsd
 		accountres.Address = avalue.Address
 		accountres.WalletName = avalue.Name
 
@@ -539,6 +542,8 @@ func (b *StartpayWeb3Api) GetAccountInfo(c *gin.Context) {
 
 		aacountResp.AccountInfo = append(aacountResp.AccountInfo, accountres)
 	}
+	aacountResp.AssetValuationAmount = totalamount
+	aacountResp.AssetValuationCurrency = "USTD"
 	response.OkWithDetailed(aacountResp, "获取account成功", c)
 }
 
@@ -960,7 +965,7 @@ func (b *StartpayWeb3Api) WithdrawOrderList(c *gin.Context) {
 
 		bkId, err := StartpayWeb3Service.BankAccountInfo(uwvalue.BankId)
 
-		if err != nil {
+		if err == nil {
 			uds.BankInfo = bkId.BankTitle
 			uds.BankAccount.BankTitle = bkId.BankTitle
 			uds.BankAccount.EnterpriseTitle = bkId.EnterpriseTitle
