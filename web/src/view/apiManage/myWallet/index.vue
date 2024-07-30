@@ -11,8 +11,9 @@
     <!-- 表格 -->
     <el-table :data="walletList" style="width: 100%">
       <el-table-column label="链类型" prop="chain" />
-      <el-table-column label="商户关联ID" prop="merchantAddressId" />
-      <el-table-column label="关联项目" prop="projectName" />
+      <!-- TODO - 隐藏商户关联id -->
+      <!-- <el-table-column label="商户关联ID" prop="merchantAddressId" /> -->
+      <el-table-column label="钱包名称" prop="projectName" />
       <el-table-column label="地址">
         <template #default="scope">
           <div class="address">
