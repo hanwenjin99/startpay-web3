@@ -960,7 +960,7 @@ func (b *StartpayWeb3Api) WithdrawOrderList(c *gin.Context) {
 
 		bkId, err := StartpayWeb3Service.BankAccountInfo(uwvalue.BankId)
 
-		if err != nil {
+		if err == nil {
 			uds.BankInfo = bkId.BankTitle
 			uds.BankAccount.BankTitle = bkId.BankTitle
 			uds.BankAccount.EnterpriseTitle = bkId.EnterpriseTitle
