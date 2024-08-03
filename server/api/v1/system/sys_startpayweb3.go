@@ -558,6 +558,7 @@ func (b *StartpayWeb3Api) GetAccountInfo(c *gin.Context) {
 		accountres.TransferEnable = FeeReturn.TransferEnable
 		accountres.TransferFeerate1 = FeeReturn.TransferFeerate1
 		accountres.TransferFeerate2 = FeeReturn.TransferFeerate2
+		accountres.MaxBound = FeeReturn.Maxbound
 
 		aacountResp.AccountInfo = append(aacountResp.AccountInfo, accountres)
 	}

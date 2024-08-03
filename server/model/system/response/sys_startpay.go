@@ -110,9 +110,9 @@ type Web3AccountInfo struct {
 	TransferFeerate1       float64 `json:"transferFeerate1"`
 	TransferFeerate2       float64 `json:"transferFeerate2"`
 
-	ChargeEnable   int     `json:"chargeEnable"`
-	TransferEnable int     `json:"transferEnable"`
-	MaxBound       float64 `json:"maxBound"`
+	ChargeEnable   int   `json:"chargeEnable"`
+	TransferEnable int   `json:"transferEnable"`
+	MaxBound       int64 `json:"maxBound"`
 }
 
 type Web3ChainListRespons struct {

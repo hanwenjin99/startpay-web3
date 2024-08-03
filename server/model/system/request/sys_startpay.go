@@ -87,6 +87,7 @@ type CreateTransferRequest struct {
 	Amount      string  `json:"amount"`
 	Asset       string  `json:"asset"`
 	Chain       string  `json:"chain"`
+	ProjectId   int     `json:"projectId"`
 	EmailCode   string  `json:"emailCode"`
 	GasDefault  float64 `json:"gasDefault"`
 	GoogleCode  string  `json:"googleCode"`
