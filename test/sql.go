@@ -107,3 +107,71 @@ UNIQUE KEY unique_index_name (`merchantId`, `bankId`,`currency`,`chain`,`created
 
 
 
+CREATE TABLE `user_contract` (
+`id` bigint unsigned NOT NULL AUTO_INCREMENT,
+`merchantId` bigint    NOT NULL COMMENT '用户ID',
+`created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+`updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+`deleted_at` datetime  DEFAULT NULL,
+`max_bound` bigint    NOT NULL COMMENT 'max_bound',
+
+`withdraw_enable` int    NOT NULL COMMENT 'withdraw_enable',
+`charge_enable` int    NOT NULL COMMENT 'charge_enable',
+`transfer_enable` int    NOT NULL COMMENT 'transfer_enable',
+
+`currency` varchar(64) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'currency',
+`chain` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'chain',
+`withdraw_feeamount` DOUBLE(16, 5)  DEFAULT NULL COMMENT 'withdraw_feeamount',
+`desposit_feeamount` DOUBLE(16, 5)  DEFAULT NULL COMMENT 'desposit_feeamount',
+`charge_feeamount` DOUBLE(16, 5)  DEFAULT NULL COMMENT 'charge_feeamount',
+`transfer_feeamount` DOUBLE(16, 5)  DEFAULT NULL COMMENT 'transfer_feeamount',
+`withdraw_feerate1` DOUBLE(16, 5)  DEFAULT NULL COMMENT 'withdraw_feerate1',
+`withdraw_feerate2` DOUBLE(16, 5)  DEFAULT NULL COMMENT 'withdraw_feerate2',
+`desposit_feerate1` DOUBLE(16, 5)  DEFAULT NULL COMMENT 'desposit_feerate1',
+`desposit_feerate2` DOUBLE(16, 5)  DEFAULT NULL COMMENT 'desposit_feerate2',
+`charge_feerate1` DOUBLE(16, 5)  DEFAULT NULL COMMENT 'charge_feerate1',
+`charge_feerate2` DOUBLE(16, 5)  DEFAULT NULL COMMENT 'charge_feerate2',
+`transfer_feerate1` DOUBLE(16, 5)  DEFAULT NULL COMMENT 'transfer_feerate1',
+`transfer_feerate2` DOUBLE(16, 5)  DEFAULT NULL COMMENT 'transfer_feerate2',
+PRIMARY KEY (`id`),
+KEY `idx_merchantId` (`merchantId`),
+KEY `idx_currency` (`currency`),
+KEY `idx_chain` (`chain`),
+UNIQUE KEY unique_index_name (`merchantId`,`currency`, `chain`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+
+CREATE TABLE `user_charge_order` (
+`id` bigint unsigned NOT NULL AUTO_INCREMENT,
+`merchantId` bigint  NOT NULL COMMENT '用户ID',
+`merchantName` varchar(128)  COLLATE utf8mb4_general_ci  NOT NULL COMMENT 'merchantName',
+`bankId` varchar(128)  COLLATE utf8mb4_general_ci  NOT NULL COMMENT 'bankId',
+`bankTitle` varchar(256)  COLLATE utf8mb4_general_ci  NOT NULL COMMENT 'bankTitle',
+`created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+`updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+`deleted_at` datetime  DEFAULT NULL,
+`currency` varchar(64) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'currency',
+`chain` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'chain',
+`amount` DOUBLE(16, 5)  DEFAULT NULL COMMENT 'amount',
+`fee`    DOUBLE(16, 5)  DEFAULT NULL COMMENT 'fee',
+`remittanceFee` DOUBLE(16, 5)  DEFAULT NULL COMMENT 'remittanceFee',
+`totalAmount` DOUBLE(16, 5)  DEFAULT NULL COMMENT 'totalAmount',
+`status` int   DEFAULT 1  COMMENT 'status 1: 完成,2:待审核 3:审核完成 4: 进行中 5: 完成',
+`statusName` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'statusName',
+`txInfo` varchar(256) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'txInfo',
+`txCertificationUrl` varchar(128) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'txCertificationUrl',
+`txReference` varchar(128) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'txReference',
+`inputNote`varchar(128) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'inputNote',
+`supplier` varchar(128) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'supplier',
+`adminMemo` varchar(256) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'adminMemo',
+`memo` varchar(256) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'memo',
+`assemble_address` varchar(191) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'assembleAddress',
+PRIMARY KEY (`id`),
+KEY `idx_merchantId` (`merchantId`),
+KEY `idx_bankId` (`bankId`),
+KEY `idx_currency` (`currency`),
+KEY `idx_chain` (`chain`),
+UNIQUE KEY unique_index_name (`merchantId`, `bankId`,`currency`,`chain`,`created_at` )
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+

@@ -4,12 +4,11 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 )
 
-type UserWithDrawOrder struct {
+type UserChargeOrder struct {
 	global.GVA_MODEL
 	MerchantId   int64  `json:"merchantId"  gorm:"column:merchantId" `
 	MerchantName string `json:"merchantName" gorm:"column:merchantName"`
 	BankId       string `json:"bankId" gorm:"column:bankId"`
-	ProjetcId    int    `json:"projetcId" gorm:"column:projetcId"`
 	BankTitle    string `json:"bankTitle"  gorm:"column:bankTitle"`
 	Currency     string `json:"currency" gorm:"column:currency"`
 	Chain        string `json:"chain"  gorm:"column:chain"`
@@ -31,6 +30,6 @@ type UserWithDrawOrder struct {
 	AssembleAddress    string `json:"assemble_address" gorm:"column:assemble_address"`
 }
 
-func (UserWithDrawOrder) TableName() string {
-	return "user_withdraw_order"
+func (UserChargeOrder) TableName() string {
+	return "user_charge_order"
 }

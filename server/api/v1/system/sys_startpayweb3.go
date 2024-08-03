@@ -507,6 +507,13 @@ func (b *StartpayWeb3Api) GetAccountInfo(c *gin.Context) {
 		return
 	}
 
+	FeeReturn, err := StartpayWeb3Service.GetFeeInfo(userId)
+	if err != nil {
+		global.GVA_LOG.Error("获取account失败!", zap.Error(err))
+		response.FailWithDetailed("获取account失败", "获取account失败", c)
+		return
+	}
+
 	aacountResp := systemRes.GetAccountInfoRespons{}
 
 	totalamount := 0.0
@@ -529,16 +536,28 @@ func (b *StartpayWeb3Api) GetAccountInfo(c *gin.Context) {
 		accountres.ChainIcon = SymbolInfo.Chainicon
 		accountres.CurrencyIcon = SymbolInfo.Icon
 		accountres.CurrencyName = SymbolInfo.Symbol
-		accountres.WithdrawEnable = true
-		accountres.RemittanceFeeAmount = RemittanceFee
-		accountres.WithdrawFeeBoundAmount = MaxRemittanceFee
-		accountres.WithdrawFeeRate1 = GLOBAL_Fee
-		accountres.WithdrawFeeRate2 = GLOBAL_Fee
-		accountres.WithdrawFeeRate3 = GLOBAL_Fee
-		accountres.WithdrawFeeRate4 = GLOBAL_Fee
-		accountres.WithdrawFeeRate5 = GLOBAL_Fee
-		accountres.WithdrawFeeRate6 = GLOBAL_Fee
-		accountres.WithdrawFeeRate7 = GLOBAL_Fee
+		accountres.RemittanceFeeAmount = FeeReturn.WithdrawFeeamount
+		accountres.WithdrawFeeBoundAmount = FeeReturn.Maxbound
+		accountres.WithdrawFeeRate1 = FeeReturn.WithdrawFeerate1
+
+		accountres.WithdrawFeeamount = FeeReturn.WithdrawFeeamount
+		accountres.WithdrawFeerate1 = FeeReturn.WithdrawFeerate1
+		accountres.WithdrawFeerate2 = FeeReturn.WithdrawFeerate2
+		accountres.WithdrawEnable = FeeReturn.WithdrawEnable
+
+		accountres.ChargeEnable = FeeReturn.ChargeEnable
+		accountres.ChargeFeeamount = FeeReturn.ChargeFeeamount
+		accountres.ChargeFeerate1 = FeeReturn.ChargeFeerate1
+		accountres.ChargeFeerate2 = FeeReturn.ChargeFeerate2
+
+		accountres.DespositFeerate1 = FeeReturn.DespositFeerate1
+		accountres.DespositFeerate2 = FeeReturn.DespositFeerate2
+		accountres.DespositFeeamount = FeeReturn.DespositFeeamount
+
+		accountres.TransferFeeamount = FeeReturn.TransferFeeamount
+		accountres.TransferEnable = FeeReturn.TransferEnable
+		accountres.TransferFeerate1 = FeeReturn.TransferFeerate1
+		accountres.TransferFeerate2 = FeeReturn.TransferFeerate2
 
 		aacountResp.AccountInfo = append(aacountResp.AccountInfo, accountres)
 	}
@@ -923,6 +942,7 @@ func (b *StartpayWeb3Api) AdminWithdrawOrderList(c *gin.Context) {
 		uds.MerchantId = fmt.Sprintf("%v", uwvalue.MerchantId)
 		uds.RemittanceFee = uwvalue.RemittanceFee
 		uds.Amount = uwvalue.Amount
+		uds.Fee = uwvalue.Fee
 		uds.TotalAmount = uwvalue.TotalAmount
 		uws.Content = append(uws.Content, uds)
 	}
@@ -987,6 +1007,7 @@ func (b *StartpayWeb3Api) WithdrawOrderList(c *gin.Context) {
 		uds.Status = fmt.Sprintf("%v", uwvalue.Status)
 		uds.MerchantId = fmt.Sprintf("%v", uwvalue.MerchantId)
 		uds.RemittanceFee = uwvalue.RemittanceFee
+		uds.Fee = uwvalue.Fee
 		uds.Amount = uwvalue.Amount
 		uds.TotalAmount = uwvalue.TotalAmount
 		uws.Content = append(uws.Content, uds)
@@ -1014,15 +1035,24 @@ func (b *StartpayWeb3Api) WithdrawOrderCreate(c *gin.Context) {
 
 	Iamount, _ := strconv.ParseFloat(r.Amount, 10)
 
+	feeInfo, err := StartpayWeb3Service.GetFeeInfo(userId)
+
+	if err != nil {
+		global.GVA_LOG.Error("创建取现订单失败!", zap.Error(err))
+		response.FailWithDetailed("false", "创建取现订单失败", c)
+		return
+	}
+
 	uwo := &system.UserWithDrawOrder{
 		Currency:      r.Currency,
 		Chain:         r.Chain,
 		Amount:        Iamount,
 		BankId:        r.BankAccountId,
+		ProjetcId:     r.ProjectId,
 		InputNote:     r.Note,
-		Fee:           GLOBAL_Fee,
-		RemittanceFee: RemittanceFee,
-		TotalAmount:   Iamount*(1+GLOBAL_Fee) + RemittanceFee,
+		Fee:           feeInfo.WithdrawFeerate1 * Iamount,
+		RemittanceFee: feeInfo.WithdrawFeeamount,
+		TotalAmount:   feeInfo.WithdrawFeerate1*Iamount + feeInfo.WithdrawFeeamount,
 	}
 	uwo.MerchantId = int64(userId)
 
@@ -1078,6 +1108,258 @@ func (b *StartpayWeb3Api) WithdrawOrderUpdate(c *gin.Context) {
 	global.GVA_LOG.Info("AdminWithdrawOrderUpdate ShouldBindJSON ", zap.Any("request", r))
 
 	err = StartpayWeb3Service.WithdrawOrderUpdate(&r)
+	if err != nil {
+		global.GVA_LOG.Error("更新取现订单失败!", zap.Error(err))
+		response.FailWithDetailed("false", err.Error(), c)
+		return
+	}
+	response.OkWithDetailed("true", "更新取现订单成功", c)
+}
+
+func (b *StartpayWeb3Api) AdminChargeOrderList(c *gin.Context) {
+
+	var r systemReq.GetWeb3Requst
+	r.Page = 1
+	r.PageSize = 20
+
+	err := c.ShouldBindQuery(&r)
+	if err != nil {
+		global.GVA_LOG.Error("xxx ShouldBindJSON fail", zap.Any("err", err.Error()))
+	}
+
+	global.GVA_LOG.Error("GetbankAccountList web3 db before", zap.Any("GetbankAccountList", r))
+
+	//struserId := fmt.Sprintf("%u", userId)
+
+	list, _, err := StartpayWeb3Service.AdminChargeOrderList(&r)
+
+	if err != nil {
+		global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		response.FailWithMessage("获取失败", c)
+		return
+	}
+
+	uws := systemRes.UserChargeOrderRespons{}
+
+	platformBank, err := StartpayWeb3Service.BankAccountInfo("888")
+
+	if err != nil {
+		global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		response.FailWithMessage("获取失败", c)
+		return
+	}
+
+	for _, uwvalue := range list {
+
+		uds := systemRes.UserChargeOrder{}
+
+		iid := int(uwvalue.ID)
+		uds.Id = strconv.Itoa(iid)
+
+		bkId, err := StartpayWeb3Service.BankAccountInfo(uwvalue.BankId)
+
+		if err == nil {
+			uds.BankInfo = bkId.BankTitle
+			uds.BankAccount.BankTitle = bkId.BankTitle
+			uds.BankAccount.EnterpriseTitle = bkId.EnterpriseTitle
+			uds.BankAccount.BankCode = bkId.BankCode
+			uds.BankAccount.ReceiverName = bkId.ReceiverName
+			uds.BankAccount.ReceiverNumber = bkId.ReceiverNumber
+			uds.BankAccount.Region = bkId.Region
+		}
+
+		uds.BankInfo = platformBank.BankTitle
+		uds.PlatformBank.BankTitle = platformBank.BankTitle
+		uds.PlatformBank.EnterpriseTitle = platformBank.EnterpriseTitle
+		uds.PlatformBank.BankCode = platformBank.BankCode
+		uds.PlatformBank.ReceiverName = platformBank.ReceiverName
+		uds.PlatformBank.ReceiverNumber = platformBank.ReceiverNumber
+		uds.PlatformBank.Region = platformBank.Region
+
+		uds.BankInfo = uwvalue.BankTitle
+		uds.Currency = uwvalue.Currency
+		uds.Chain = uwvalue.Chain
+		uds.Memo = uwvalue.Memo
+		uds.AdminMemo = uwvalue.AdminMemo
+		uds.InputNote = uwvalue.InputNote
+		uds.TxInfo = uwvalue.TxInfo
+		uds.StatusName = uwvalue.StatusName
+		uds.CreateTime = uwvalue.UpdatedAt
+		uds.Status = fmt.Sprintf("%v", uwvalue.Status)
+		uds.MerchantId = fmt.Sprintf("%v", uwvalue.MerchantId)
+		uds.RemittanceFee = uwvalue.RemittanceFee
+		uds.Amount = uwvalue.Amount
+		uds.TotalAmount = uwvalue.TotalAmount
+		uws.Content = append(uws.Content, uds)
+	}
+	response.OkWithDetailed(uws, "获取成功", c)
+
+}
+
+func (b *StartpayWeb3Api) ChargeOrderList(c *gin.Context) {
+
+	var r systemReq.GetWeb3Requst
+	r.Page = 1
+	r.PageSize = 20
+
+	err := c.ShouldBindQuery(&r)
+	if err != nil {
+		global.GVA_LOG.Error("xxx ShouldBindJSON fail", zap.Any("err", err.Error()))
+	}
+
+	global.GVA_LOG.Error("GetbankAccountList web3 db before", zap.Any("GetbankAccountList", r))
+	userId := utils.GetUserID(c)
+
+	//struserId := fmt.Sprintf("%u", userId)
+
+	list, _, err := StartpayWeb3Service.ChargeOrderList(userId, &r)
+
+	if err != nil {
+		global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		response.FailWithMessage("获取失败", c)
+		return
+	}
+
+	uws := systemRes.UserChargeOrderRespons{}
+
+	platformBank, err := StartpayWeb3Service.BankAccountInfo("888")
+
+	if err != nil {
+		global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		response.FailWithMessage("获取失败", c)
+		return
+	}
+
+	for _, uwvalue := range list {
+
+		uds := systemRes.UserChargeOrder{}
+
+		iid := int(uwvalue.ID)
+		uds.Id = strconv.Itoa(iid)
+
+		bkId, err := StartpayWeb3Service.BankAccountInfo(uwvalue.BankId)
+
+		if err == nil {
+			uds.BankInfo = bkId.BankTitle
+			uds.BankAccount.BankTitle = bkId.BankTitle
+			uds.BankAccount.EnterpriseTitle = bkId.EnterpriseTitle
+			uds.BankAccount.BankCode = bkId.BankCode
+			uds.BankAccount.ReceiverName = bkId.ReceiverName
+			uds.BankAccount.ReceiverNumber = bkId.ReceiverNumber
+			uds.BankAccount.Region = bkId.Region
+		}
+
+		uds.BankInfo = platformBank.BankTitle
+		uds.PlatformBank.BankTitle = platformBank.BankTitle
+		uds.PlatformBank.EnterpriseTitle = platformBank.EnterpriseTitle
+		uds.PlatformBank.BankCode = platformBank.BankCode
+		uds.PlatformBank.ReceiverName = platformBank.ReceiverName
+		uds.PlatformBank.ReceiverNumber = platformBank.ReceiverNumber
+		uds.PlatformBank.Region = platformBank.Region
+
+		uds.BankInfo = uwvalue.BankTitle
+		uds.Currency = uwvalue.Currency
+		uds.Chain = uwvalue.Chain
+		uds.Memo = uwvalue.Memo
+		uds.AdminMemo = uwvalue.AdminMemo
+		uds.InputNote = uwvalue.InputNote
+		uds.TxInfo = uwvalue.TxInfo
+		uds.StatusName = uwvalue.StatusName
+		uds.CreateTime = uwvalue.UpdatedAt
+		uds.Status = fmt.Sprintf("%v", uwvalue.Status)
+		uds.MerchantId = fmt.Sprintf("%v", uwvalue.MerchantId)
+		uds.RemittanceFee = uwvalue.RemittanceFee
+		uds.Amount = uwvalue.Amount
+		uds.TotalAmount = uwvalue.TotalAmount
+		uws.Content = append(uws.Content, uds)
+	}
+	response.OkWithDetailed(uws, "获取成功", c)
+
+}
+
+func (b *StartpayWeb3Api) ChargeOrderCreate(c *gin.Context) {
+
+	var r systemReq.CreateWithdrawOrderRequst
+	err := c.ShouldBindJSON(&r)
+	if err != nil {
+		global.GVA_LOG.Error("xxx ShouldBindJSON fail", zap.Any("err", err.Error()))
+	}
+
+	/*err = utils.Verify(r, utils.PageInfoVerify)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}*/
+
+	global.GVA_LOG.Error("UserContactCreate web3 db before", zap.Any("UserContactCreate", r))
+	userId := utils.GetUserID(c)
+
+	Iamount, _ := strconv.ParseFloat(r.Amount, 10)
+
+	uwo := &system.UserChargeOrder{
+		Currency:      r.Currency,
+		Chain:         r.Chain,
+		Amount:        Iamount,
+		BankId:        r.BankAccountId,
+		InputNote:     r.Note,
+		Fee:           GLOBAL_Fee,
+		RemittanceFee: RemittanceFee,
+		TotalAmount:   Iamount*(1+GLOBAL_Fee) + RemittanceFee,
+	}
+	uwo.MerchantId = int64(userId)
+
+	err = StartpayWeb3Service.ChargeOrderCreate(uwo)
+	if err != nil {
+		global.GVA_LOG.Error("创建取现订单失败!", zap.Error(err))
+		response.FailWithDetailed("false", "创建取现订单失败", c)
+		return
+	}
+	response.OkWithDetailed("true", "创建取现订单成功", c)
+
+}
+
+func (b *StartpayWeb3Api) AdminChargeOrderUpdate(c *gin.Context) {
+
+	var r systemReq.UpdateWithdrawOrderRequst
+	err := c.ShouldBindJSON(&r)
+	if err != nil {
+		global.GVA_LOG.Error("AdminWithdrawOrderUpdate ShouldBindJSON fail", zap.Any("err", err.Error()))
+	}
+
+	/*err = utils.Verify(r, utils.PageInfoVerify)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}*/
+
+	global.GVA_LOG.Info("AdminWithdrawOrderUpdate ShouldBindJSON ", zap.Any("request", r))
+
+	err = StartpayWeb3Service.AdminChargeOrderUpdate(&r)
+	if err != nil {
+		global.GVA_LOG.Error("更新取现订单失败!", zap.Error(err))
+		response.FailWithDetailed("false", err.Error(), c)
+		return
+	}
+	response.OkWithDetailed("true", "更新取现订单成功", c)
+
+}
+
+func (b *StartpayWeb3Api) ChargeOrderUpdate(c *gin.Context) {
+	var r systemReq.UpdateWithdrawOrderRequst
+	err := c.ShouldBindJSON(&r)
+	if err != nil {
+		global.GVA_LOG.Error("xxx ShouldBindJSON fail", zap.Any("err", err.Error()))
+	}
+
+	/*err = utils.Verify(r, utils.PageInfoVerify)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}*/
+
+	global.GVA_LOG.Info("AdminWithdrawOrderUpdate ShouldBindJSON ", zap.Any("request", r))
+
+	err = StartpayWeb3Service.ChargeOrderUpdate(&r)
 	if err != nil {
 		global.GVA_LOG.Error("更新取现订单失败!", zap.Error(err))
 		response.FailWithDetailed("false", err.Error(), c)

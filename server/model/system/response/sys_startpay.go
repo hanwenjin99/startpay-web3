@@ -79,7 +79,7 @@ type Web3AccountInfo struct {
 	WalletName             string  `json:"Walletname"`
 	Currency               string  `json:"currency"`
 	Chain                  string  `json:"chain"`
-	WithdrawEnable         bool    `json:"withdrawEnable"`
+	WithdrawEnable         int     `json:"withdrawEnable"`
 	Balance                float64 `json:"balance"`
 	AmountUsd              float64 `json:"amountUsd"`
 	Address                string  `json:"address"`
@@ -92,17 +92,27 @@ type Web3AccountInfo struct {
 	GasTokenIcon           string  `json:"gasTokenIcon"`
 	GasAmount              float64 `json:"gasAmount"`
 	UsdPrice               float64 `json:"usdPrice"`
-	WithdrawFeeBoundAmount int     `json:"withdrawFeeBoundAmount"`
+	WithdrawFeeBoundAmount int64   `json:"withdrawFeeBoundAmount"`
 	WithdrawFeeRateDown    float64 `json:"withdrawFeeRateDown"`
 	WithdrawFeeRateUp      float64 `json:"withdrawFeeRateUp"`
-	RemittanceFeeAmount    int     `json:"remittanceFeeAmount"`
+	RemittanceFeeAmount    float64 `json:"remittanceFeeAmount"`
 	WithdrawFeeRate1       float64 `json:"withdrawFeeRate1"`
-	WithdrawFeeRate2       float64 `json:"withdrawFeeRate2"`
-	WithdrawFeeRate3       float64 `json:"withdrawFeeRate3"`
-	WithdrawFeeRate4       float64 `json:"withdrawFeeRate4"`
-	WithdrawFeeRate5       float64 `json:"withdrawFeeRate5"`
-	WithdrawFeeRate6       float64 `json:"withdrawFeeRate6"`
-	WithdrawFeeRate7       float64 `json:"withdrawFeeRate7"`
+	WithdrawFeeamount      float64 `json:"withdrawFeeamount"`
+	DespositFeeamount      float64 `json:"despositFeeamount"`
+	ChargeFeeamount        float64 `json:"chargeFeeamount"`
+	TransferFeeamount      float64 `json:"transferFeeamount"`
+	WithdrawFeerate1       float64 `json:"withdrawFeerate1" `
+	WithdrawFeerate2       float64 `json:"withdrawFeerate2"`
+	DespositFeerate1       float64 `json:"despositFeerate1" `
+	DespositFeerate2       float64 `json:"despositFeerate2"`
+	ChargeFeerate1         float64 `json:"chargeFeerate1" `
+	ChargeFeerate2         float64 `json:"chargeFeerate2"`
+	TransferFeerate1       float64 `json:"transferFeerate1"`
+	TransferFeerate2       float64 `json:"transferFeerate2"`
+
+	ChargeEnable   int     `json:"chargeEnable"`
+	TransferEnable int     `json:"transferEnable"`
+	MaxBound       float64 `json:"maxBound"`
 }
 
 type Web3ChainListRespons struct {
@@ -143,6 +153,42 @@ type UserBankRespons struct {
 	ReferenceField  interface{} `json:"referenceField"`
 	CreateTime      time.Time   `json:"createTime"`
 	UpdateTime      time.Time   `json:"updateTime"`
+}
+
+type UserChargeOrderRespons struct {
+	Content    []UserChargeOrder `json:"content"`
+	TotalPages int               `json:"total_pages"`
+	Last       bool              `json:"last"`
+	Page       int               `json:"page"`
+	PageSize   int               `json:"page_size"`
+	Total      float64           `json:"total"`
+}
+
+type UserChargeOrder struct {
+	Id                 string          `json:"id"`
+	MerchantId         string          `json:"merchantId"`
+	MerchantName       string          `json:"merchantName"`
+	Currency           string          `json:"currency"`
+	Chain              string          `json:"chain"`
+	ChainIcon          string          `json:"chainIcon"`
+	Amount             float64         `json:"amount"`
+	Fee                float64         `json:"fee"`
+	RemittanceFee      float64         `json:"remittanceFee"`
+	TotalAmount        float64         `json:"totalAmount"`
+	BankInfo           string          `json:"bankInfo"`
+	BankAccount        UserBankRespons `json:"bankAccount"`
+	PlatformBank       UserBankRespons `json:"platformBank"`
+	Status             string          `json:"status"`
+	StatusName         string          `json:"statusName"`
+	TxInfo             string          `json:"txInfo"`
+	TxCertificationUrl string          `json:"txCertificationUrl"`
+	TxReference        string          `json:"txReference"`
+	CreateTime         time.Time       `json:"createTime"`
+	InputNote          string          `json:"inputNote"`
+	CurrencyIcon       string          `json:"currencyIcon"`
+	Supplier           string          `json:"supplier"`
+	Memo               string          `json:"memo"`
+	AdminMemo          string          `json:"adminMemo"`
 }
 
 type UserWithdrawOrderRespons struct {
