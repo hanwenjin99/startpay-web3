@@ -64,6 +64,7 @@ type GetWithdrawOrderRequst struct {
 type CreateWithdrawOrderRequst struct {
 	Amount        string `json:"amount"`
 	BankAccountId string `json:"bankAccountId"`
+	ProjectId     int    `json:"projectId"`
 	Chain         string `json:"chain"`
 	Currency      string `json:"currency"`
 	EmailCode     string `json:"emailCode"`

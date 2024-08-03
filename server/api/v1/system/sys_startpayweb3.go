@@ -942,6 +942,7 @@ func (b *StartpayWeb3Api) AdminWithdrawOrderList(c *gin.Context) {
 		uds.MerchantId = fmt.Sprintf("%v", uwvalue.MerchantId)
 		uds.RemittanceFee = uwvalue.RemittanceFee
 		uds.Amount = uwvalue.Amount
+		uds.Fee = uwvalue.Fee
 		uds.TotalAmount = uwvalue.TotalAmount
 		uws.Content = append(uws.Content, uds)
 	}
@@ -1006,6 +1007,7 @@ func (b *StartpayWeb3Api) WithdrawOrderList(c *gin.Context) {
 		uds.Status = fmt.Sprintf("%v", uwvalue.Status)
 		uds.MerchantId = fmt.Sprintf("%v", uwvalue.MerchantId)
 		uds.RemittanceFee = uwvalue.RemittanceFee
+		uds.Fee = uwvalue.Fee
 		uds.Amount = uwvalue.Amount
 		uds.TotalAmount = uwvalue.TotalAmount
 		uws.Content = append(uws.Content, uds)
@@ -1033,15 +1035,24 @@ func (b *StartpayWeb3Api) WithdrawOrderCreate(c *gin.Context) {
 
 	Iamount, _ := strconv.ParseFloat(r.Amount, 10)
 
+	feeInfo, err := StartpayWeb3Service.GetFeeInfo(userId)
+
+	if err != nil {
+		global.GVA_LOG.Error("创建取现订单失败!", zap.Error(err))
+		response.FailWithDetailed("false", "创建取现订单失败", c)
+		return
+	}
+
 	uwo := &system.UserWithDrawOrder{
 		Currency:      r.Currency,
 		Chain:         r.Chain,
 		Amount:        Iamount,
 		BankId:        r.BankAccountId,
+		ProjetcId:     r.ProjectId,
 		InputNote:     r.Note,
-		Fee:           GLOBAL_Fee,
-		RemittanceFee: RemittanceFee,
-		TotalAmount:   Iamount*(1+GLOBAL_Fee) + RemittanceFee,
+		Fee:           feeInfo.WithdrawFeerate1 * Iamount,
+		RemittanceFee: feeInfo.WithdrawFeeamount,
+		TotalAmount:   feeInfo.WithdrawFeerate1*Iamount + feeInfo.WithdrawFeeamount,
 	}
 	uwo.MerchantId = int64(userId)
 

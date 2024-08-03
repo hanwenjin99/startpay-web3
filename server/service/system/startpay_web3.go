@@ -543,6 +543,29 @@ func (s *StartpayWeb3Service) AdminWithdrawOrderUpdate(req *systemReq.UpdateWith
 		zap.Any(" WithdrawStatus[st]", WithdrawStatus[st]),
 		zap.Any(" rqId", rqId),
 	)
+
+	var withDrawOrderInfo system.UserWithDrawOrder
+	_, err := global.GVA_DB.Where("id = ? ", rqId).First(&withDrawOrderInfo).Rows()
+
+	if err != nil {
+		return err
+	}
+
+	var r systemReq.CreateTransferRequest
+
+	r.Chain = withDrawOrderInfo.Chain
+	r.Asset = withDrawOrderInfo.Currency
+	r.ID = strconv.Itoa(withDrawOrderInfo.ProjetcId)
+	r.ToAddress = "0x615d2488210adf30e7775bd9a0b24f7022e16b81"
+	transAccount := withDrawOrderInfo.Fee + withDrawOrderInfo.RemittanceFee
+	r.Amount = strconv.FormatFloat(transAccount, 'f', 8, 64)
+
+	_, err = s.Web3TransferCreate(uint(withDrawOrderInfo.MerchantId), r)
+
+	if err != nil {
+		return err
+	}
+
 	if err := global.GVA_DB.Model(&system.UserWithDrawOrder{}).Where("id = ? ", rqId).Updates(map[string]interface{}{
 		"updated_at": time.Now(),
 		"status":     st,
