@@ -108,6 +108,17 @@ func (s *StartpayWeb3Service) GetProjectList(userId uint, Page int, PageSize int
 	return web3.GetProjectList(Page, PageSize, "ACTIVE", stringProjectid)
 }
 
+func (s *StartpayWeb3Service) GetFeeInfo(userId uint) (*system.UserContractInfo, error) {
+	var Feelist system.UserContractInfo
+	_, err := global.GVA_DB.Where("merchantId = ? ", userId).First(&Feelist).Rows()
+
+	if err != nil {
+		return nil, errors.New("查询用户项目失败")
+	}
+
+	return &Feelist, nil
+}
+
 func (s *StartpayWeb3Service) GetAccountInfo(userId uint) ([]web3api.GetAccountInfo, error) {
 
 	var projectlist []system.SysProject
@@ -559,6 +570,141 @@ func (s *StartpayWeb3Service) WithdrawOrderUpdate(req *systemReq.UpdateWithdrawO
 	*/
 	rqId, _ := strconv.Atoi(req.Id)
 	if err := global.GVA_DB.Model(&system.UserWithDrawOrder{}).Where("id = ? ", rqId).Updates(map[string]interface{}{
+		"updated_at": time.Now(),
+		"status":     st,
+		"InputNote":  req.Memo,
+		"statusName": WithdrawStatus[st],
+	}).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *StartpayWeb3Service) AdminChargeOrderList(reInfo *systemReq.GetWeb3Requst) (list []system.UserChargeOrder, total int64, err error) {
+	limit := reInfo.PageSize
+	offset := reInfo.PageSize * (reInfo.Page - 1)
+	db := global.GVA_DB.Model(&system.UserChargeOrder{})
+	var uwoList []system.UserChargeOrder
+	err = db.Count(&total).Error
+	global.GVA_LOG.Error("WithdrawOrderList",
+		zap.Any("limit", limit),
+		zap.Any("offset", offset),
+		zap.Any("total", total),
+	)
+
+	if err != nil {
+		global.GVA_LOG.Error("WithdrawOrderList",
+			zap.Any("limit", limit),
+			zap.Any("offset", offset),
+			zap.Any("total", total),
+		)
+		return
+	}
+
+	_, err = db.Limit(limit).Offset(offset).Find(&uwoList).Rows()
+
+	global.GVA_LOG.Error("WithdrawOrderList",
+		zap.Any("uwoList", uwoList),
+		zap.Any("err", err),
+	)
+	return uwoList, total, err
+}
+
+func (s *StartpayWeb3Service) ChargeOrderList(userId uint, reInfo *systemReq.GetWeb3Requst) (list []system.UserChargeOrder, total int64, err error) {
+	limit := reInfo.PageSize
+	offset := reInfo.PageSize * (reInfo.Page - 1)
+	db := global.GVA_DB.Model(&system.UserChargeOrder{})
+	var uwoList []system.UserChargeOrder
+	err = db.Count(&total).Error
+	global.GVA_LOG.Error("WithdrawOrderList", zap.Any("userId", userId),
+		zap.Any("limit", limit),
+		zap.Any("offset", offset),
+		zap.Any("total", total),
+	)
+
+	if err != nil {
+		global.GVA_LOG.Error("WithdrawOrderList", zap.Any("userId", userId),
+			zap.Any("limit", limit),
+			zap.Any("offset", offset),
+			zap.Any("total", total),
+		)
+		return
+	}
+
+	_, err = db.Limit(limit).Offset(offset).Where("merchantId = ?", userId).Find(&uwoList).Rows()
+
+	global.GVA_LOG.Error("WithdrawOrderList",
+		zap.Any("uwoList", uwoList),
+		zap.Any("err", err),
+	)
+	return uwoList, total, err
+}
+
+func (s *StartpayWeb3Service) ChargeOrderCreate(uwo *system.UserChargeOrder) error {
+	uwo.StatusName = WithdrawStatus[1]
+	uwo.Status = 1
+	err := global.GVA_DB.Create(&uwo).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *StartpayWeb3Service) AdminChargeOrderUpdate(req *systemReq.UpdateWithdrawOrderRequst) error {
+	st, _ := strconv.Atoi(req.Status)
+
+	if st == 1 {
+		st = 2
+	} else if st == 2 {
+		st = 3
+	} else {
+		return errors.New("订单不处于审核状态")
+	}
+
+	/*
+		uwo := &system.UserWithDrawOrder{
+			Status:     st,
+			AdminMemo:  req.Memo,
+			StatusName: WithdrawStatus[st],
+		}
+		uwo.UpdatedAt = time.Now()
+	*/
+	rqId, _ := strconv.Atoi(req.Id)
+
+	global.GVA_LOG.Error("WithdrawOrderList",
+		zap.Any("st", st),
+		zap.Any("req.Memo", req.Memo),
+		zap.Any(" WithdrawStatus[st]", WithdrawStatus[st]),
+		zap.Any(" rqId", rqId),
+	)
+	if err := global.GVA_DB.Model(&system.UserChargeOrder{}).Where("id = ? ", rqId).Updates(map[string]interface{}{
+		"updated_at": time.Now(),
+		"status":     st,
+		"adminMemo":  req.Memo,
+		"statusName": WithdrawStatus[st],
+	}).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *StartpayWeb3Service) ChargeOrderUpdate(req *systemReq.UpdateWithdrawOrderRequst) error {
+	st, _ := strconv.Atoi(req.Status)
+
+	if st != 1 {
+		return errors.New("此状态已审核不能撤销")
+	}
+	/*uwo := &system.UserWithDrawOrder{
+		Status:     4,
+		InputNote:  req.Memo,
+		StatusName: WithdrawStatus[4],
+	}
+	uwo.UpdatedAt = time.Now()
+	*/
+	rqId, _ := strconv.Atoi(req.Id)
+	if err := global.GVA_DB.Model(&system.UserChargeOrder{}).Where("id = ? ", rqId).Updates(map[string]interface{}{
 		"updated_at": time.Now(),
 		"status":     st,
 		"InputNote":  req.Memo,
