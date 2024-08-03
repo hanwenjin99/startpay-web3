@@ -34,8 +34,9 @@
               <el-button icon="delete" type="danger" circle />
             </template>
           </el-popconfirm>
-          <el-button icon="edit" type="info" circle />
-          <el-button color="#000" plain round @click="comfirmSelect(scope.row)">提现</el-button>
+          <!-- <el-button icon="edit" type="info" circle /> -->
+          <el-button style="margin-left: 40px;" color="#000" plain round @click="comfirmSelectToPay(scope.row)">提现</el-button>
+          <el-button style="margin-left: 40px;" color="#000" plain round @click="comfirmSelectToRecharge(scope.row)">充值</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -57,8 +58,8 @@ console.log(route)
 
 const listData = ref([])
 
-// 选择银行账户
-const comfirmSelect = (item) => {
+// 选择银行账户 - 提现
+const comfirmSelectToPay = (item) => {
   commonStore.ChangePageInitPay({
     ...commonStore.pageInitPay,
     bankInfo: {
@@ -68,6 +69,19 @@ const comfirmSelect = (item) => {
     isSelectedBankAccount: true,
   })
   router.push('/layout/account/pay')
+}
+
+// 选择银行账户 - 充值
+const comfirmSelectToRecharge = (item) => {
+  commonStore.ChangePageInitRecharge({
+    ...commonStore.pageInitRecharge,
+    bankInfo: {
+      receiverName: item.receiverName,
+      id: item.id
+    },
+    isSelectedBankAccount: true,
+  })
+  router.push('/layout/account/recharge')
 }
 
 const queryList = async () => {

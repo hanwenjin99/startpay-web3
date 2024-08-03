@@ -31,7 +31,7 @@
 
     <!-- 手续费 -->
     <div class="sumContainer">
-      <span class="name">手续费</span>
+      <span class="name">手续费(StartPay服务费+转账手续费)</span>
       {{ feeAmount }}
     </div>
 
@@ -112,14 +112,15 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="燃料费">
+        <!-- TODO - 单笔转账记录不展示燃料费 -->
+        <!-- <el-table-column label="燃料费">
           <template #default="scope">
             <div class="fuel">
               <span>{{ `${scope.row.gas} ${scope.row.gasToken}` }}</span>
-              <!-- <span>{{ `$0.081` }}</span> -->
+              <span>{{ `$0.081` }}</span>
             </div>
           </template>
-        </el-table-column>
+        </el-table-column> -->
         <el-table-column label="手续费">
           <template #default="scope">{{ `${scope.row.fee}${scope.row.currency}` }}</template>
         </el-table-column>
@@ -162,7 +163,7 @@ const creatForm = ref({
   asset: '',
   chain: '',
   toAddress: '', // 收款人地址
-  id: ''
+  projectId: '' // 选择的币种id
 })
 
 // 继续按钮是否可点击
@@ -174,7 +175,7 @@ const isCanSubmit = computed(() =>
 )
 
 // 手续费
-const feeAmount = ref(0)
+const feeAmount = computed(() => (Number(selectOneCurrency.value.transferFeerate1 ?? 0) * Number(creatForm.value.amount ?? 0) + Number(selectOneCurrency.value.transferFeeamount ?? 0)).toFixed(2))
 
 // 等价的值
 const amountEqualVal = computed(() => {
@@ -215,7 +216,7 @@ const handleSelect = (selectInfo) => {
   selectOneCurrency.value = selectInfo
   creatForm.value.asset = selectInfo.currency // 币种
   creatForm.value.chain = selectInfo.chain // 链类型
-  creatForm.value.id = selectInfo.id // 币种id
+  creatForm.value.projectId = selectInfo.id // 币种id
 
   // 单笔转账页面的记录查询需要带上选择的币种信息
   queryTransferList({

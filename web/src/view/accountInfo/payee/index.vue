@@ -73,7 +73,7 @@
               <el-button icon="delete" type="danger" circle />
             </template>
           </el-popconfirm>
-          <el-button color="#000" plain round @click.stop="selectPayee(scope.row)">转账</el-button>
+          <el-button style="margin-left: 40px;" color="#000" plain round @click.stop="selectPayee(scope.row)">转账</el-button>
         </template>
       </el-table-column>
     </el-table>

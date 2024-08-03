@@ -104,14 +104,15 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="燃料费">
+      <!-- TODO - 单笔转账记录不展示燃料费 -->
+      <!-- <el-table-column label="燃料费">
         <template #default="scope">
           <div class="fuel">
             <span>{{ `${scope.row.gas} ${scope.row.gasToken}` }}</span>
-            <!-- <span>{{ `$0.081` }}</span> -->
+            <span>{{ `$0.081` }}</span>
           </div>
         </template>
-      </el-table-column>
+      </el-table-column> -->
       <el-table-column label="手续费">
         <template #default="scope">{{ `${scope.row.fee}${scope.row.currency}` }}</template>
       </el-table-column>

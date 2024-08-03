@@ -10,7 +10,7 @@
     <!-- 添加币种 -->
     <section class="add">
       <span class="title">币种</span>
-      <el-button color="#000" icon="plus" type="info" round @click="router.push('add')">添加币种</el-button>
+      <!-- <el-button color="#000" icon="plus" type="info" round @click="router.push('add')">添加币种</el-button> -->
     </section>
 
     <!-- 列表 -->
@@ -120,7 +120,7 @@ onMounted(() => {
   .add {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    // justify-content: space-between;
 
     margin-bottom: 40px;
 

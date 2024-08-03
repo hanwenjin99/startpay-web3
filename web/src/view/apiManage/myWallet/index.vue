@@ -73,7 +73,7 @@
         <el-form-item label="结算币种" prop="settleCurrency">
           <el-select v-model="formLabelAlign.settleCurrency">
             <el-option
-              v-for="item in commonStore.currencyOptions"
+              v-for="item in ownCurrencyList"
               :key="item.name"
               :label="item.name"
               :value="item.name"
@@ -97,6 +97,7 @@ import { reactive, ref, onMounted } from 'vue'
 import dayjs from 'dayjs'
 import { ElMessage } from 'element-plus'
 
+import { getCurrencyOptions } from '@/api/common'
 import { useCommonStore } from '@/pinia/modules/common'
 import { getBoundAddressList, addProject } from '@/api/apiManage'
 import { copyMessage } from '@/utils/common.js'
@@ -165,20 +166,23 @@ const refresh = () => {
   queryList(1)
 }
 
+// 钱包的结算币种。未选择链时不展示币种列表
+const ownCurrencyList = ref([])
+
 // 选择链类型后，动态查询结算币种列表
-const handleChangeChain = (chain) => {
+const handleChangeChain = async (chain) => {
   // 清空结算币种的选择
   formLabelAlign.settleCurrency = ''
-  commonStore.QueryCurrencyOptions({ chain })
+  const { code, data } = await getCurrencyOptions({ chain })
+  if (code === 0) {
+    ownCurrencyList.value = data || []
+  }
 }
 
 onMounted(() => {
   if (commonStore.chainsList.length === 0) {
     // 更新链类型
     commonStore.GetChainsList()
-  }
-  if (commonStore.currencyOptions.length === 0) {
-    commonStore.QueryCurrencyOptions()
   }
   queryList(1)
 })

@@ -1,24 +1,23 @@
 <template>
   <main class="content_container">
-    <h1 class="title">提现</h1>
+    <h1 class="title">充值</h1>
     <!-- 选择币种组件 -->
     <SelectCurrency :init-data="selectOneCurrency" @handle-select-callback="handleSelect" />
     <div class="inputTitle">
-      提现金额
-      <span>{{ selectOneCurrency.balance }}{{ selectOneCurrency.currency }} 可用</span>
+      充值金额
     </div>
     <div class="sumAmount">
-      <span>{{ withdrawAmount }}{{ selectOneCurrency.currency }}</span>
+      <span>{{ rechargeAmount }}{{ selectOneCurrency.currency }}</span>
     </div>
     <img class="smallImg" :src="reduce" alt="">
     <div class="feeContainer">
-      <h2>StartPay服务费+汇款手续费</h2>
-      <h2>{{ serviceAmount }}{{ selectOneCurrency.currency }}+{{ selectOneCurrency.withdrawFeeamount ?? 0 }}{{ selectOneCurrency.currency }}={{ totalFee }}{{ selectOneCurrency.currency }}</h2>
+      <h2>StartPay服务费+充值手续费</h2>
+      <h2>{{ serviceAmount }}{{ selectOneCurrency.currency }}+{{ selectOneCurrency.chargeFeeamount ?? 0 }}{{ selectOneCurrency.currency }}={{ totalFee }}{{ selectOneCurrency.currency }}</h2>
     </div>
     <img class="smallImg" :src="equal" alt="">
     <span class="realAmountTitle">到账金额</span>
     <div class="amountOuter">
-      <span class="amountBtn" @click="writeMaxAmount">最大</span>
+      <!-- <span class="amountBtn" @click="writeMaxAmount">最大</span> -->
       <input
         v-model="creatForm.amount"
         :placeholder="`0 ${selectOneCurrency.currency ?? ''}`"
@@ -26,7 +25,7 @@
         @input="e => handleChange(e.target.value)"
       >
     </div>
-    <span class="payee">到</span>
+    <span class="payee">汇款账户</span>
     <div class="bankSelector">
       <template v-if="creatForm.bankAccountId">
         <div class="selectBA">
@@ -68,11 +67,11 @@
       继续
     </el-button>
 
-    <!-- 提现记录 -->
+    <!-- 充值记录 -->
     <section class="record">
       <div class="title">
-        <span>提现记录</span>
-        <el-button link @click="router.push('/layout/tradeRecord/payRecord')">查看全部</el-button>
+        <span>充值记录</span>
+        <el-button link @click="router.push('/layout/tradeRecord/rechargeRecord')">查看全部</el-button>
       </div>
 
       <!-- 表格 -->
@@ -86,10 +85,32 @@
           </template>
         </el-table-column>
         <el-table-column label="状态" prop="statusName" />
-        <el-table-column label="到">
+        <el-table-column label="汇款银行">
           <template #default="scope">{{ scope.row.bankAccount?.bankTitle }}</template>
         </el-table-column>
-        <el-table-column label="币种" prop="currency" />
+        <el-table-column label="钱包" prop="currency" />
+        <!-- 平台银行 -->
+        <el-table-column label="平台银行">
+          <template #default="scope">
+            <el-popover
+              placement="top"
+              width="300"
+              title="详细信息"
+            >
+              <template #reference>
+                {{ scope.row.platformBank?.bankTitle }}
+              </template>
+              <div class="platformBank">
+                <span>企业名称：{{ scope.row.platformBank?.enterpriseTitle }}</span>
+                <span>银行名称：{{ scope.row.platformBank?.bankTitle }}</span>
+                <span>银行代码：{{ scope.row.platformBank?.bankCode }}</span>
+                <span>收款人银行账号：{{ scope.row.platformBank?.receiverNumber }}</span>
+                <span>银行账户名：{{ scope.row.platformBank?.receiverName }}</span>
+                <el-button plain color="#000" @click="copyPlatformBankMsg(scope.row.platformBank)">复制</el-button>
+              </div>
+            </el-popover>
+          </template>
+        </el-table-column>
         <el-table-column label="服务费">
           <template #default="scope">
             {{ `${Number(scope.row.fee ?? 0).toFixed(2)}${scope.row.currency}` }}
@@ -119,7 +140,7 @@
         <!-- 新增交易/审核附言 -->
         <el-table-column label="交易附言" prop="inputNote" />
         <el-table-column label="审核附言" prop="adminMemo" />
-        <!-- 商户端 - 撤销 -->
+        <!-- 商户端 - 审核｜撤销 -->
         <el-table-column label="操作">
           <template #default="scope">
             <el-popconfirm
@@ -127,8 +148,20 @@
               cancel-button-text="取消"
               icon="infoFilled"
               icon-color="#626AEF"
+              title="确认审核此条记录？"
+              @confirm="actionRecharge(scope.row, '审核')"
+            >
+              <template #reference>
+                <el-button link>审核</el-button>
+              </template>
+            </el-popconfirm>
+            <el-popconfirm
+              confirm-button-text="确定"
+              cancel-button-text="取消"
+              icon="infoFilled"
+              icon-color="#626AEF"
               title="确认撤销此条记录？"
-              @confirm="revokeWithdraw(scope.row)"
+              @confirm="actionRecharge(scope.row, '撤销')"
             >
               <template #reference>
                 <el-button link>撤销</el-button>
@@ -152,8 +185,9 @@ import { useRouter } from 'vue-router'
 import dayjs from 'dayjs'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
+import { copyMessage } from '@/utils/common.js'
 import { useCommonStore } from '@/pinia/modules/common'
-import { getWithdrawOrderList, createMerchantWithdraw, revokeMerchantWithdraw } from '@/api/account'
+import { getRechargeList, createMerchantRecharge, actionMerchantRecharge } from '@/api/account'
 import SelectCurrency from '@/components/selectCurrency/index.vue'
 import reduce from '@/assets/icons/reduce.svg'
 import equal from '@/assets/icons/equal.svg'
@@ -187,32 +221,20 @@ const recordData = ref([])
 const total = ref(0)
 
 // 服务费
-const serviceAmount = computed(() => (Number(creatForm.value.amount ?? 0) * Number(selectOneCurrency.value.withdrawFeeRate1 ?? 0)).toFixed(2))
+const serviceAmount = computed(() => (Number(creatForm.value.amount ?? 0) * Number(selectOneCurrency.value.chargeFeerate1 ?? 0)).toFixed(2))
 
 // 总手续费 = 服务费 + 手续费
-const totalFee = computed(() => (Number(serviceAmount.value ?? 0) + Number(selectOneCurrency.value.withdrawFeeamount ?? 0)).toFixed(2))
+const totalFee = computed(() => (Number(serviceAmount.value ?? 0) + Number(selectOneCurrency.value.chargeFeeamount ?? 0)).toFixed(2))
 
-// 提现金额
-const withdrawAmount = ref(0)
-// 是否点击最大按钮
-const isClickMax = ref(false)
+// 充值金额
+const rechargeAmount = ref(0)
 
-const setWithdrawAmount = (newAmount) => {
-  if (newAmount !== 0 && !isClickMax.value) {
-    withdrawAmount.value = (Number(totalFee.value ?? 0) + Number(newAmount ?? 0)).toFixed(2)
+const setRechargeAmount = (newAmount) => {
+  if (newAmount !== 0) {
+    rechargeAmount.value = (Number(totalFee.value ?? 0) + Number(newAmount ?? 0)).toFixed(2)
   } else if (newAmount === 0) {
-    withdrawAmount.value = 0
-  } else {
-    isClickMax.value = false
+    rechargeAmount.value = 0
   }
-}
-
-// 填入最大提现金额
-const writeMaxAmount = () => {
-  isClickMax.value = true
-  withdrawAmount.value = selectOneCurrency.value.balance ?? 0
-  creatForm.value.amount = ((Number(selectOneCurrency.value.balance ?? 0) - Number(selectOneCurrency.value.withdrawFeeamount ?? 0)) /
-    (1 + Number(selectOneCurrency.value.withdrawFeeRate1 ?? 0))).toFixed(2)
 }
 
 // 重新选择银行
@@ -229,7 +251,7 @@ const handleSelect = (selectInfo) => {
   creatForm.value.currency = selectInfo.currency
   creatForm.value.projectId = selectInfo.id
 
-  // 提现页面的记录查询需要带上选择的币种信息
+  // 充值页面的记录查询需要带上选择的币种信息
   queryList({
     page: 1,
     currency: selectInfo.currency,
@@ -239,7 +261,7 @@ const handleSelect = (selectInfo) => {
 }
 
 const queryList = async (params) => {
-  const { code, data = {} } = await getWithdrawOrderList({ ...params, pageSize: 10 })
+  const { code, data = {} } = await getRechargeList({ ...params, pageSize: 10 })
   if (code === 0) {
     recordData.value = data.content ?? []
     total.value = data.total_pages ?? 0
@@ -256,25 +278,27 @@ const handleChangePage = (page) => {
   })
 }
 
-// 创建提现提交
+// 复制平台银行信息
+const copyPlatformBankMsg = (item) => {
+  copyMessage(
+    `企业名称：${item.enterpriseTitle}\n银行名称：${item.bankTitle}\n银行代码：${item.bankCode}\n收款人银行账号：${item.receiverNumber}\n银行账户名：${item.receiverName}\n`
+  )
+}
+
+// 创建充值提交
 const submitCreate = () => {
   if (Number(creatForm.value.amount) <= 0) {
-    ElMessage.warning('提现金额需大于0！')
-    return
-  }
-  
-  if (Number(withdrawAmount.value) > Number(selectOneCurrency.value.balance)) {
-    ElMessage.warning('提现金额不能大于最大可用金额！')
+    ElMessage.warning('充值金额需大于0！')
     return
   }
 
   if (Number(creatForm.value.amount) > Number(selectOneCurrency.value.maxBound)) {
-    ElMessage.warning(`提现金额最多不超过${selectOneCurrency.value.maxBound}！`)
+    ElMessage.warning(`充值金额最多不超过${selectOneCurrency.value.maxBound}！`)
     return
   }
   // 二次确认
   ElMessageBox.confirm(
-    '确认创建提现记录吗？',
+    '确认创建充值记录吗？',
     '二次确认',
     {
       confirmButtonText: '确认',
@@ -282,9 +306,9 @@ const submitCreate = () => {
       type: 'warning',
     }
   ).then(async () => {
-    const { code } = await createMerchantWithdraw(creatForm.value)
+    const { code } = await createMerchantRecharge(creatForm.value)
     if (code === 0) {
-      ElMessage.success('创建提现成功')
+      ElMessage.success('创建充值成功')
       // 刷新列表数据
       queryList({
         page: 1,
@@ -298,29 +322,29 @@ const submitCreate = () => {
 
 // 选择银行账户
 const selectBankAccount = () => {
-  commonStore.ChangePageInitPay({
+  commonStore.ChangePageInitRecharge({
     creatForm: creatForm.value,
     selectOneCurrency: selectOneCurrency.value
   })
   router.push({ name: 'bankAccount' })
 }
 
-// 商户端 - 撤销提现
-const revokeWithdraw = (item) => {
+// 商户端 - 充值列表操作(撤销/审核)
+const actionRecharge = (item, type) => {
   // 填写备注信息
-  ElMessageBox.prompt('请填写撤销备注信息', '提示', {
+  ElMessageBox.prompt(`请填写${type}备注信息`, '提示', {
     confirmButtonText: '确认',
     cancelButtonText: '取消'
   }).then(async ({ value }) => {
-    const { code } = await revokeMerchantWithdraw({
+    const { code } = await actionMerchantRecharge({
       id: item.id,
       chain: item.chain,
       currency: item.currency,
       status: item.status,
-      memo: value // 撤销备注信息
+      memo: value // 撤销|审核备注信息
     })
     if (code === 0) {
-      ElMessage.success('撤销提现成功！')
+      ElMessage.success(`${type}充值成功！`)
       // 刷新列表
       queryList({
         page: 1,
@@ -334,28 +358,23 @@ const revokeWithdraw = (item) => {
 
 onMounted(() => {
   // 如果是选择银行账户返回 - 填充数据
-  if (commonStore.pageInitPay?.isSelectedBankAccount) {
+  if (commonStore.pageInitRecharge?.isSelectedBankAccount) {
     // 选择的币种信息
-    selectOneCurrency.value = commonStore.pageInitPay.selectOneCurrency
+    selectOneCurrency.value = commonStore.pageInitRecharge.selectOneCurrency
     // 选择的银行账户信息
-    selectBAInfo.value = commonStore.pageInitPay.bankInfo
+    selectBAInfo.value = commonStore.pageInitRecharge.bankInfo
     // 其他信息
-    creatForm.value = { ...commonStore.pageInitPay.creatForm, bankAccountId: commonStore.pageInitPay.bankInfo.id }
-    commonStore.ChangePageInitPay({
-      ...commonStore.pageInitPay,
+    creatForm.value = { ...commonStore.pageInitRecharge.creatForm, bankAccountId: commonStore.pageInitRecharge.bankInfo.id }
+    commonStore.ChangePageInitRecharge({
+      ...commonStore.pageInitRecharge,
       isSelectedBankAccount: false
     })
-  } else if (commonStore.propertyToActionInitSelect) {
-    // 初始化默认选择币种
-    selectOneCurrency.value = commonStore.propertyToActionInitSelect
-    // 清空数据
-    commonStore.SetPropertyToActionInitSelect('')
   }
 })
 
 watch(creatForm, (newVal) => {
   const newAmount = Number(newVal.amount)
-  setWithdrawAmount(newAmount)
+  setRechargeAmount(newAmount)
 }, {
   deep: true
 })
@@ -614,6 +633,11 @@ watch(creatForm, (newVal) => {
       font-size: 14px;
     }
   }
+}
+
+.platformBank {
+  display: flex;
+  flex-direction: column;
 }
 
 .footerPage {

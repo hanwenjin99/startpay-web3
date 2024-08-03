@@ -152,3 +152,55 @@ export const getSignedSupplierList = (params) => {
     }
   })
 }
+
+// 商户端获取充值列表
+export const getRechargeList = (params) => {
+  return service({
+    url: `/web3/merchant/charge/list?${qs.stringify(params)}`,
+    method: 'get'
+  })
+}
+
+// 商户端 - 充值提交
+export const createMerchantRecharge = (params) => {
+  return service({
+    url: '/web3/merchant/charge/create',
+    method: 'post',
+    data: JSON.stringify(params),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+}
+
+// 商户端 - 充值列表操作
+export const actionMerchantRecharge = (params) => {
+  return service({
+    url: '/web3/merchant/charge/update',
+    method: 'post',
+    data: JSON.stringify(params),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+}
+
+// 管理后台 - 获取充值列表
+export const getAdminRechargeList = (params) => {
+  return service({
+    url: `/web3/admin/charge/list?${qs.stringify(params)}`,
+    method: 'get'
+  })
+}
+
+// 管理后台 - 充值审核
+export const reviewAdminRecharge = (params) => {
+  return service({
+    url: '/web3/admin/charge/update',
+    method: 'post',
+    data: JSON.stringify(params),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+}
