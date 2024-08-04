@@ -116,6 +116,19 @@ func (s *StartpayWeb3Service) GetProjectList(userId uint, Page int, PageSize int
 	return web3.GetProjectList(Page, PageSize, "ACTIVE", stringProjectid)
 }
 
+func (s *StartpayWeb3Service) GetProjectInfo(pro_Id string) (*system.SysProject, error) {
+
+	var projectInfo system.SysProject
+
+	_, err := global.GVA_DB.Where("pro_uuid = ? ", pro_Id).First(&projectInfo).Rows()
+
+	if err != nil {
+		return nil, errors.New("查询用户项目失败")
+	}
+
+	return &projectInfo, nil
+}
+
 func (s *StartpayWeb3Service) GetFeeInfo(userId uint) (*system.UserContractInfo, error) {
 	var Feelist system.UserContractInfo
 	_, err := global.GVA_DB.Where("merchantId = ? ", userId).First(&Feelist).Rows()
@@ -774,7 +787,7 @@ func (s *StartpayWeb3Service) AdminChargeOrderUpdate(req *systemReq.UpdateWithdr
 func (s *StartpayWeb3Service) ChargeOrderUpdate(req *systemReq.UpdateWithdrawOrderRequst) error {
 	st, _ := strconv.Atoi(req.Status)
 
-	if st != 1 {
+	if st == 1 {
 		return errors.New("此状态已付款")
 	}
 	/*uwo := &system.UserWithDrawOrder{

@@ -1217,7 +1217,7 @@ func (b *StartpayWeb3Api) AdminChargeOrderList(c *gin.Context) {
 		uds.PlatformBank.Region = platformBank.Region
 
 		uds.BankInfo = uwvalue.BankTitle
-		uds.Currency = uwvalue.Currency + "-" + uwvalue.Chain
+		uds.Currency = uwvalue.Currency + "-" + uwvalue.Chain + "_" + uwvalue.WalletName
 		uds.Chain = uwvalue.Chain
 		uds.Memo = uwvalue.Memo
 		uds.AdminMemo = uwvalue.AdminMemo
@@ -1299,7 +1299,7 @@ func (b *StartpayWeb3Api) ChargeOrderList(c *gin.Context) {
 		uds.PlatformBank.Region = platformBank.Region
 
 		uds.BankInfo = uwvalue.BankTitle
-		uds.Currency = uwvalue.Currency
+		uds.Currency = uwvalue.Currency + "-" + uwvalue.Chain + "_" + uwvalue.WalletName
 		uds.Chain = uwvalue.Chain
 		uds.Memo = uwvalue.Memo
 		uds.AdminMemo = uwvalue.AdminMemo
@@ -1344,11 +1344,19 @@ func (b *StartpayWeb3Api) ChargeOrderCreate(c *gin.Context) {
 		return
 	}
 
+	proInfo, err := StartpayWeb3Service.GetProjectInfo(r.ProjectId)
+
+	if err != nil {
+		response.FailWithDetailed("false", "创建充值订单失败", c)
+		return
+	}
+
 	Iamount, _ := strconv.ParseFloat(r.Amount, 10)
 
 	uwo := &system.UserChargeOrder{
 		Currency:      r.Currency,
 		Chain:         r.Chain,
+		WalletName:    proInfo.ProName,
 		Amount:        Iamount,
 		BankId:        r.BankAccountId,
 		InputNote:     r.Note,
