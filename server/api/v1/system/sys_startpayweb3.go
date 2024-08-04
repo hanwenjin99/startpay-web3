@@ -582,16 +582,21 @@ func (b *StartpayWeb3Api) GetWeb3Quote(c *gin.Context) {
 }
 
 func (b *StartpayWeb3Api) GetTokenListInfo(c *gin.Context) {
-	//var r systemReq.GetTokenInfoReq
-	Chain := c.GetString("chain")
+	var r systemReq.GetTokenInfoReq
+	err := c.ShouldBindQuery(&r)
+	if err != nil {
+		//response.FailWithMessage(err.Error(), c)
+		global.GVA_LOG.Error("test welcome", zap.Any("err", err.Error()))
+		//return
+	}
 
-	global.GVA_LOG.Info("GetTokenListInfo web3 db before", zap.Any("GetTokenListInfo", Chain))
+	global.GVA_LOG.Info("GetTokenListInfo web3 db before", zap.Any("GetTokenListInfo", r))
 
 	TokenList := make([]systemRes.Web3ChainListRespons, 0)
-	if Chain != "" {
-		if data, ok := WEB3TOKENLIST[Chain]; ok {
+	if r.Chain != "" {
+		if data, ok := WEB3TOKENLIST[r.Chain]; ok {
 			global.GVA_LOG.Info("GetTokenListInfo chain list before", zap.Any("data", data),
-				zap.Any("chain", Chain))
+				zap.Any("chain", r.Chain))
 			for _, value := range data {
 				tokenInfo := systemRes.Web3ChainListRespons{Name: value.Symbol, Icon: value.Icon}
 				TokenList = append(TokenList, tokenInfo)

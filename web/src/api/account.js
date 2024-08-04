@@ -14,9 +14,10 @@ export const getAccountInfo = () => {
 export const getAccountCurrencyCreatableList = (params) => {
   return service({
     url: `/web3/token_list?${qs.stringify({
-      ...params,
+      ...params
+      /*,
       page: 0,
-      pageSize: 200
+      pageSize: 200*/
     })}`,
     method: 'get'
   })
