@@ -596,7 +596,8 @@ func (s *StartpayWeb3Service) AdminWithdrawOrderUpdate(req *systemReq.UpdateWith
 	r.Asset = withDrawOrderInfo.Currency
 	r.ID = withDrawOrderInfo.ProjetcId
 	r.ToAddress = platformWallet.Address
-	transAccount := feeInfo.TransferFeeamount + feeInfo.TransferFeerate1*withDrawOrderInfo.Amount
+	//transAccount := feeInfo.TransferFeeamount + feeInfo.TransferFeerate1*withDrawOrderInfo.Amount
+	transAccount := feeInfo.TransferFeerate1 * withDrawOrderInfo.Amount
 	r.Amount = strconv.FormatFloat(transAccount, 'f', 8, 64)
 
 	_, err = s.Web3TransferCreate(uint(withDrawOrderInfo.MerchantId), r)
