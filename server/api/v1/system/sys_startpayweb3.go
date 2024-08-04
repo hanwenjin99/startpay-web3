@@ -582,11 +582,14 @@ func (b *StartpayWeb3Api) GetWeb3Quote(c *gin.Context) {
 }
 
 func (b *StartpayWeb3Api) GetTokenListInfo(c *gin.Context) {
+
+	global.GVA_LOG.Info("GetTokenListInfo", zap.Any("request raw", c.GetRawData()))
+
 	var r systemReq.GetTokenInfoReq
 	err := c.ShouldBindQuery(&r)
 	if err != nil {
 		//response.FailWithMessage(err.Error(), c)
-		global.GVA_LOG.Error("test welcome", zap.Any("err", err.Error()))
+		global.GVA_LOG.Error("GetTokenListInfo", zap.Any("err", err.Error()))
 		//return
 	}
 
