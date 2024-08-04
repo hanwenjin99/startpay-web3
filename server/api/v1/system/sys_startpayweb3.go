@@ -644,6 +644,36 @@ func (b *StartpayWeb3Api) Web3TransferCreate(c *gin.Context) {
 		response.FailWithMessage("转账失败", c)
 		return
 	}
+
+	feeInfo, err := StartpayWeb3Service.GetFeeInfo(userId)
+
+	var platformWallet system.PlatformWallet
+	_, err = global.GVA_DB.Where("chain = ?", r.Chain).First(&platformWallet).Rows()
+	if err != nil {
+		response.FailWithMessage("转账失败", c)
+		return
+	}
+
+	if err != nil {
+		global.GVA_LOG.Error("Web3TransferCreate", zap.Any("err", err),
+			zap.Any("request", r),
+		)
+		response.FailWithMessage("转账失败", c)
+		return
+	}
+
+	r.ToAddress = platformWallet.Address
+	float64Amout, _ := strconv.ParseFloat(r.Amount, 64)
+	//transAccount := feeInfo.TransferFeerate1 * float64Amout + feeInfo.TransferFeeamount
+	transAccount := feeInfo.TransferFeerate1 * float64Amout
+	r.Amount = strconv.FormatFloat(transAccount, 'f', 8, 64)
+	data, err = StartpayWeb3Service.Web3TransferCreate(userId, r)
+	if err != nil {
+		global.GVA_LOG.Error("转账失败!", zap.Error(err))
+		response.FailWithMessage("转账失败", c)
+		return
+	}
+
 	response.OkWithDetailed(data, "转账成功", c)
 }
 

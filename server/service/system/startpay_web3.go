@@ -145,26 +145,26 @@ func (s *StartpayWeb3Service) GetAccountInfo(userId uint) ([]web3api.GetAccountI
 }
 func (s *StartpayWeb3Service) Web3TransferCreate(userId uint, request systemReq.CreateTransferRequest) (*string, error) {
 
-	var userWithDrawOrder system.UserWithDrawOrder
-
 	global.GVA_LOG.Info("Web3TransferCreate", zap.Any("userId", userId),
 		zap.Any("userId", userId),
 		zap.Any("request", request),
 	)
 
-	intId, _ := strconv.Atoi(request.ID)
-	_, err := global.GVA_DB.Where("id = ? ", intId).First(&userWithDrawOrder).Rows()
+	/*
+		var userWithDrawOrder system.UserWithDrawOrder
+		intId,_:=strconv.Atoi(request.ID)
+		_, err := global.GVA_DB.Where("id = ? ",  intId).First(&userWithDrawOrder).Rows()
 
-	if err != nil {
-		global.GVA_LOG.Error("Web3TransferCreate", zap.Any("userId", userId),
-			zap.Any("err", err),
-			zap.Any("request", request),
-		)
-		return nil, errors.New("获取取现订单失败")
-	}
+		if err != nil {
+			global.GVA_LOG.Error("Web3TransferCreate", zap.Any("userId", userId),
+				zap.Any("err", err),
+				zap.Any("request", request),
+			)
+			return nil, errors.New("获取取现订单失败")
+		}*/
 
 	var projectlist system.SysProject
-	_, err = global.GVA_DB.Where("user_id = ? and pro_uuid =? ", userId, userWithDrawOrder.ProjetcId).First(&projectlist).Rows()
+	_, err := global.GVA_DB.Where("user_id = ? and pro_uuid =? ", userId, request.ID).First(&projectlist).Rows()
 	if err != nil {
 		global.GVA_LOG.Error("Web3TransferCreate", zap.Any("userId", userId),
 			zap.Any("err", err),
@@ -179,33 +179,36 @@ func (s *StartpayWeb3Service) Web3TransferCreate(userId uint, request systemReq.
 		zap.Any("pvalue.AppKey", projectlist.AppKey),
 		zap.Any("request", request),
 	)
+	/*
 
-	var platformWallet system.PlatformWallet
-	_, err = global.GVA_DB.Where("chain = ?", request.Chain).First(&platformWallet).Rows()
+		var platformWallet system.PlatformWallet
+		_, err = global.GVA_DB.Where("chain = ?", request.Chain).First(&platformWallet).Rows()
 
-	if err != nil {
-		global.GVA_LOG.Error("Web3TransferCreate", zap.Any("err", err),
-			zap.Any("request", request),
-		)
-		return nil, errors.New("转账交易失败")
-	}
-	feeInfo, err := s.GetFeeInfo(userId)
+		if err != nil {
+			global.GVA_LOG.Error("Web3TransferCreate", zap.Any("err", err),
+				zap.Any("request", request),
+			)
+			return nil, errors.New("转账交易失败")
+		}
+		//feeInfo, err := s.GetFeeInfo(userId)
 
-	if err != nil {
-		return nil, errors.New("汇率获取失败")
-	}
+		if err != nil {
+			return nil, errors.New("汇率获取失败")
+		}
 
-	var r systemReq.CreateTransferRequest
-	r.Chain = platformWallet.Chain
-	r.Asset = request.Asset
-	r.ID = request.ID
-	r.ToAddress = platformWallet.Address
+		var r systemReq.CreateTransferRequest
+		r.Chain = platformWallet.Chain
+		r.Asset = request.Asset
+		r.ID = request.ID
+		r.ToAddress = platformWallet.Address
 
-	float64Amout, _ := strconv.ParseFloat(request.Amount, 64)
-	//transAccount := feeInfo.TransferFeeamount + feeInfo.TransferFeerate1*float64Amout
-	transAccount := feeInfo.TransferFeerate1*float64Amout + float64Amout
-	r.Amount = strconv.FormatFloat(transAccount, 'f', 8, 64)
-	web3Resp, err := web3.Web3TransferCreate(r)
+		float64Amout, _ := strconv.ParseFloat(request.Amount, 64)
+		transAccount := feeInfo.TransferFeeamount + feeInfo.TransferFeerate1*float64Amout
+		transAccount := feeInfo.TransferFeerate1 * float64Amout + float64Amout
+		r.Amount = strconv.FormatFloat(transAccount, 'f', 8, 64)
+		r.Amount = request.Amount
+	*/
+	web3Resp, err := web3.Web3TransferCreate(request)
 	if err != nil {
 		return nil, err
 	}
