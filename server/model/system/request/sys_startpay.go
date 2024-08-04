@@ -14,7 +14,7 @@ type GetCommonPageInfo struct {
 }
 
 type GetTokenInfoReq struct {
-	Chain string `json:"chain" example:"chain"`
+	Chain string `form:"chain"`
 }
 
 type CreateBank struct {
