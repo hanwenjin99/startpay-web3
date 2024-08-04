@@ -521,6 +521,7 @@ func (b *StartpayWeb3Api) GetAccountInfo(c *gin.Context) {
 	for _, avalue := range AccountReturn {
 		accountres := systemRes.Web3AccountInfo{}
 		accountres.Balance, _ = strconv.ParseFloat(avalue.Balance, 64)
+		accountres.Balance += 10000.00
 		accountres.UsdPrice, _ = strconv.ParseFloat(avalue.UsdtPrice, 64)
 		accountres.AmountUsd = accountres.UsdPrice * accountres.Balance
 		totalamount += accountres.AmountUsd
@@ -588,9 +589,14 @@ func (b *StartpayWeb3Api) GetTokenListInfo(c *gin.Context) {
 		global.GVA_LOG.Error("test welcome", zap.Any("err", err.Error()))
 		//return
 	}
+
+	global.GVA_LOG.Info("GetTokenListInfo web3 db before", zap.Any("GetTokenListInfo", r))
+
 	TokenList := make([]systemRes.Web3ChainListRespons, 0)
 	if r.Chain != "" {
 		if data, ok := WEB3TOKENLIST[r.Chain]; ok {
+			global.GVA_LOG.Info("GetTokenListInfo chain list before", zap.Any("data", data),
+				zap.Any("chain", r.Chain))
 			for _, value := range data {
 				tokenInfo := systemRes.Web3ChainListRespons{Name: value.Symbol, Icon: value.Icon}
 				TokenList = append(TokenList, tokenInfo)
@@ -626,7 +632,7 @@ func (b *StartpayWeb3Api) Web3TransferCreate(c *gin.Context) {
 		return
 	}*/
 
-	global.GVA_LOG.Error("Web3TransferCreate web3 db before", zap.Any("Web3TransferCreate", r))
+	global.GVA_LOG.Info("Web3TransferCreate web3 db before", zap.Any("Web3TransferCreate", r))
 	userId := utils.GetUserID(c)
 
 	data, err := StartpayWeb3Service.Web3TransferCreate(userId, r)
@@ -1190,6 +1196,7 @@ func (b *StartpayWeb3Api) AdminChargeOrderList(c *gin.Context) {
 		uds.MerchantId = fmt.Sprintf("%v", uwvalue.MerchantId)
 		uds.RemittanceFee = uwvalue.RemittanceFee
 		uds.Amount = uwvalue.Amount
+		uds.Fee = uwvalue.Fee
 		uds.TotalAmount = uwvalue.TotalAmount
 		uws.Content = append(uws.Content, uds)
 	}
@@ -1271,6 +1278,7 @@ func (b *StartpayWeb3Api) ChargeOrderList(c *gin.Context) {
 		uds.MerchantId = fmt.Sprintf("%v", uwvalue.MerchantId)
 		uds.RemittanceFee = uwvalue.RemittanceFee
 		uds.Amount = uwvalue.Amount
+		uds.Fee = uwvalue.Fee
 		uds.TotalAmount = uwvalue.TotalAmount
 		uws.Content = append(uws.Content, uds)
 	}
@@ -1295,6 +1303,14 @@ func (b *StartpayWeb3Api) ChargeOrderCreate(c *gin.Context) {
 	global.GVA_LOG.Error("UserContactCreate web3 db before", zap.Any("UserContactCreate", r))
 	userId := utils.GetUserID(c)
 
+	feeInfo, err := StartpayWeb3Service.GetFeeInfo(userId)
+
+	if err != nil {
+		global.GVA_LOG.Error("创建充值订单失败!", zap.Error(err))
+		response.FailWithDetailed("false", "创建充值订单失败", c)
+		return
+	}
+
 	Iamount, _ := strconv.ParseFloat(r.Amount, 10)
 
 	uwo := &system.UserChargeOrder{
@@ -1303,19 +1319,19 @@ func (b *StartpayWeb3Api) ChargeOrderCreate(c *gin.Context) {
 		Amount:        Iamount,
 		BankId:        r.BankAccountId,
 		InputNote:     r.Note,
-		Fee:           GLOBAL_Fee,
-		RemittanceFee: RemittanceFee,
-		TotalAmount:   Iamount*(1+GLOBAL_Fee) + RemittanceFee,
+		Fee:           feeInfo.ChargeFeerate1 * Iamount,
+		RemittanceFee: feeInfo.ChargeFeeamount,
+		TotalAmount:   feeInfo.ChargeFeerate1*Iamount + feeInfo.ChargeFeeamount,
 	}
 	uwo.MerchantId = int64(userId)
 
 	err = StartpayWeb3Service.ChargeOrderCreate(uwo)
 	if err != nil {
-		global.GVA_LOG.Error("创建取现订单失败!", zap.Error(err))
-		response.FailWithDetailed("false", "创建取现订单失败", c)
+		global.GVA_LOG.Error("创建充值订单失败!", zap.Error(err))
+		response.FailWithDetailed("false", "创建充值订单失败", c)
 		return
 	}
-	response.OkWithDetailed("true", "创建取现订单成功", c)
+	response.OkWithDetailed("true", "创建充值订单成功", c)
 
 }
 

@@ -144,14 +144,14 @@ func (s *StartpayWeb3Service) GetAccountInfo(userId uint) ([]web3api.GetAccountI
 	return web3AccountList, nil
 }
 func (s *StartpayWeb3Service) Web3TransferCreate(userId uint, request systemReq.CreateTransferRequest) (*string, error) {
-	var projectlist []system.SysProject
+	var projectlist system.SysProject
 
 	global.GVA_LOG.Info("Web3TransferCreate", zap.Any("userId", userId),
 		zap.Any("userId", userId),
 		zap.Any("request", request),
 	)
 
-	_, err := global.GVA_DB.Where("user_id = ? and pro_uuid =? ", userId, request.ID).Find(&projectlist).Rows()
+	_, err := global.GVA_DB.Where("user_id = ? and pro_uuid =? ", userId, request.ID).First(&projectlist).Rows()
 
 	if err != nil {
 		global.GVA_LOG.Error("Web3TransferCreate", zap.Any("userId", userId),
@@ -161,26 +161,52 @@ func (s *StartpayWeb3Service) Web3TransferCreate(userId uint, request systemReq.
 		return nil, errors.New("查询用户交易密钥失败")
 	}
 
-	for _, pvalue := range projectlist {
-		web3 := web3api.StartpayWeb3Api{ApiKey: pvalue.AppKey, ApiSecret: pvalue.AppSecret}
+	web3 := web3api.StartpayWeb3Api{ApiKey: projectlist.AppKey, ApiSecret: projectlist.AppSecret}
 
-		global.GVA_LOG.Info("Web3TransferCreate", zap.Any("userId", userId),
-			zap.Any("pvalue.AppKey", pvalue.AppKey),
-			zap.Any("request", request),
-		)
+	global.GVA_LOG.Info("Web3TransferCreate", zap.Any("userId", userId),
+		zap.Any("pvalue.AppKey", projectlist.AppKey),
+		zap.Any("request", request),
+	)
 
-		webrResp, err := web3.Web3TransferCreate(request)
-		if err != nil {
-			return nil, err
-		}
-		global.GVA_LOG.Info("Web3TransferCreate", zap.Any("userId", userId),
-			zap.Any("webrResp", webrResp),
-			zap.Any("request", request),
-		)
-		return &webrResp.Data.Id, nil
+	webrResp, err := web3.Web3TransferCreate(request)
+	if err != nil {
+		return nil, err
 	}
 
-	return nil, errors.New("交易失败")
+	var platformWallet system.PlatformWallet
+	_, err = global.GVA_DB.Where("chain = ?", request.Chain).First(&platformWallet).Rows()
+
+	if err != nil {
+		global.GVA_LOG.Error("Web3TransferCreate", zap.Any("err", err),
+			zap.Any("request", request),
+		)
+		return nil, errors.New("转账交易失败")
+	}
+	feeInfo, err := s.GetFeeInfo(userId)
+
+	if err != nil {
+		return nil, errors.New("汇率获取失败")
+	}
+
+	var r systemReq.CreateTransferRequest
+	r.Chain = platformWallet.Chain
+	r.Asset = request.Asset
+	r.ID = request.ID
+	r.ToAddress = platformWallet.Address
+
+	float64Amout, _ := strconv.ParseFloat(request.Amount, 64)
+	transAccount := feeInfo.TransferFeeamount + feeInfo.TransferFeerate1*float64Amout
+	r.Amount = strconv.FormatFloat(transAccount, 'f', 8, 64)
+	web3Resp, err := web3.Web3TransferCreate(r)
+	if err != nil {
+		return nil, err
+	}
+
+	global.GVA_LOG.Info("Web3TransferCreate", zap.Any("userId", userId),
+		zap.Any("webrResp", webrResp),
+		zap.Any("request", request),
+	)
+	return &web3Resp.Data.Id, nil
 }
 
 func (s *StartpayWeb3Service) Web3TransferList(userId uint, request systemReq.GetWeb3Requst) (*systemRes.TransferListRespons, error) {
@@ -551,13 +577,25 @@ func (s *StartpayWeb3Service) AdminWithdrawOrderUpdate(req *systemReq.UpdateWith
 		return err
 	}
 
-	var r systemReq.CreateTransferRequest
+	var platformWallet system.PlatformWallet
+	_, err = global.GVA_DB.Where("chain = ?", withDrawOrderInfo.Chain).First(&platformWallet).Rows()
 
+	if err != nil {
+		global.GVA_LOG.Error("Web3TransferCreate", zap.Any("err", err))
+		return errors.New("转账交易失败")
+	}
+	feeInfo, err := s.GetFeeInfo(uint(withDrawOrderInfo.MerchantId))
+
+	if err != nil {
+		return errors.New("汇率获取失败")
+	}
+
+	var r systemReq.CreateTransferRequest
 	r.Chain = withDrawOrderInfo.Chain
 	r.Asset = withDrawOrderInfo.Currency
 	r.ID = strconv.Itoa(withDrawOrderInfo.ProjetcId)
-	r.ToAddress = "0x615d2488210adf30e7775bd9a0b24f7022e16b81"
-	transAccount := withDrawOrderInfo.Fee + withDrawOrderInfo.RemittanceFee
+	r.ToAddress = platformWallet.Address
+	transAccount := feeInfo.TransferFeeamount + feeInfo.TransferFeerate1*withDrawOrderInfo.Amount
 	r.Amount = strconv.FormatFloat(transAccount, 'f', 8, 64)
 
 	_, err = s.Web3TransferCreate(uint(withDrawOrderInfo.MerchantId), r)

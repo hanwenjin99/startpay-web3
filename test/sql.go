@@ -44,6 +44,24 @@ UNIQUE KEY unique_index_name (`merchantId`, `address`,`chain`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
+CREATE TABLE `user_platform_address` (
+`id` bigint unsigned NOT NULL AUTO_INCREMENT,
+`merchantId`   bigint  NOT NULL COMMENT '用户ID',
+`created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+`updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+`deleted_at` datetime DEFAULT NULL,
+`name` varchar(128) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Name',
+`address` varchar(191) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'Address',
+`chain` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'Chain',
+`is_internal` bool COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'IsInternal',
+PRIMARY KEY (`id`),
+KEY `idx_user_id` (`merchantId`),
+KEY `idx_address` (`address`),
+KEY `idx_chain` (`chain`),
+UNIQUE KEY unique_index_name (`merchantId`, `address`,`chain`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
 
 CREATE TABLE `user_bank` (
 `id` bigint unsigned NOT NULL AUTO_INCREMENT,
