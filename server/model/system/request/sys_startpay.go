@@ -64,7 +64,7 @@ type GetWithdrawOrderRequst struct {
 type CreateWithdrawOrderRequst struct {
 	Amount        string `json:"amount"`
 	BankAccountId string `json:"bankAccountId"`
-	ProjectId     int    `json:"projectId"`
+	ProjectId     string `json:"projectId"`
 	Chain         string `json:"chain"`
 	Currency      string `json:"currency"`
 	EmailCode     string `json:"emailCode"`
@@ -87,7 +87,7 @@ type CreateTransferRequest struct {
 	Amount      string  `json:"amount"`
 	Asset       string  `json:"asset"`
 	Chain       string  `json:"chain"`
-	ProjectId   int     `json:"projectId"`
+	ProjectId   string  `json:"projectId"`
 	EmailCode   string  `json:"emailCode"`
 	GasDefault  float64 `json:"gasDefault"`
 	GoogleCode  string  `json:"googleCode"`
