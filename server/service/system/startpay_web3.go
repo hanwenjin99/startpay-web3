@@ -195,7 +195,8 @@ func (s *StartpayWeb3Service) Web3TransferCreate(userId uint, request systemReq.
 	r.ToAddress = platformWallet.Address
 
 	float64Amout, _ := strconv.ParseFloat(request.Amount, 64)
-	transAccount := feeInfo.TransferFeeamount + feeInfo.TransferFeerate1*float64Amout
+	//transAccount := feeInfo.TransferFeeamount + feeInfo.TransferFeerate1*float64Amout
+	transAccount := feeInfo.TransferFeerate1 * float64Amout
 	r.Amount = strconv.FormatFloat(transAccount, 'f', 8, 64)
 	web3Resp, err := web3.Web3TransferCreate(r)
 	if err != nil {
