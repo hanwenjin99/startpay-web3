@@ -52,7 +52,7 @@ var WEB3TOKENLIST = map[string][]Web3Chain{
 		},
 	},
 
-	"BNB": {
+	"BSC": {
 		{
 			Chain:     "BSC",
 			Chainicon: "https://pifutures.oss-cn-shanghai.aliyuncs.com/cash/png",
