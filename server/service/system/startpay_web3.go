@@ -151,7 +151,7 @@ func (s *StartpayWeb3Service) Web3TransferCreate(userId uint, request systemReq.
 		zap.Any("request", request),
 	)
 
-	_, err := global.GVA_DB.Where("user_id = ? and pro_uuid =? ", userId, request.ID).First(&projectlist).Rows()
+	_, err := global.GVA_DB.Where("user_id = ? and pro_uuid =? ", userId, request.ProjectId).First(&projectlist).Rows()
 
 	if err != nil {
 		global.GVA_LOG.Error("Web3TransferCreate", zap.Any("userId", userId),
