@@ -959,7 +959,7 @@ func (b *StartpayWeb3Api) AdminWithdrawOrderList(c *gin.Context) {
 
 		bkId, err := StartpayWeb3Service.BankAccountInfo(uwvalue.BankId)
 
-		if err != nil {
+		if err == nil {
 			uds.BankInfo = bkId.BankTitle
 			uds.BankAccount.BankTitle = bkId.BankTitle
 			uds.BankAccount.EnterpriseTitle = bkId.EnterpriseTitle
@@ -1217,7 +1217,7 @@ func (b *StartpayWeb3Api) AdminChargeOrderList(c *gin.Context) {
 		uds.PlatformBank.Region = platformBank.Region
 
 		uds.BankInfo = uwvalue.BankTitle
-		uds.Currency = uwvalue.Currency
+		uds.Currency = uwvalue.Currency + "-" + uwvalue.Chain
 		uds.Chain = uwvalue.Chain
 		uds.Memo = uwvalue.Memo
 		uds.AdminMemo = uwvalue.AdminMemo
@@ -1352,9 +1352,10 @@ func (b *StartpayWeb3Api) ChargeOrderCreate(c *gin.Context) {
 		Amount:        Iamount,
 		BankId:        r.BankAccountId,
 		InputNote:     r.Note,
+		ProjetcId:     r.ProjectId,
 		Fee:           feeInfo.ChargeFeerate1 * Iamount,
 		RemittanceFee: feeInfo.ChargeFeeamount,
-		TotalAmount:   feeInfo.ChargeFeerate1*Iamount + feeInfo.ChargeFeeamount,
+		TotalAmount:   feeInfo.ChargeFeerate1*Iamount + feeInfo.ChargeFeeamount + Iamount,
 	}
 	uwo.MerchantId = int64(userId)
 

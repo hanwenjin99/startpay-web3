@@ -17,8 +17,16 @@ import (
 var WithdrawStatus = map[int]string{
 	1: "待审核",
 	2: "审核中",
-	3: "完成",
+	3: "已汇款",
 	4: "撤销",
+}
+
+var ChargeStatus = map[int]string{
+	1: "待审核",
+	2: "已汇款",
+	3: "转账中",
+	4: "已转账",
+	5: "撤销",
 }
 
 type StartpayWeb3Service struct {
@@ -606,7 +614,7 @@ func (s *StartpayWeb3Service) AdminWithdrawOrderUpdate(req *systemReq.UpdateWith
 	r.Asset = withDrawOrderInfo.Currency
 	r.ProjectId = withDrawOrderInfo.ProjetcId
 	r.ToAddress = platformWallet.Address
-	//transAccount := feeInfo.TransferFeeamount + feeInfo.TransferFeerate1*withDrawOrderInfo.Amount
+	//transAccount := feeInfo.TransferFeeamount + feeInfo.TransferFeerate1*withDrawOrderInfo.Amount + withDrawOrderInfo.Amount
 	transAccount := feeInfo.TransferFeerate1 * withDrawOrderInfo.Amount
 	r.Amount = strconv.FormatFloat(transAccount, 'f', 8, 64)
 
@@ -644,9 +652,9 @@ func (s *StartpayWeb3Service) WithdrawOrderUpdate(req *systemReq.UpdateWithdrawO
 	rqId, _ := strconv.Atoi(req.Id)
 	if err := global.GVA_DB.Model(&system.UserWithDrawOrder{}).Where("id = ? ", rqId).Updates(map[string]interface{}{
 		"updated_at": time.Now(),
-		"status":     st,
+		"status":     4,
 		"InputNote":  req.Memo,
-		"statusName": WithdrawStatus[st],
+		"statusName": WithdrawStatus[4],
 	}).Error; err != nil {
 		return err
 	}
@@ -715,7 +723,7 @@ func (s *StartpayWeb3Service) ChargeOrderList(userId uint, reInfo *systemReq.Get
 }
 
 func (s *StartpayWeb3Service) ChargeOrderCreate(uwo *system.UserChargeOrder) error {
-	uwo.StatusName = WithdrawStatus[1]
+	uwo.StatusName = ChargeStatus[1]
 	uwo.Status = 1
 	err := global.GVA_DB.Create(&uwo).Error
 	if err != nil {
@@ -727,10 +735,10 @@ func (s *StartpayWeb3Service) ChargeOrderCreate(uwo *system.UserChargeOrder) err
 func (s *StartpayWeb3Service) AdminChargeOrderUpdate(req *systemReq.UpdateWithdrawOrderRequst) error {
 	st, _ := strconv.Atoi(req.Status)
 
-	if st == 1 {
-		st = 2
-	} else if st == 2 {
+	if st == 2 {
 		st = 3
+	} else if st == 3 {
+		st = 4
 	} else {
 		return errors.New("订单不处于审核状态")
 	}
@@ -748,14 +756,14 @@ func (s *StartpayWeb3Service) AdminChargeOrderUpdate(req *systemReq.UpdateWithdr
 	global.GVA_LOG.Error("WithdrawOrderList",
 		zap.Any("st", st),
 		zap.Any("req.Memo", req.Memo),
-		zap.Any(" WithdrawStatus[st]", WithdrawStatus[st]),
+		zap.Any(" WithdrawStatus[st]", ChargeStatus[st]),
 		zap.Any(" rqId", rqId),
 	)
 	if err := global.GVA_DB.Model(&system.UserChargeOrder{}).Where("id = ? ", rqId).Updates(map[string]interface{}{
 		"updated_at": time.Now(),
 		"status":     st,
 		"adminMemo":  req.Memo,
-		"statusName": WithdrawStatus[st],
+		"statusName": ChargeStatus[st],
 	}).Error; err != nil {
 		return err
 	}
@@ -767,7 +775,7 @@ func (s *StartpayWeb3Service) ChargeOrderUpdate(req *systemReq.UpdateWithdrawOrd
 	st, _ := strconv.Atoi(req.Status)
 
 	if st != 1 {
-		return errors.New("此状态已审核不能撤销")
+		return errors.New("此状态已付款")
 	}
 	/*uwo := &system.UserWithDrawOrder{
 		Status:     4,
@@ -779,9 +787,9 @@ func (s *StartpayWeb3Service) ChargeOrderUpdate(req *systemReq.UpdateWithdrawOrd
 	rqId, _ := strconv.Atoi(req.Id)
 	if err := global.GVA_DB.Model(&system.UserChargeOrder{}).Where("id = ? ", rqId).Updates(map[string]interface{}{
 		"updated_at": time.Now(),
-		"status":     st,
+		"status":     2,
 		"InputNote":  req.Memo,
-		"statusName": WithdrawStatus[st],
+		"statusName": ChargeStatus[2],
 	}).Error; err != nil {
 		return err
 	}

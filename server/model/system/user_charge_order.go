@@ -9,6 +9,7 @@ type UserChargeOrder struct {
 	MerchantId   int64  `json:"merchantId"  gorm:"column:merchantId" `
 	MerchantName string `json:"merchantName" gorm:"column:merchantName"`
 	BankId       string `json:"bankId" gorm:"column:bankId"`
+	ProjetcId    string `json:"projetcId" gorm:"column:projetcId"`
 	BankTitle    string `json:"bankTitle"  gorm:"column:bankTitle"`
 	Currency     string `json:"currency" gorm:"column:currency"`
 	Chain        string `json:"chain"  gorm:"column:chain"`
