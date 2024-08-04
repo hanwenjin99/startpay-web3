@@ -586,7 +586,7 @@ func (b *StartpayWeb3Api) GetTokenListInfo(c *gin.Context) {
 	global.GVA_LOG.Info("GetTokenListInfo", zap.Any("request raw", rawqure))
 
 	var r systemReq.GetTokenInfoReq
-	err := c.ShouldBind(&r)
+	err := c.ShouldBindQuery(&r)
 	if err != nil {
 		//response.FailWithMessage(err.Error(), c)
 		global.GVA_LOG.Error("GetTokenListInfo", zap.Any("err", err.Error()))
