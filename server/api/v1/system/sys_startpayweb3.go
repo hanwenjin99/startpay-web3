@@ -521,7 +521,7 @@ func (b *StartpayWeb3Api) GetAccountInfo(c *gin.Context) {
 	for _, avalue := range AccountReturn {
 		accountres := systemRes.Web3AccountInfo{}
 		accountres.Balance, _ = strconv.ParseFloat(avalue.Balance, 64)
-		accountres.Balance += 10000.00
+		//accountres.Balance += 10000.00
 		accountres.UsdPrice, _ = strconv.ParseFloat(avalue.UsdtPrice, 64)
 		accountres.AmountUsd = accountres.UsdPrice * accountres.Balance
 		totalamount += accountres.AmountUsd
