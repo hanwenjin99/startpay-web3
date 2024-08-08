@@ -2,6 +2,7 @@ package system
 
 import (
 	"errors"
+	"go.uber.org/zap"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
@@ -26,6 +27,7 @@ func (menuService *MenuService) getMenuTreeMap(authorityId uint) (treeMap map[ui
 	treeMap = make(map[uint][]system.SysMenu)
 
 	var SysAuthorityMenus []system.SysAuthorityMenu
+	global.GVA_LOG.Error("getMenuTreeMap web3 db before", zap.Any("getMenuTreeMap", authorityId))
 	err = global.GVA_DB.Where("sys_authority_authority_id = ?", authorityId).Find(&SysAuthorityMenus).Error
 	if err != nil {
 		return
@@ -33,14 +35,20 @@ func (menuService *MenuService) getMenuTreeMap(authorityId uint) (treeMap map[ui
 
 	var MenuIds []string
 
+	global.GVA_LOG.Error("getMenuTreeMap web3 db before", zap.Any("SysAuthorityMenus", SysAuthorityMenus))
+
 	for i := range SysAuthorityMenus {
 		MenuIds = append(MenuIds, SysAuthorityMenus[i].MenuId)
 	}
+
+	global.GVA_LOG.Error("getMenuTreeMap web3 db before", zap.Any("MenuIds", MenuIds))
 
 	err = global.GVA_DB.Where("id in (?)", MenuIds).Order("sort").Preload("Parameters").Find(&baseMenu).Error
 	if err != nil {
 		return
 	}
+
+	global.GVA_LOG.Error("getMenuTreeMap web3 db before", zap.Any("baseMenu", baseMenu))
 
 	for i := range baseMenu {
 		allMenus = append(allMenus, system.SysMenu{
@@ -55,6 +63,9 @@ func (menuService *MenuService) getMenuTreeMap(authorityId uint) (treeMap map[ui
 	if err != nil {
 		return
 	}
+
+	global.GVA_LOG.Error("getMenuTreeMap web3 db before", zap.Any("btns", btns))
+
 	var btnMap = make(map[uint]map[string]uint)
 	for _, v := range btns {
 		if btnMap[v.SysMenuID] == nil {
