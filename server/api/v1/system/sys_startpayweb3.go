@@ -638,12 +638,7 @@ func (b *StartpayWeb3Api) Web3TransferCreate(c *gin.Context) {
 	global.GVA_LOG.Info("Web3TransferCreate web3 db before", zap.Any("Web3TransferCreate", r))
 	userId := utils.GetUserID(c)
 
-	data, err := StartpayWeb3Service.Web3TransferCreate(userId, r)
-	if err != nil {
-		global.GVA_LOG.Error("转账失败!", zap.Error(err))
-		response.FailWithMessage("转账失败", c)
-		return
-	}
+	Iamount, _ := strconv.ParseFloat(r.Amount, 10)
 
 	feeInfo, err := StartpayWeb3Service.GetFeeInfo(userId)
 
@@ -662,17 +657,54 @@ func (b *StartpayWeb3Api) Web3TransferCreate(c *gin.Context) {
 		return
 	}
 
+	uwo := &system.UserTransferOrder{
+		Currency:      r.Asset,
+		Chain:         r.Chain,
+		Amount:        Iamount,
+		ProjetcId:     r.ProjectId,
+		Fee:           feeInfo.TransferFeerate1 * Iamount,
+		RemittanceFee: feeInfo.TransferFeeamount,
+		TotalAmount:   (feeInfo.TransferFeerate1+1)*Iamount + feeInfo.TransferFeeamount,
+		ToAddress:     r.ToAddress,
+	}
+	uwo.MerchantId = int64(userId)
+
+	insertId, err := StartpayWeb3Service.TransferOrderInsert(uwo)
+
+	status := 1
+
+	if err != nil {
+		global.GVA_LOG.Error("转账失败!", zap.Error(err))
+		response.FailWithMessage("转账失败", c)
+		status = 3
+		StartpayWeb3Service.TransferOrdeUpdate(*insertId, status)
+		return
+	}
+
+	data, err := StartpayWeb3Service.Web3TransferCreate(userId, r)
+	if err != nil {
+		global.GVA_LOG.Error("转账失败!", zap.Error(err))
+		response.FailWithMessage("转账失败", c)
+		status = 3
+		StartpayWeb3Service.TransferOrdeUpdate(*insertId, status)
+		return
+	}
+
 	r.ToAddress = platformWallet.Address
 	float64Amout, _ := strconv.ParseFloat(r.Amount, 64)
-	//transAccount := feeInfo.TransferFeerate1 * float64Amout + feeInfo.TransferFeeamount
-	transAccount := feeInfo.TransferFeerate1 * float64Amout
+	transAccount := feeInfo.TransferFeerate1*float64Amout + feeInfo.TransferFeeamount
 	r.Amount = strconv.FormatFloat(transAccount, 'f', 8, 64)
 	data, err = StartpayWeb3Service.Web3TransferCreate(userId, r)
 	if err != nil {
 		global.GVA_LOG.Error("转账失败!", zap.Error(err))
 		response.FailWithMessage("转账失败", c)
+		status = 3
+		StartpayWeb3Service.TransferOrdeUpdate(*insertId, status)
 		return
 	}
+
+	status = 4
+	StartpayWeb3Service.TransferOrdeUpdate(*insertId, status)
 
 	response.OkWithDetailed(data, "转账成功", c)
 }

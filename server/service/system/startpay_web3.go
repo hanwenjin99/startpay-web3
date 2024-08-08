@@ -21,6 +21,13 @@ var WithdrawStatus = map[int]string{
 	4: "撤销",
 }
 
+var TransferStatus = map[int]string{
+	1: "已创建",
+	2: "转账成功",
+	3: "转账失败",
+	4: "手续费扣除失败",
+}
+
 var ChargeStatus = map[int]string{
 	1: "待审核",
 	2: "已汇款",
@@ -164,6 +171,44 @@ func (s *StartpayWeb3Service) GetAccountInfo(userId uint) ([]web3api.GetAccountI
 	}
 	return web3AccountList, nil
 }
+
+func (s *StartpayWeb3Service) TransferOrderInsert(uwo *system.UserTransferOrder) (*uint, error) {
+	uwo.StatusName = TransferStatus[1]
+	uwo.Status = 1
+
+	var projectlist system.SysProject
+	_, err := global.GVA_DB.Where("user_id = ? and pro_uuid =? ", uwo.MerchantId, uwo.ProjetcId).First(&projectlist).Rows()
+	if err != nil {
+		global.GVA_LOG.Error("Web3TransferCreate", zap.Any("userId", uwo.MerchantId),
+			zap.Any("err", err),
+			zap.Any("UserTransferOrder", uwo),
+		)
+		return nil, errors.New("查询转账信息失败")
+	}
+
+	uwo.FromAddress = projectlist.AssembleAddress
+	uwo.Chain = projectlist.AssembleChain
+	uwo.Currency = projectlist.SettleCurrency
+	err = global.GVA_DB.Create(&uwo).Error
+	if err != nil {
+		return nil, err
+	}
+	return &uwo.ID, nil
+}
+
+func (s *StartpayWeb3Service) TransferOrdeUpdate(rid uint, status int) error {
+
+	if err := global.GVA_DB.Model(&system.UserTransferOrder{}).Where("id = ? ", rid).Updates(map[string]interface{}{
+		"updated_at": time.Now(),
+		"status":     status,
+		"statusName": TransferStatus[status],
+	}).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (s *StartpayWeb3Service) Web3TransferCreate(userId uint, request systemReq.CreateTransferRequest) (*string, error) {
 
 	global.GVA_LOG.Info("Web3TransferCreate", zap.Any("userId", userId),
